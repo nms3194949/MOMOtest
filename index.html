@@ -1,0 +1,350 @@
+<!doctype html><html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>當沖多空篩選器（強化：容錯 Yahoo 分時 JSON）</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .card{border-radius:1rem;box-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06)}
+  .btn{padding:.5rem .75rem;border:1px solid #e5e7eb;border-radius:.75rem;background:#fff}
+  .btn:hover{background:#fafafa}
+  .chip{font-size:.75rem;padding:.15rem .5rem;border-radius:.5rem;border:1px solid #e5e7eb}
+</style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mx-auto{margin-left:auto;margin-right:auto}.ml-5{margin-left:1.25rem}.flex{display:flex}.grid{display:grid}.w-20{width:5rem}.w-full{width:100%}.max-w-7xl{max-width:80rem}.list-disc{list-style-type:disc}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-x-auto{overflow-x:auto}.rounded{border-radius:0.25rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.bg-neutral-50{--tw-bg-opacity:1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.p-4{padding:1rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.text-left{text-align:left}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.text-neutral-500{--tw-text-opacity:1;color:rgb(115 115 115 / var(--tw-text-opacity, 1))}.text-neutral-600{--tw-text-opacity:1;color:rgb(82 82 82 / var(--tw-text-opacity, 1))}.text-neutral-900{--tw-text-opacity:1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.hover\:bg-neutral-50:hover{--tw-bg-opacity:1;background-color:rgb(250 250 250 / var(--tw-bg-opacity, 1))}@media (min-width: 768px){.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:justify-between{justify-content:space-between}.md\:p-6{padding:1.5rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}}</style></head>
+<body class="bg-neutral-50 text-neutral-900">
+<main class="max-w-7xl mx-auto p-4 md:p-6 space-y-4">
+<header class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+  <div>
+    <h1 class="text-2xl md:text-3xl font-bold">當沖多空篩選器（1分/5分｜VWAP / ORB / RVOL）</h1>
+    <p class="text-sm text-neutral-600">資料：Yahoo Chart API（自動多鏡像；強化處理「Title: ...」非 JSON 回應）</p>
+  </div>
+  <div class="flex items-center gap-2">
+    <button id="btnSave" class="btn">下載此頁（.html）</button>
+  </div>
+</header>
+
+<section class="p-4 bg-white card space-y-3">
+  <div class="grid md:grid-cols-3 gap-3">
+    <div class="space-y-2">
+      <label class="text-xs text-neutral-500">代號清單（台股 2330.TW、美股 NVDA；空白/逗號/換行分隔）</label>
+      <textarea id="symbols" rows="6" class="w-full p-3 rounded-xl border mono">2330.TW
+2317.TW
+2603.TW
+AAPL
+NVDA
+TSLA</textarea>
+      <div class="flex flex-wrap gap-2 text-xs">
+        <button class="btn" onclick="addSet('TW')">台股熱門</button>
+        <button class="btn" onclick="addSet('US')">美股熱門</button>
+      </div>
+    </div>
+    <div class="space-y-2">
+      <div class="grid grid-cols-2 gap-2 text-sm items-center">
+        <label class="flex items-center justify-between gap-2"><span>時間框架</span>
+          <select id="interval" class="px-2 py-1 rounded border">
+            <option value="1m">1 分鐘</option><option value="5m">5 分鐘</option>
+          </select>
+        </label>
+        <label class="flex items-center justify-between gap-2"><span>ORB 視窗</span>
+          <select id="orbWindow" class="px-2 py-1 rounded border">
+            <option value="15">15 分</option><option value="30">30 分</option>
+          </select>
+        </label>
+        <label class="flex items-center justify-between gap-2"><span>VWAP 價型</span>
+          <select id="vwapPrice" class="px-2 py-1 rounded border">
+            <option value="close">收盤</option><option value="hlc3">(H+L+C)/3</option>
+          </select>
+        </label>
+        <label class="flex items-center justify-between gap-2"><span>RSI 期間</span>
+          <input id="rsiLen" type="number" value="3" class="w-20 px-2 py-1 rounded border">
+        </label>
+        <label class="flex items-center justify-between gap-2"><span>多頭條件</span>
+          <select id="longCond" class="px-2 py-1 rounded border">
+            <option value="tight">嚴格（&gt;ORB高、&gt;VWAP、RSI&gt;60、Gap≥0）</option>
+            <option value="loose">寬鬆（&gt;VWAP 或 &gt;ORB高）</option>
+          </select>
+        </label>
+        <label class="flex items-center justify-between gap-2"><span>空頭條件</span>
+          <select id="shortCond" class="px-2 py-1 rounded border">
+            <option value="tight">嚴格（<orb低、<vwap、rsi<40、gap≤0）< option="">
+            <option value="loose">寬鬆（<vwap 或="" <orb低）<="" option="">
+          </vwap></option></orb低、<vwap、rsi<40、gap≤0）<></option></select>
+        </label>
+      </div>
+      <div class="text-xs text-neutral-500">美股分時用「AAPL/NVDA」，台股請加 .TW。</div>
+      <div class="flex gap-2"><button id="btnRun" class="btn">執行篩選</button><button id="btnCSV" class="btn">匯出 CSV</button></div>
+      <div id="err" class="text-xs text-red-600"></div>
+    </div>
+    <div class="space-y-2 text-sm">
+      <div class="font-semibold">指標</div>
+      <ul class="list-disc ml-5 space-y-1 text-neutral-600">
+        <li><b>Gap%</b>：今開 vs 昨收</li><li><b>ORB</b>：開盤前 N 分鐘高/低</li>
+        <li><b>VWAP</b>：量加權均價</li><li><b>RSI(n)</b>：分時 RSI（預設 3）</li>
+        <li><b>RVOL</b>：今日累積量 ÷ 過去20日平均日量（粗估）</li>
+      </ul>
+      <div class="text-xs text-neutral-500">僅供研究，非投資建議；資料可能延遲或不完整。</div>
+    </div>
+  </div>
+</section>
+
+<section class="p-4 bg-white card space-y-3">
+  <div class="flex items-center justify-between"><div class="text-lg font-semibold">結果</div><div class="text-xs text-neutral-500" id="summary">完成 6 檔（1m，ORB=15m，RSI=3）。</div></div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm" id="table">
+      <thead><tr class="border-b">
+        <th class="text-left py-2">代號</th><th class="text-right">現價</th><th class="text-right">Gap%</th>
+        <th class="text-right">區間高/低</th><th class="text-right">VWAP 乖離%</th><th class="text-right">RSI</th>
+        <th class="text-right">RVOL</th><th class="text-right">區間突破</th><th class="text-left">訊號</th><th class="text-left">備註</th>
+      </tr></thead>
+      <tbody id="tbody"><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">2317.TW</td>
+      <td class="text-right">221.50</td>
+      <td class="text-right text-green-600">0.89</td>
+      <td class="text-right">227.00 / 223.50</td>
+      <td class="text-right text-red-600">-0.52</td>
+      <td class="text-right">21</td>
+      <td class="text-right">0.71</td>
+      <td class="text-right">↓</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">2603.TW</td>
+      <td class="text-right">178.50</td>
+      <td class="text-right text-green-600">0.28</td>
+      <td class="text-right">180.00 / 179.50</td>
+      <td class="text-right text-red-600">-0.41</td>
+      <td class="text-right">33</td>
+      <td class="text-right">0.56</td>
+      <td class="text-right">↓</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">NVDA</td>
+      <td class="text-right">193.26</td>
+      <td class="text-right text-green-600">0.06</td>
+      <td class="text-right">193.36 / 192.22</td>
+      <td class="text-right text-green-600">0.31</td>
+      <td class="text-right">74</td>
+      <td class="text-right">0.10</td>
+      <td class="text-right">—</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">2330.TW</td>
+      <td class="text-right">1440.00</td>
+      <td class="text-right text-green-600">1.77</td>
+      <td class="text-right">1445.00 / 1435.00</td>
+      <td class="text-right text-red-600">-0.23</td>
+      <td class="text-right">76</td>
+      <td class="text-right">0.99</td>
+      <td class="text-right">—</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">AAPL</td>
+      <td class="text-right">255.74</td>
+      <td class="text-right text-green-600">0.50</td>
+      <td class="text-right">256.29 / 254.93</td>
+      <td class="text-right text-green-600">0.06</td>
+      <td class="text-right">54</td>
+      <td class="text-right">0.07</td>
+      <td class="text-right">—</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr><tr class="border-b hover:bg-neutral-50">
+      <td class="py-2 mono">TSLA</td>
+      <td class="text-right">439.38</td>
+      <td class="text-right text-green-600">0.49</td>
+      <td class="text-right">443.13 / 437.46</td>
+      <td class="text-right text-green-600">0.03</td>
+      <td class="text-right">50</td>
+      <td class="text-right">0.10</td>
+      <td class="text-right">—</td>
+      <td class="text-left"><span class="chip ">—</span></td>
+      <td class="text-left text-red-600"></td></tr></tbody>
+    </table>
+  </div>
+</section>
+</main>
+
+<script>
+// ===== Utils =====
+const fmt=(n,d=2)=>Number.isFinite(n)?n.toFixed(d):'--';
+function addSet(tag){const ta=document.getElementById('symbols');const tw=['2330.TW','2317.TW','2303.TW','2881.TW','2603.TW','2379.TW'];const us=['NVDA','AAPL','TSLA','MSFT','META','AMZN'];ta.value+='\\n'+(tag==='TW'?tw:us).join('\\n');}
+
+// ===== Robust Yahoo Chart fetch with mirrors & text-to-JSON fallback =====
+function tryParseJSONFromText(txt){
+  // Some mirrors may wrap or prepend text (e.g., "Title: ..."). Try to extract the JSON blob that starts with {"chart":
+  const i = txt.indexOf('{"chart"');
+  if(i>=0){
+    // find last closing brace
+    const j = txt.lastIndexOf('}');
+    if(j>i){
+      const sub = txt.slice(i, j+1);
+      try{ return JSON.parse(sub); }catch(_){/* fallthrough */}
+    }
+  }
+  // Also allow codefences ```json ... ```
+  const fence = txt.match(/```(?:json)?\\s*([\\s\\S]*?)```/i);
+  if(fence){ try{ return JSON.parse(fence[1]); }catch(_){/* ignore */} }
+  // Finally, try raw parse (in case content-type is wrong but body is pure JSON)
+  try{ return JSON.parse(txt); }catch(_){}
+  throw new Error("非 JSON 內容（可能被代理/防火牆攔截）");
+}
+
+async function fetchChartJSON(sym, range='1d', interval='1m'){
+  const s = sym.trim().replace('。','.');
+  const bases = [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${range}&interval=${interval}&includePrePost=false`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${range}&interval=${interval}&includePrePost=false`,
+  ];
+  const mirrors = [];
+  for(const b of bases){
+    mirrors.push(b);
+    mirrors.push(`https://r.jina.ai/http://${b.replace('https://','')}`);
+    mirrors.push(`https://r.jina.ai/https://${b.replace('https://','')}`);
+  }
+  let last;
+  for(const url of mirrors){
+    try{
+      const r = await fetch(url, { cache:'no-store' });
+      const ct = r.headers.get('content-type')||'';
+      const txt = await r.text();
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const json = ct.includes('application/json') ? JSON.parse(txt) : tryParseJSONFromText(txt);
+      const res = json?.chart?.result?.[0];
+      if(!res) throw new Error('空結果');
+      const ts = res.timestamp || [];
+      const q = res.indicators?.quote?.[0] || {};
+      const rows = ts.map((t,i)=>({time:t, open:q.open?.[i], high:q.high?.[i], low:q.low?.[i], close:q.close?.[i], volume:q.volume?.[i]}))
+                    .filter(x=>Number.isFinite(x.close));
+      return { rows, prevClose: res.meta?.chartPreviousClose };
+    }catch(e){ last = e; }
+  }
+  throw new Error('Yahoo 分時讀取失敗：'+(last?.message||last));
+}
+
+async function fetchDailyJSON(sym, days=60){
+  const s = sym.trim().replace('。','.');
+  const bases = [
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${days}d&interval=1d&includePrePost=false`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${days}d&interval=1d&includePrePost=false`,
+  ];
+  const mirrors = [];
+  for(const b of bases){
+    mirrors.push(b);
+    mirrors.push(`https://r.jina.ai/http://${b.replace('https://','')}`);
+    mirrors.push(`https://r.jina.ai/https://${b.replace('https://','')}`);
+  }
+  let last;
+  for(const url of mirrors){
+    try{
+      const r = await fetch(url, { cache:'no-store' });
+      const ct = r.headers.get('content-type')||'';
+      const txt = await r.text();
+      if(!r.ok) throw new Error(`HTTP ${r.status}`);
+      const json = ct.includes('application/json') ? JSON.parse(txt) : tryParseJSONFromText(txt);
+      const res = json?.chart?.result?.[0]; if(!res) throw new Error('空結果');
+      const ts = res.timestamp || []; const q = res.indicators?.quote?.[0] || {};
+      return ts.map((t,i)=>({time:t, close:q.close?.[i], volume:q.volume?.[i]})).filter(x=>Number.isFinite(x.close));
+    }catch(e){ last = e; }
+  }
+  throw new Error('Yahoo 日線讀取失敗：'+(last?.message||last));
+}
+
+// ===== Indicators =====
+function calcRSI(closes,period=3){const out=new Array(closes.length).fill(null);let g=0,l=0;for(let i=1;i<closes.length;i++){const ch=closes[i]-closes[i-1];const gg=Math.max(ch,0),ll=Math.max(-ch,0);if(i<=period){g+=gg;l+=ll;if(i===period){const rs=l===0?100:g/l;out[i]=100-100/(1+rs);}}else{g=(g*(period-1)+gg)/period;l=(l*(period-1)+ll)/period;const rs=l===0?100:g/l;out[i]=100-100/(1+rs);}}return out;}
+function calcVWAP(candles,mode='close'){let pv=0,vv=0;const out=[];for(const k of candles){const p=mode==='hlc3'?(k.high+k.low+k.close)/3:k.close;const vol=+k.volume||0;pv+=p*vol;vv+=vol;out.push(vv>0?pv/vv:null);}return out;}
+function firstNMinutesHighLow(candles,minutes){if(!candles.length)return{high:null,low:null};const firstIdx=Math.min(candles.length,Math.ceil(minutes/(candles.intervalMin||1)));let hi=-Infinity,lo=Infinity;for(let i=0;i<firstIdx;i++){const k=candles[i];if(Number.isFinite(k.high))hi=Math.max(hi,k.high);if(Number.isFinite(k.low))lo=Math.min(lo,k.low);}return{high:hi,low:lo};}
+
+// ===== Main run =====
+async function run(){
+  const list=document.getElementById('symbols').value.split(/\s|,|;|\r?\\n/).map(s=>s.trim()).filter(Boolean);
+  const interval=document.getElementById('interval').value;
+  const orbMin=+document.getElementById('orbWindow').value||15;
+  const rsiLen=+document.getElementById('rsiLen').value||3;
+  const vwapMode=document.getElementById('vwapPrice').value;
+  const longCond=document.getElementById('longCond').value;
+  const shortCond=document.getElementById('shortCond').value;
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  const summary=document.getElementById('summary'); const errBox=document.getElementById('err'); errBox.textContent='';
+  summary.textContent=`共 ${list.length} 檔，抓取中…`;
+  const out=[];
+
+  for(const s of list){
+    const tr=document.createElement('tr'); tr.className='border-b';
+    tr.innerHTML=`<td class='py-2 mono text-neutral-500'>${s}</td><td class='text-right'>…</td><td class='text-right'>…</td><td class='text-right'>…</td><td class='text-right'>…</td><td class='text-right'>…</td><td class='text-right'>…</td><td class='text-right'>…</td><td></td><td class='text-left text-red-500'></td>`; tbody.appendChild(tr);
+    try{
+      const intra=await fetchChartJSON(s,'1d',interval);
+      const daily=await fetchDailyJSON(s,60);
+      const candles=intra.rows; candles.intervalMin=interval==='5m'?5:1;
+      if(candles.length<5) throw new Error('分時樣本不足');
+      const now=candles.at(-1);
+      const prevClose=intra.prevClose??(daily.length>1?daily.at(-2).close:null);
+      const gapPct=(Number.isFinite(prevClose)&&Number.isFinite(candles[0].open))?((candles[0].open/prevClose)-1)*100:null;
+
+      const or=firstNMinutesHighLow(candles,orbMin);
+      const brokeHi=Number.isFinite(or.high)&&now.close>or.high;
+      const brokeLo=Number.isFinite(or.low)&&now.close<or.low;
+
+      const vwapArr=calcVWAP(candles,vwapMode); const vwapNow=vwapArr.at(-1);
+      const vwapDev=(Number.isFinite(vwapNow)&&Number.isFinite(now.close))?((now.close/vwapNow)-1)*100:null;
+
+      const closes=candles.map(k=>k.close); const rsiArr=calcRSI(closes,rsiLen); const rsiNow=rsiArr.at(-1);
+
+      const cumVol=candles.reduce((a,b)=>a+(+b.volume||0),0);
+      const avgVol20=daily.slice(-21,-1).reduce((a,b)=>a+(+b.volume||0),0)/Math.max(daily.slice(-21,-1).length,1);
+      const rvol=Number.isFinite(avgVol20)&&avgVol20>0?cumVol/avgVol20:null;
+
+      let signal='—', cls='';
+      const longTight=(brokeHi&&now.close>vwapNow&&rsiNow>60&&(gapPct??0)>=0);
+      const shortTight=(brokeLo&&now.close<vwapNow&&rsiNow<40&&(gapPct??0)<=0);
+      const longLoose=(now.close>vwapNow)||brokeHi;
+      const shortLoose=(now.close<vwapNow)||brokeLo;
+      if(longCond==='tight'?longTight:longLoose){signal='做多';cls='text-green-700';}
+      if(shortCond==='tight'?shortTight:shortLoose){signal=(signal==='做多'?'觀望':'做空');cls=(signal==='做空')?'text-red-700':'text-amber-600';}
+
+      out.push({s,price:now.close,gapPct,orHigh:or.high,orLow:or.low,vwapDev,rsi:rsiNow,rvol,broke:brokeHi?'↑':brokeLo?'↓':'—',signal,cls,note:''});
+    }catch(e){
+      out.push({s, error:e.message||String(e)});
+      errBox.textContent = '有部分代號讀取失敗，已在備註欄顯示。';
+    }
+  }
+
+  out.sort((a,b)=>{const rk=x=>x.signal==='做多'?2:x.signal==='做空'?1:0;return (rk(b)-rk(a))||(Math.abs(b.vwapDev||0)-Math.abs(a.vwapDev||0))||((b.rvol||0)-(a.rvol||0));});
+
+  tbody.innerHTML='';
+  out.forEach(r=>{
+    const tr=document.createElement('tr'); tr.className='border-b hover:bg-neutral-50';
+    tr.innerHTML = `
+      <td class='py-2 mono'>${r.s}</td>
+      <td class='text-right'>${fmt(r.price)}</td>
+      <td class='text-right ${r.gapPct>0?'text-green-600':r.gapPct<0?'text-red-600':''}'>${fmt(r.gapPct)}</td>
+      <td class='text-right'>${fmt(r.orHigh)} / ${fmt(r.orLow)}</td>
+      <td class='text-right ${r.vwapDev>0?'text-green-600':r.vwapDev<0?'text-red-600':''}'>${fmt(r.vwapDev)}</td>
+      <td class='text-right'>${fmt(r.rsi,0)}</td>
+      <td class='text-right'>${fmt(r.rvol,2)}</td>
+      <td class='text-right'>${r.broke||'—'}</td>
+      <td class='text-left'><span class='chip ${r.cls}'>${r.signal||''}</span></td>
+      <td class='text-left text-red-600'>${r.error||r.note||''}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('btnCSV').disabled=out.length===0;
+  window.__result=out; summary.textContent=`完成 ${out.length} 檔（${interval}，ORB=${orbMin}m，RSI=${rsiLen}）。`;
+}
+
+// Export CSV
+function exportCSV(){const rows=window.__result||[];const headers=['Symbol','Price','Gap%','ORHigh','ORLow','VWAPDev%','RSI','RVOL','Break','Signal'];const lines=[headers.join(',')].concat(rows.map(r=>[r.s,r.price??'',r.gapPct??'',r.orHigh??'',r.orLow??'',r.vwapDev??'',r.rsi??'',r.rvol??'',r.broke??'',r.signal??''].join(',')));const blob=new Blob([lines.join('\\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`daytrade_scanner_${new Date().toISOString().slice(0,10)}.csv`;a.click();}
+
+// Download this page
+function saveSelf(){const html='<!doctype html>'+document.documentElement.outerHTML;const blob=new Blob([html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='daytrade_scanner_v2.html';a.click();}
+
+document.getElementById('btnRun').addEventListener('click',run);
+document.getElementById('btnCSV').addEventListener('click',exportCSV);
+document.getElementById('btnSave').addEventListener('click',saveSelf);
+
+// Auto-run once
+run();
+
+// Dev smoke tests (console)
+(function(){try{
+  const sample='Title: Upstream\n```json\n{"chart":{"result":[{"timestamp":[1,2,3],"indicators":{"quote":[{"open":[1,2,3],"high":[1,2,3],"low":[1,2,3],"close":[1,2,3],"volume":[10,20,30]}]},"meta":{"chartPreviousClose":0}}]}}\n```';
+  const j=tryParseJSONFromText(sample); console.assert(j?.chart?.result, 'text→JSON fallback works');
+}catch(e){console.warn('dev tests',e);}})();
+</script>
+
+</body></html>
