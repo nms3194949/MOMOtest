@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>純前端 RAG（已預載：聯盟行銷功能說明）｜含初始化燈號</title>
+<title>純前端 RAG（已預載）｜iOS 相容＋燈號＋進度</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <style>
@@ -41,18 +41,15 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>📄 純前端文件問答（RAG）— 已預載《聯盟行銷功能說明.pdf》</h1>
+  <h1>📄 純前端文件問答（RAG）— 已預載 PDF</h1>
 
   <div class="card">
     <div class="row"><strong>初始化</strong><span id="status" class="muted">尚未開始</span></div>
-
-    <!-- 總進度 -->
     <div class="row" style="margin-top:8px">
       <div class="progress" style="flex:1;min-width:240px"><div id="bar" class="bar"></div></div>
       <span id="pct" class="kv">0%</span>
     </div>
 
-    <!-- 每步驟燈號 -->
     <div class="steps" id="steps">
       <span class="led red" id="led1"></span><div class="step">1) 載入程式庫（pdf.js / transformers.js / IndexedDB）</div><div class="right" id="t1">—</div>
       <span class="led red" id="led2"></span><div class="step">2) 解析內建 PDF（base64 內嵌，不外傳）</div><div class="right" id="t2">—</div>
@@ -62,7 +59,6 @@
       <span class="led red" id="led6"></span><div class="step">6) 寫入索引（IndexedDB）→ 就緒</div><div class="right" id="t6">—</div>
     </div>
 
-    <!-- 子進度 -->
     <div class="row" style="margin-top:10px">
       <div class="subprogress" style="flex:1;min-width:240px"><div id="subbar" class="subbar"></div></div>
       <span id="subtxt" class="kv">子進度：0%</span>
@@ -131,17 +127,43 @@ function bar(p){ $bar.style.width = p+"%"; $pct.textContent = Math.round(p) + "%
 function subbar(p,txt){ $subbar.style.width = p+"%"; $subtxt.textContent = "子進度：" + Math.round(p) + "% " + (txt?("｜"+txt):""); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function clip(t,n){ return (t.length>n)?(t.slice(0,n)+"…"):t; }
-function normalize(s){ return s.replace(/\s+/g," ").trim(); }
+function normalizeText(s){ return s.replace(/\s+/g," ").trim(); }
+
+// iOS 相容：randomUUID polyfill
+if (!('randomUUID' in crypto)) {
+  crypto.randomUUID = function () {
+    const bytes = new Uint8Array(16);
+    crypto.getRandomValues(bytes);
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hex = [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+  }
+}
+
 function toB64F32(arr){ const bytes = new Uint8Array(arr.buffer); let bin=""; for(let b of bytes) bin += String.fromCharCode(b); return btoa(bin); }
 function fromB64F32(b){ const bin = atob(b); const bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new Float32Array(bytes.buffer); }
 function cosine(a,b){ let dot=0,na=0,nb=0; for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-12); }
-function splitSentences(text){ return text.split(/(?<=[。！？.!?])\s+|[\n\r]+/).filter(Boolean); }
+
+// Safari/iOS 相容：不使用 lookbehind 的分句
+function splitSentences(text){
+  const out = [];
+  let buf = "";
+  const punct = /[。．｡！？!?\.]/;
+  for (let i=0;i<text.length;i++){
+    const ch = text[i];
+    buf += ch;
+    if (punct.test(ch)) { out.push(buf.trim()); buf = ""; }
+  }
+  if (buf.trim()) out.push(buf.trim());
+  return out;
+}
 
 let timeouts = []; // 每步 watchdog
 function startWatch(i,secs=20, tip){
   clearWatch(i);
   const id = setTimeout(()=>{
-    setHint(tip || "初始化似乎較久，若在 iOS/Safari 可能受記憶體限制；建議改用 Wi-Fi/桌機或將 PDF 分割後再試。");
+    setHint(tip || "初始化較久：若在 iOS/Safari 可能受記憶體限制；建議改用 Wi-Fi/桌機或將 PDF 分割再試。");
     setTxt(i,"逾時…"); setLed(i,"yellow");
   }, secs*1000);
   timeouts[i]=id;
@@ -150,7 +172,7 @@ function clearWatch(i){ if(timeouts[i]){ clearTimeout(timeouts[i]); timeouts[i]=
 
 /* ====== 解析內嵌 PDF ====== */
 async function parsePDF(){
-  // 由我替你內嵌：如果你自行替換，請把 __PDF_B64__ 換成你的 base64
+  // 將 __PDF_B64__ 替換為你的 PDF base64；下載版已內嵌完成可直接用
   const b64 = "__PDF_B64__";
   const data = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
   const pdf = await pdfjsLib.getDocument({ data }).promise;
@@ -179,11 +201,11 @@ async function getEmbedder(){
 async function buildIndex(){
   // 1) 載入程式庫
   setStatus("步驟 1/6：載入程式庫…");
-  setLed(1,"yellow"); startWatch(1,15,"若卡住：檢查網路／CDN 是否被擋，或改用 4G/桌機。");
-  await sleep(200); // 讓 UI 有感
+  setLed(1,"yellow"); startWatch(1,15,"如卡住：檢查網路或 CDN 是否被擋；可改用 4G/桌機。");
+  await sleep(200);
   clearWatch(1); setLed(1,"green"); setTxt(1,"OK"); bar(8);
 
-  // 如果已存在索引，直接就緒
+  // 既有索引 → 直接就緒
   const cached = await DB.getItem(KEY_DATA);
   if (cached && cached.length){
     setStatus(`偵測到現有索引（${cached.length} 段），直接就緒。`);
@@ -204,7 +226,7 @@ async function buildIndex(){
   const chunks = [];
   const chunkChars = 900, overlap = 150;
   for (let i=0;i<pages.length;i++){
-    const t = normalize(pages[i].text);
+    const t = normalizeText(pages[i].text);
     let j=0; const L = t.length;
     while(j < L){
       const end = Math.min(L, j+chunkChars);
