@@ -3,12 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>純前端 RAG（已預載）｜iOS 相容＋燈號＋進度</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<title>極速純前端 RAG（單檔版｜LED＋進度｜TF-IDF）</title>
 <style>
   :root{
-    --deep:#0A1221; --gold:#C9A227; --ink:#e7ecf3; --muted:#a8b3c7; --card:#0C152A; --line:rgba(233,209,138,.28);
+    --deep:#0A1221; --gold:#C9A227; --ink:#e7ecf3; --muted:#a8b3c7;
+    --card:#0C152A; --line:rgba(233,209,138,.28);
     --ok:#39C27A; --warn:#f59e0b; --bad:#ef4444;
   }
   *{box-sizing:border-box}
@@ -25,50 +24,38 @@
   .btn{padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   input,textarea,select{background:#0b1226;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:10px}
+  textarea{width:100%;min-height:120px}
   .answer{white-space:pre-wrap;line-height:1.7}
   .cite{font-size:13px;color:var(--muted)}
-  /* LED */
   .led{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;border:1px solid rgba(255,255,255,.2)}
-  .red{background:var(--bad)}
-  .yellow{background:var(--warn)}
-  .green{background:var(--ok)}
+  .red{background:var(--bad)} .yellow{background:var(--warn)} .green{background:var(--ok)}
   .steps{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;margin-top:8px}
   .step{padding:6px 8px;border:1px dashed var(--line);border-radius:10px}
   .right{justify-self:end;color:var(--muted);font-size:12px}
-  .hint{font-size:12px;color:#fcd34d;margin-top:6px}
-  details summary{cursor:pointer}
+  code{background:#0b1226;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>📄 純前端文件問答（RAG）— 已預載 PDF</h1>
+  <h1>⚡ 極速純前端文件問答（RAG）— 單檔版</h1>
 
   <div class="card">
     <div class="row"><strong>初始化</strong><span id="status" class="muted">尚未開始</span></div>
     <div class="row" style="margin-top:8px">
       <div class="progress" style="flex:1;min-width:240px"><div id="bar" class="bar"></div></div>
       <span id="pct" class="kv">0%</span>
+      <span id="meta" class="kv">—</span>
     </div>
-
-    <div class="steps" id="steps">
-      <span class="led red" id="led1"></span><div class="step">1) 載入程式庫（pdf.js / transformers.js / IndexedDB）</div><div class="right" id="t1">—</div>
-      <span class="led red" id="led2"></span><div class="step">2) 解析內建 PDF（base64 內嵌，不外傳）</div><div class="right" id="t2">—</div>
-      <span class="led red" id="led3"></span><div class="step">3) 分塊（chunking）</div><div class="right" id="t3">—</div>
-      <span class="led red" id="led4"></span><div class="step">4) 載入模型（Xenova / all-MiniLM-L6-v2, WASM）</div><div class="right" id="t4">—</div>
-      <span class="led red" id="led5"></span><div class="step">5) 產生向量（embedding）</div><div class="right" id="t5">—</div>
-      <span class="led red" id="led6"></span><div class="step">6) 寫入索引（IndexedDB）→ 就緒</div><div class="right" id="t6">—</div>
+    <div class="steps">
+      <span class="led red" id="led1"></span><div class="step">1) 載入內嵌資料／或準備抽取</div><div class="right" id="t1">—</div>
+      <span class="led red" id="led2"></span><div class="step">2) 建立 TF-IDF 索引（本機）</div><div class="right" id="t2">—</div>
+      <span class="led red" id="led3"></span><div class="step">3) 完成，就緒</div><div class="right" id="t3">—</div>
     </div>
 
     <div class="row" style="margin-top:10px">
-      <div class="subprogress" style="flex:1;min-width:240px"><div id="subbar" class="subbar"></div></div>
-      <span id="subtxt" class="kv">子進度：0%</span>
-    </div>
-
-    <div id="hint" class="hint" style="display:none"></div>
-
-    <div class="row" style="margin-top:10px">
-      <button id="retry" class="btn">重試初始化</button>
-      <button id="clear" class="btn">清空索引</button>
+      <button id="initBtn" class="btn">開始初始化</button>
+      <button id="clearBtn" class="btn">重置</button>
+      <a id="downloadPdf" class="btn" download="document.pdf">下載內嵌 PDF</a>
     </div>
   </div>
 
@@ -76,12 +63,26 @@
     <div class="row"><strong>提問</strong><span class="muted">索引完成後即可使用</span></div>
     <input id="question" type="text" placeholder="例如：經銷商的申請在哪裡設定？">
     <div class="row" style="margin-top:8px">
-      <label>Top-k：<select id="topk"><option>3</option><option selected>5</option><option>7</option></select></label>
+      <label>Top-k：<select id="topk"><option>3</option><option selected>5</option><option>7</option><option>10</option></select></label>
       <label>每段字數上限：<select id="cliplen"><option>200</option><option selected>360</option><option>500</option></select></label>
       <button id="askBtn" class="btn" disabled>送出問題</button>
     </div>
     <div id="answer" class="answer" style="margin-top:10px">（尚無回答）</div>
     <div id="cites" class="cite"></div>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>📎 內嵌資料設定（可折疊）</summary>
+      <p class="muted">二選一：<br>1) 直接貼上 <b>資料集 JSON</b>（開頁即用，最快）<br>2) 僅貼 <b>PDF base64</b>，再按「抽取 PDF」→ 由頁面抽取並建索引（較慢）</p>
+      <h4>1) 內嵌資料集（可選）</h4>
+      <textarea id="datasetBox" placeholder='貼上你預先算好的 DATASET（格式見下方程式區塊說明）。留空表示改走「抽取 PDF」模式。'></textarea>
+      <h4>2) 內嵌 PDF base64（可選）</h4>
+      <textarea id="pdfBox" placeholder='貼上你的 PDF base64（例如：base64 -i 你的.pdf）。'></textarea>
+      <div class="row" style="margin-top:8px">
+        <button id="extractBtn" class="btn">抽取 PDF（用 base64 → 文字 → 分塊 → 建索引）</button>
+      </div>
+    </details>
   </div>
 
   <details class="card">
@@ -90,23 +91,27 @@
   </details>
 </div>
 
-<!-- libs -->
-<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js"></script>
 <script>
-/* ====== 基本設定 ====== */
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.js";
+/* ========== 你可以直接在下方兩個變數內「預先貼好內容」： ========== */
+/* === 內嵌資料集（可選）===
+格式：
+{
+  "doc": "聯盟行銷功能說明.pdf",
+  "createdAt": 1730000000000,
+  "pages": [{"page":1,"len":1234}, ...],
+  "chunks": [{"id":"1-0","doc":"...","page":1,"text":"..."}, ...]
+}
+*/
+const EMBEDDED_DATASET = null; // ← 若有預先算好的資料，直接放物件（不是字串）。否則保持 null。
 
-const DB = localforage.createInstance({ name: "momo-rag-prepack", storeName: "chunks" });
-const KEY_META = "meta"; const KEY_DATA = "data"; const PREPACK_KEY = "prepacked_v1";
+/* === 內嵌 PDF base64（可選）=== */
+const PDF_B64 = ""; // ← 把你的 PDF 轉成 base64，整段貼進字串（無需 data: 前綴）
 
+/* ========== UI/工具 ========== */
 const $status = document.getElementById("status");
 const $bar = document.getElementById("bar");
 const $pct = document.getElementById("pct");
-const $subbar = document.getElementById("subbar");
-const $subtxt = document.getElementById("subtxt");
-const $hint = document.getElementById("hint");
+const $meta = document.getElementById("meta");
 const $askBtn = document.getElementById("askBtn");
 const $answer = document.getElementById("answer");
 const $cites = document.getElementById("cites");
@@ -114,172 +119,162 @@ const $q = document.getElementById("question");
 const $topk = document.getElementById("topk");
 const $cliplen = document.getElementById("cliplen");
 const $log = document.getElementById("log");
+const leds = [1,2,3].map(i=>document.getElementById("led"+i));
+const ts = [1,2,3].map(i=>document.getElementById("t"+i));
+const $datasetBox = document.getElementById("datasetBox");
+const $pdfBox = document.getElementById("pdfBox");
+const $extractBtn = document.getElementById("extractBtn");
+const $initBtn = document.getElementById("initBtn");
+const $clearBtn = document.getElementById("clearBtn");
+const $downloadPdf = document.getElementById("downloadPdf");
 
-const leds = [...Array(6)].map((_,i)=>document.getElementById("led"+(i+1)));
-const ts = [...Array(6)].map((_,i)=>document.getElementById("t"+(i+1)));
-
-function log(s){ $log.textContent += `${new Date().toLocaleTimeString()}  ${s}\n`; }
+function log(s){ $log.textContent += new Date().toLocaleTimeString()+"  "+s+"\n"; }
+function bar(p){ $bar.style.width = p+"%"; $pct.textContent = Math.round(p)+"%"; }
 function setLed(i,color){ leds[i-1].className = "led " + color; }
 function setTxt(i,txt){ ts[i-1].textContent = txt; }
-function setStatus(s){ $status.textContent = s; log(s); }
-function setHint(s){ $hint.style.display = s? "block":"none"; $hint.textContent = s || ""; }
-function bar(p){ $bar.style.width = p+"%"; $pct.textContent = Math.round(p) + "%"; }
-function subbar(p,txt){ $subbar.style.width = p+"%"; $subtxt.textContent = "子進度：" + Math.round(p) + "% " + (txt?("｜"+txt):""); }
+function clip(t,n){ return t.length>n ? (t.slice(0,n)+'…') : t; }
+function normalize(s){ return (s||"").replace(/\s+/g," ").trim(); }
+function tokenize(s){ return (s.toLowerCase().match(/[a-z0-9\u4e00-\u9fa5]+/g) || []); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function clip(t,n){ return (t.length>n)?(t.slice(0,n)+"…"):t; }
-function normalizeText(s){ return s.replace(/\s+/g," ").trim(); }
 
-// iOS 相容：randomUUID polyfill
-if (!('randomUUID' in crypto)) {
-  crypto.randomUUID = function () {
-    const bytes = new Uint8Array(16);
-    crypto.getRandomValues(bytes);
-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
-    const hex = [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
-    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+/* ========== TF-IDF ========== */
+function tfidfBuild(chunks, onProgress){
+  const N = chunks.length;
+  const tokenized = new Array(N);
+  const df = new Map();
+  for (let i=0;i<N;i++){
+    const toks = tokenize(chunks[i].text);
+    tokenized[i] = toks;
+    const uniq = new Set(toks);
+    uniq.forEach(t => df.set(t, (df.get(t)||0)+1));
+    if (onProgress && i%10===0) onProgress(40 + Math.floor((i/N)*30));
+  }
+  const idf = new Map(); df.forEach((v,k)=> idf.set(k, Math.log((N+1)/(v+1))+1) );
+  return { tokenized, idf, chunks };
+}
+function tfidfVector(toks, idf){
+  const tf = new Map();
+  toks.forEach(t => tf.set(t, (tf.get(t)||0)+1));
+  const vec = new Map();
+  tf.forEach((f,t)=> vec.set(t, f * (idf.get(t)||0)) );
+  return vec;
+}
+function dotMap(a,b){ let s=0; if (a.size>b.size){ const tmp=a; a=b; b=tmp; } a.forEach((va,k)=>{ const vb=b.get(k)||0; s+=va*vb; }); return s; }
+function normMap(a){ let s=0; a.forEach(v=>s+=v*v); return Math.sqrt(s); }
+function cosineMap(a,b){ return dotMap(a,b)/(normMap(a)*normMap(b)+1e-12); }
+
+/* ========== PDF 文字抽取（純前端） ==========
+   說明：不使用 pdf.js；這裡提供極簡方案，只對含文字的 PDF 有效。
+   若 PDF 以向量或圖片為主，建議改走「預先抽取並貼入 DATASET」的路徑。
+   （這段方法對多數由 Word/Google Docs 轉出之 PDF 仍可抽到文字。）
+*/
+async function naiveExtractTextFromPDF(b64){
+  try{
+    // 嘗試解析 PDF 的文字物件（非常簡化，非完整 PDF 解碼）
+    // 作法：把 base64 → Uint8Array → 以字串掃描常見的文字片段（TJ / Tj）
+    const bin = atob(b64);
+    const maybeText = [];
+    // 將可能的可視字元抽出（避免二進位造成效能問題）
+    for (let i=0;i<bin.length;i++){
+      const c = bin.charCodeAt(i);
+      if (c===10 || c===13 || (c>=32 && c<=126) || (c>=0x80)) {
+        maybeText.push(bin[i]);
+      } else {
+        maybeText.push(' ');
+      }
+    }
+    const s = maybeText.join('');
+    // 常見 PDF 字串文字寫法：(...)Tj / [(...)]TJ
+    const regex = /\(([^)]{1,2000})\)\s*Tj|\[\s*(?:\([^)]+\)\s*\d+\s*)+\]\s*TJ/g;
+    const parts = [];
+    let m;
+    while ((m = regex.exec(s)) !== null){
+      const grp = m[1] || "";
+      if (grp) parts.push(grp.replace(/\\([nrtbf()\\/])/g, '$1')); // 反斜線轉義還原
+      if (parts.length % 200 === 0) await sleep(1);
+    }
+    const textJoined = normalize(parts.join(' '));
+    if (!textJoined) throw new Error("未能從 PDF 抽到文字；此檔可能是掃描或圖像為主。");
+    // 粗略分頁（以常見 'Page ' or '/Type /Page' 出現數估計），此為近似
+    const pageCount = Math.max(1, (s.match(/\/Type\s*\/Page/g)||[]).length);
+    const perPageLen = Math.ceil(textJoined.length / pageCount);
+    const pages = [];
+    for (let i=0;i<pageCount;i++){
+      pages.push({page: i+1, text: textJoined.slice(i*perPageLen, (i+1)*perPageLen)});
+    }
+    return { pages, textJoined };
+  }catch(e){
+    throw e;
   }
 }
 
-function toB64F32(arr){ const bytes = new Uint8Array(arr.buffer); let bin=""; for(let b of bytes) bin += String.fromCharCode(b); return btoa(bin); }
-function fromB64F32(b){ const bin = atob(b); const bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new Float32Array(bytes.buffer); }
-function cosine(a,b){ let dot=0,na=0,nb=0; for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-12); }
-
-// Safari/iOS 相容：不使用 lookbehind 的分句
-function splitSentences(text){
+function chunkPages(pages, chunkChars=900, overlap=150){
   const out = [];
-  let buf = "";
-  const punct = /[。．｡！？!?\.]/;
-  for (let i=0;i<text.length;i++){
-    const ch = text[i];
-    buf += ch;
-    if (punct.test(ch)) { out.push(buf.trim()); buf = ""; }
+  for (const p of pages){
+    const t = normalize(p.text);
+    if (!t) continue;
+    let i=0, L=t.length;
+    while (i<L){
+      const end = Math.min(L, i+chunkChars);
+      out.push({ id: `${p.page}-${i}`, doc: CURRENT_DOC, page: p.page, text: t.slice(i,end) });
+      i = end - overlap; if (i<0) i=0; if (i>=L) break;
+    }
   }
-  if (buf.trim()) out.push(buf.trim());
   return out;
 }
 
-let timeouts = []; // 每步 watchdog
-function startWatch(i,secs=20, tip){
-  clearWatch(i);
-  const id = setTimeout(()=>{
-    setHint(tip || "初始化較久：若在 iOS/Safari 可能受記憶體限制；建議改用 Wi-Fi/桌機或將 PDF 分割再試。");
-    setTxt(i,"逾時…"); setLed(i,"yellow");
-  }, secs*1000);
-  timeouts[i]=id;
-}
-function clearWatch(i){ if(timeouts[i]){ clearTimeout(timeouts[i]); timeouts[i]=null; } }
+/* ========== 狀態 ========== */
+let INDEX = null;
+let CURRENT_DOC = "document.pdf";
 
-/* ====== 解析內嵌 PDF ====== */
-async function parsePDF(){
-  // 將 __PDF_B64__ 替換為你的 PDF base64；下載版已內嵌完成可直接用
-  const b64 = "__PDF_B64__";
-  const data = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
-  const pdf = await pdfjsLib.getDocument({ data }).promise;
+/* ========== 初始化流程 ========== */
+async function initialize({dataset, pdfb64}){
+  try{
+    setLed(1,"yellow"); setTxt(1,"準備中…"); bar(10);
+    if (dataset && Array.isArray(dataset.chunks) && dataset.chunks.length){
+      // 走已嵌入資料集（最快）
+      CURRENT_DOC = dataset.doc || CURRENT_DOC;
+      $meta.textContent = `段落 ${dataset.chunks.length}｜頁數 ${dataset.pages?.length ?? "—"}`;
+      setLed(1,"green"); setTxt(1,"載入內嵌資料 OK"); bar(25);
+      setLed(2,"yellow"); setTxt(2,"建立 TF-IDF 中…");
+      INDEX = tfidfBuild(dataset.chunks, p => bar(p));
+      setLed(2,"green"); setTxt(2,"索引 OK"); bar(90);
+    } else if (pdfb64) {
+      // 走 PDF 抽取
+      setTxt(1,"抽取 PDF 文字…"); bar(20);
+      const { pages } = await naiveExtractTextFromPDF(pdfb64);
+      if (!pages || !pages.length) throw new Error("抽取失敗：沒有文字可用。");
+      CURRENT_DOC = "嵌入 PDF";
+      setTxt(1, `抽取頁面 ${pages.length} 完成`); bar(35);
 
-  const pages = [];
-  for (let p=1;p<=pdf.numPages;p++){
-    const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const text = content.items.map(it=>it.str).join(" ");
-    pages.push({ doc:"聯盟行銷功能說明.pdf", page:p, text });
-    subbar((p/pdf.numPages)*100, `抽取第 ${p}/${pdf.numPages} 頁`);
-    await sleep(4);
-  }
-  return pages;
-}
-
-/* ====== 嵌入器 ====== */
-let embedPipe = null;
-async function getEmbedder(){
-  if (embedPipe) return embedPipe;
-  embedPipe = await window.transformers.pipeline("feature-extraction","Xenova/all-MiniLM-L6-v2");
-  return embedPipe;
-}
-
-/* ====== 建立索引 ====== */
-async function buildIndex(){
-  // 1) 載入程式庫
-  setStatus("步驟 1/6：載入程式庫…");
-  setLed(1,"yellow"); startWatch(1,15,"如卡住：檢查網路或 CDN 是否被擋；可改用 4G/桌機。");
-  await sleep(200);
-  clearWatch(1); setLed(1,"green"); setTxt(1,"OK"); bar(8);
-
-  // 既有索引 → 直接就緒
-  const cached = await DB.getItem(KEY_DATA);
-  if (cached && cached.length){
-    setStatus(`偵測到現有索引（${cached.length} 段），直接就緒。`);
-    setLed(2,"green"); setLed(3,"green"); setLed(4,"green"); setLed(5,"green"); setLed(6,"green");
-    setTxt(2,"略過"); setTxt(3,"略過"); setTxt(4,"略過"); setTxt(5,"略過"); setTxt(6,"OK");
-    bar(100); subbar(100,"已就緒"); $askBtn.disabled=false; return;
-  }
-
-  // 2) 解析 PDF
-  setStatus("步驟 2/6：解析內建 PDF…");
-  setLed(2,"yellow"); startWatch(2,20,"PDF 解析較久：行動裝置可稍慢，請耐心等候或換桌機。");
-  const pages = await parsePDF(); clearWatch(2); setLed(2,"green"); setTxt(2,`共 ${pages.length} 頁`);
-  bar(20);
-
-  // 3) 分塊
-  setStatus("步驟 3/6：分塊（chunking）…");
-  setLed(3,"yellow"); startWatch(3,10);
-  const chunks = [];
-  const chunkChars = 900, overlap = 150;
-  for (let i=0;i<pages.length;i++){
-    const t = normalizeText(pages[i].text);
-    let j=0; const L = t.length;
-    while(j < L){
-      const end = Math.min(L, j+chunkChars);
-      chunks.push({ id: crypto.randomUUID(), doc: pages[i].doc, page: pages[i].page, text: t.slice(j,end) });
-      j = end - overlap; if (j<0) j=0; if (j>=L) break;
+      setLed(2,"yellow"); setTxt(2,"分塊＆建索引…");
+      const chunks = chunkPages(pages, 900, 150);
+      $meta.textContent = `段落 ${chunks.length}｜頁數 ${pages.length}`;
+      INDEX = tfidfBuild(chunks, p => bar(p));
+      setLed(2,"green"); setTxt(2,"索引 OK"); bar(90);
+    } else {
+      throw new Error("沒有資料可用：請貼 DATASET 或 PDF base64。");
     }
-    subbar(((i+1)/pages.length)*100, `處理第 ${i+1}/${pages.length} 頁`);
-    await sleep(2);
+
+    setLed(3,"green"); setTxt(3,"就緒"); bar(100);
+    $status.textContent = "完成，可以開始提問。";
+    $askBtn.disabled = false;
+  }catch(e){
+    $status.textContent = "初始化失敗：" + e.message;
+    log("INIT ERROR: " + (e.stack || e.message));
   }
-  clearWatch(3); setLed(3,"green"); setTxt(3,`段落 ${chunks.length}`); bar(35);
-
-  // 4) 載入模型
-  setStatus("步驟 4/6：載入模型（WASM）…");
-  setLed(4,"yellow"); startWatch(4,30,"模型載入受網速影響（數十 MB）；若卡住，請切換網路或稍候。");
-  const pipe = await getEmbedder(); clearWatch(4); setLed(4,"green"); setTxt(4,"OK"); bar(50);
-
-  // 5) 產生向量
-  setStatus("步驟 5/6：產生向量（embedding）…");
-  setLed(5,"yellow"); startWatch(5,30,"向量計算較耗時；裝置較舊會慢，請保持畫面喚醒。");
-  const stored = [];
-  for (let i=0;i<chunks.length;i++){
-    const emb = await pipe(chunks[i].text, { pooling:"mean", normalize:true });
-    stored.push({ ...chunks[i], vector: toB64F32(emb.data) });
-    const p = ((i+1)/chunks.length)*100;
-    subbar(p, `嵌入 ${i+1}/${chunks.length}`);
-    if ((i+1)%3===0) await sleep(1);
-  }
-  clearWatch(5); setLed(5,"green"); setTxt(5,`完成 ${stored.length}`); bar(85);
-
-  // 6) 寫入索引
-  setStatus("步驟 6/6：寫入索引…");
-  setLed(6,"yellow"); startWatch(6,10);
-  await DB.setItem(KEY_DATA, stored);
-  await DB.setItem(KEY_META, { model:"Xenova/all-MiniLM-L6-v2", createdAt:Date.now(), totalChunks:stored.length });
-  await DB.setItem(PREPACK_KEY, true);
-  clearWatch(6); setLed(6,"green"); setTxt(6,"OK"); bar(100); subbar(100,"完成");
-  setStatus("初始化完成，可以開始提問。");
-  $askBtn.disabled = false;
 }
 
-/* ====== 提問 ====== */
-$askBtn.onclick = async () => {
+/* ========== 問答 ========== */
+document.getElementById("askBtn").onclick = () => {
   const q = $q.value.trim();
   if (!q) return alert("請輸入問題");
-  const data = await DB.getItem(KEY_DATA);
-  if (!data || !data.length) return alert("索引尚未建立");
+  if (!INDEX) return alert("索引尚未建立");
 
-  setStatus("檢索中…");
-  const pipe = await getEmbedder();
-  const qv = (await pipe(q, { pooling:"mean", normalize:true })).data;
-
-  const scored = data.map(r => ({ ...r, score: cosine(qv, fromB64F32(r.vector)) }))
-                     .sort((a,b)=> b.score - a.score);
+  const toks = tokenize(q);
+  const qv = tfidfVector(toks, INDEX.idf);
+  const scored = INDEX.chunks.map((c, i) => ({ ...c, score: cosineMap(qv, tfidfVector(INDEX.tokenized[i], INDEX.idf)) }))
+                             .sort((a,b)=> b.score - a.score);
 
   const k = parseInt($topk.value,10)||5;
   const clipLen = parseInt($cliplen.value,10)||360;
@@ -297,28 +292,42 @@ $askBtn.onclick = async () => {
     }
   }
   $cites.innerHTML = cites.length ? `<ol>${cites.join("")}</ol>` : "";
-  setStatus("完成");
 };
 
-/* ====== 控件：重試 & 清空 ====== */
-document.getElementById("retry").onclick = async ()=>{
-  setHint(""); bar(0); subbar(0,"");
-  leds.forEach((_,i)=>setLed(i+1,"red")); ts.forEach(el=>el.textContent="—");
-  await buildIndex();
-};
-document.getElementById("clear").onclick = async ()=>{
-  await DB.removeItem(KEY_DATA);
-  await DB.removeItem(KEY_META);
-  await DB.removeItem(PREPACK_KEY);
-  setStatus("已清空索引。可按「重試初始化」重新建立。");
-  $askBtn.disabled = true; bar(0); subbar(0,""); leds.forEach((_,i)=>setLed(i+1,"red")); ts.forEach(el=>el.textContent="—");
+/* ========== 事件繫結 ========== */
+$initBtn.onclick = async ()=>{
+  $status.textContent = "開始初始化…";
+  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
+  // 優先順序：1) 內嵌物件 EMBEDDED_DATASET；2) textarea dataset；3) 內嵌 PDF_B64；4) textarea pdf
+  let ds = EMBEDDED_DATASET;
+  if (!ds) {
+    try { ds = JSON.parse($datasetBox.value || "null"); } catch { ds = null; }
+  }
+  let p64 = PDF_B64 || $pdfBox.value.trim();
+  // 設定 PDF 下載按鈕
+  $downloadPdf.href = p64 ? ("data:application/pdf;base64," + p64) : "data:application/pdf;base64,";
+  await initialize({dataset: ds, pdfb64: p64 || null});
 };
 
-/* ====== 啟動 ====== */
-(async function init(){
-  setStatus("開始初始化…");
-  await buildIndex();
-})();
+$extractBtn.onclick = async ()=>{
+  // 快速路：只貼 PDF base64，在頁面抽文字、建索引
+  const p64 = ($pdfBox.value || PDF_B64 || "").trim();
+  if (!p64){ alert("請先貼上 PDF base64"); return; }
+  $datasetBox.value = "";
+  $status.textContent = "抽取 PDF → 分塊 → 建索引…";
+  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
+  // 設定 PDF 下載按鈕
+  $downloadPdf.href = "data:application/pdf;base64," + p64;
+  await initialize({dataset: null, pdfb64: p64});
+};
+
+$clearBtn.onclick = ()=>{
+  INDEX = null;
+  $status.textContent = "已重置。可再次初始化。";
+  $answer.textContent = "(尚無回答)";
+  $cites.innerHTML = "";
+  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
+};
 </script>
 </body>
 </html>
