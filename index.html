@@ -3,42 +3,81 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>純前端 RAG（已預載：聯盟行銷功能說明）</title>
+<title>純前端 RAG（已預載：聯盟行銷功能說明）｜含初始化燈號</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <style>
-  :root{ --deep:#0A1221; --gold:#C9A227; --ink:#e7ecf3; --muted:#a8b3c7; --card:#0C152A; --line:rgba(233,209,138,.28);}
+  :root{
+    --deep:#0A1221; --gold:#C9A227; --ink:#e7ecf3; --muted:#a8b3c7; --card:#0C152A; --line:rgba(233,209,138,.28);
+    --ok:#39C27A; --warn:#f59e0b; --bad:#ef4444;
+  }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--deep);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
   .wrap{max-width:980px;margin:0 auto;padding:18px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .btn{padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
   .muted{color:var(--muted)}
   .kv{background:#0b1226;border:1px solid var(--line);padding:8px 10px;border-radius:10px}
-  .progress{height:10px;border-radius:8px;background:#0b1226;border:1px solid var(--line);overflow:hidden}
+  .progress{height:12px;border-radius:999px;background:#0b1226;border:1px solid var(--line);overflow:hidden}
   .bar{height:100%;background:linear-gradient(90deg,#C9A227,#E9D18A);width:0%}
+  .subprogress{height:8px;border-radius:999px;background:#0b1226;border:1px solid var(--line);overflow:hidden}
+  .subbar{height:100%;background:linear-gradient(90deg,#6EE7B7,#34D399);width:0%}
+  .btn{padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
   input,textarea,select{background:#0b1226;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:10px}
   .answer{white-space:pre-wrap;line-height:1.7}
   .cite{font-size:13px;color:var(--muted)}
+  /* LED */
+  .led{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;border:1px solid rgba(255,255,255,.2)}
+  .red{background:var(--bad)}
+  .yellow{background:var(--warn)}
+  .green{background:var(--ok)}
+  .steps{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;margin-top:8px}
+  .step{padding:6px 8px;border:1px dashed var(--line);border-radius:10px}
+  .right{justify-self:end;color:var(--muted);font-size:12px}
+  .hint{font-size:12px;color:#fcd34d;margin-top:6px}
+  details summary{cursor:pointer}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>📄 純前端文件問答（RAG）— 已預載《聯盟行銷功能說明.pdf》</h1>
+
   <div class="card">
-    <div class="row"><strong>狀態</strong><span id="status" class="muted">初始化中…</span></div>
-    <div class="row" style="margin-top:8px">
-      <div class="kv">內建檔案：<code>聯盟行銷功能說明.pdf</code></div>
-      <div class="kv">來源：內嵌 base64（不外傳）</div>
-    </div>
+    <div class="row"><strong>初始化</strong><span id="status" class="muted">尚未開始</span></div>
+
+    <!-- 總進度 -->
     <div class="row" style="margin-top:8px">
       <div class="progress" style="flex:1;min-width:240px"><div id="bar" class="bar"></div></div>
+      <span id="pct" class="kv">0%</span>
+    </div>
+
+    <!-- 每步驟燈號 -->
+    <div class="steps" id="steps">
+      <span class="led red" id="led1"></span><div class="step">1) 載入程式庫（pdf.js / transformers.js / IndexedDB）</div><div class="right" id="t1">—</div>
+      <span class="led red" id="led2"></span><div class="step">2) 解析內建 PDF（base64 內嵌，不外傳）</div><div class="right" id="t2">—</div>
+      <span class="led red" id="led3"></span><div class="step">3) 分塊（chunking）</div><div class="right" id="t3">—</div>
+      <span class="led red" id="led4"></span><div class="step">4) 載入模型（Xenova / all-MiniLM-L6-v2, WASM）</div><div class="right" id="t4">—</div>
+      <span class="led red" id="led5"></span><div class="step">5) 產生向量（embedding）</div><div class="right" id="t5">—</div>
+      <span class="led red" id="led6"></span><div class="step">6) 寫入索引（IndexedDB）→ 就緒</div><div class="right" id="t6">—</div>
+    </div>
+
+    <!-- 子進度 -->
+    <div class="row" style="margin-top:10px">
+      <div class="subprogress" style="flex:1;min-width:240px"><div id="subbar" class="subbar"></div></div>
+      <span id="subtxt" class="kv">子進度：0%</span>
+    </div>
+
+    <div id="hint" class="hint" style="display:none"></div>
+
+    <div class="row" style="margin-top:10px">
+      <button id="retry" class="btn">重試初始化</button>
+      <button id="clear" class="btn">清空索引</button>
     </div>
   </div>
 
   <div class="card">
-    <div class="row"><strong>提問</strong><span class="muted">索引建立完成後即可使用</span></div>
+    <div class="row"><strong>提問</strong><span class="muted">索引完成後即可使用</span></div>
     <input id="question" type="text" placeholder="例如：經銷商的申請在哪裡設定？">
     <div class="row" style="margin-top:8px">
       <label>Top-k：<select id="topk"><option>3</option><option selected>5</option><option>7</option></select></label>
@@ -48,9 +87,14 @@
     <div id="answer" class="answer" style="margin-top:10px">（尚無回答）</div>
     <div id="cites" class="cite"></div>
   </div>
+
+  <details class="card">
+    <summary>🔧 除錯資訊</summary>
+    <pre id="log" style="white-space:pre-wrap;font-size:12px;color:#a1a1aa"></pre>
+  </details>
 </div>
 
-<!-- 純前端使用的函式庫 -->
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js"></script>
@@ -59,134 +103,167 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.js";
 
 const DB = localforage.createInstance({ name: "momo-rag-prepack", storeName: "chunks" });
-const KEY_META = "meta"; const KEY_DATA = "data";
-const PREPACK_KEY = "prepacked_v1"; // 是否已解析內建檔案
+const KEY_META = "meta"; const KEY_DATA = "data"; const PREPACK_KEY = "prepacked_v1";
 
 const $status = document.getElementById("status");
 const $bar = document.getElementById("bar");
+const $pct = document.getElementById("pct");
+const $subbar = document.getElementById("subbar");
+const $subtxt = document.getElementById("subtxt");
+const $hint = document.getElementById("hint");
 const $askBtn = document.getElementById("askBtn");
 const $answer = document.getElementById("answer");
 const $cites = document.getElementById("cites");
 const $q = document.getElementById("question");
 const $topk = document.getElementById("topk");
 const $cliplen = document.getElementById("cliplen");
+const $log = document.getElementById("log");
 
-function updateBar(p){ $bar.style.width = Math.max(0, Math.min(100, p)) + "%"; }
+const leds = [...Array(6)].map((_,i)=>document.getElementById("led"+(i+1)));
+const ts = [...Array(6)].map((_,i)=>document.getElementById("t"+(i+1)));
+
+function log(s){ $log.textContent += `${new Date().toLocaleTimeString()}  ${s}\n`; }
+function setLed(i,color){ leds[i-1].className = "led " + color; }
+function setTxt(i,txt){ ts[i-1].textContent = txt; }
+function setStatus(s){ $status.textContent = s; log(s); }
+function setHint(s){ $hint.style.display = s? "block":"none"; $hint.textContent = s || ""; }
+function bar(p){ $bar.style.width = p+"%"; $pct.textContent = Math.round(p) + "%"; }
+function subbar(p,txt){ $subbar.style.width = p+"%"; $subtxt.textContent = "子進度：" + Math.round(p) + "% " + (txt?("｜"+txt):""); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-function clipText(t,n){ return t.length>n ? t.slice(0,n) + "…" : t; }
-function normalizeText(s){ return s.replace(/\s+/g," ").trim(); }
+function clip(t,n){ return (t.length>n)?(t.slice(0,n)+"…"):t; }
+function normalize(s){ return s.replace(/\s+/g," ").trim(); }
+function toB64F32(arr){ const bytes = new Uint8Array(arr.buffer); let bin=""; for(let b of bytes) bin += String.fromCharCode(b); return btoa(bin); }
+function fromB64F32(b){ const bin = atob(b); const bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new Float32Array(bytes.buffer); }
+function cosine(a,b){ let dot=0,na=0,nb=0; for(let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; } return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-12); }
+function splitSentences(text){ return text.split(/(?<=[。！？.!?])\s+|[\n\r]+/).filter(Boolean); }
 
-function toBase64Float32(arr){
-  const bytes = new Uint8Array(arr.buffer);
-  let bin = ""; for (let i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
+let timeouts = []; // 每步 watchdog
+function startWatch(i,secs=20, tip){
+  clearWatch(i);
+  const id = setTimeout(()=>{
+    setHint(tip || "初始化似乎較久，若在 iOS/Safari 可能受記憶體限制；建議改用 Wi-Fi/桌機或將 PDF 分割後再試。");
+    setTxt(i,"逾時…"); setLed(i,"yellow");
+  }, secs*1000);
+  timeouts[i]=id;
 }
-function fromBase64Float32(b64){
-  const bin = atob(b64); const bytes = new Uint8Array(bin.length);
-  for (let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-  return new Float32Array(bytes.buffer);
-}
-function cosine(a,b){
-  let dot=0,na=0,nb=0; for (let i=0;i<a.length;i++){ dot+=a[i]*b[i]; na+=a[i]*a[i]; nb+=b[i]*b[i]; }
-  return dot/(Math.sqrt(na)*Math.sqrt(nb)+1e-12);
-}
-function splitSentences(text){
-  return text.split(/(?<=[。！？.!?])\s+|[\n\r]+/).filter(Boolean);
-}
+function clearWatch(i){ if(timeouts[i]){ clearTimeout(timeouts[i]); timeouts[i]=null; } }
 
-async function embedder(){
-  // 產生語意向量（WASM）：Xenova/all-MiniLM-L6-v2
-  return await window.transformers.pipeline("feature-extraction","Xenova/all-MiniLM-L6-v2");
-}
-
-/* ====== 解析內嵌 PDF 並分塊 ====== */
-async function parseEmbeddedPDF(){
-  // 將下行的 __PDF_B64__ 替換為你的 PDF base64（若使用我提供的下載檔已內嵌好）
+/* ====== 解析內嵌 PDF ====== */
+async function parsePDF(){
+  // 由我替你內嵌：如果你自行替換，請把 __PDF_B64__ 換成你的 base64
   const b64 = "__PDF_B64__";
   const data = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
   const pdf = await pdfjsLib.getDocument({ data }).promise;
+
   const pages = [];
   for (let p=1;p<=pdf.numPages;p++){
     const page = await pdf.getPage(p);
     const content = await page.getTextContent();
     const text = content.items.map(it=>it.str).join(" ");
-    pages.push({ doc: "聯盟行銷功能說明.pdf", page: p, text });
-    updateBar((p/pdf.numPages)*40); // 40%：抽取文字階段
-    await sleep(5);
+    pages.push({ doc:"聯盟行銷功能說明.pdf", page:p, text });
+    subbar((p/pdf.numPages)*100, `抽取第 ${p}/${pdf.numPages} 頁`);
+    await sleep(4);
   }
-  // 分塊：每段 ~900 字，重疊 150 字，利於檢索銜接
-  const out = [];
-  for (const pg of pages){
-    const t = normalizeText(pg.text);
-    if (!t) continue;
-    const chunkChars=900, overlap=150;
-    let i=0;
-    while(i < t.length){
-      const end = Math.min(t.length, i+chunkChars);
-      out.push({ id: crypto.randomUUID(), doc: pg.doc, page: pg.page, text: t.slice(i,end) });
-      i = end - overlap; if (i<0) i=0; if (i>=t.length) break;
-    }
-  }
-  return out;
+  return pages;
 }
 
-/* ====== 首次載入：建立/載入索引 ====== */
-async function ensureIndex(){
-  let done = await DB.getItem(PREPACK_KEY);
-  let data = await DB.getItem(KEY_DATA);
-  if (done && data && data.length){
-    $status.textContent = `索引已存在（${data.length} 段）`;
-    updateBar(100);
-    $askBtn.disabled = false;
-    return;
+/* ====== 嵌入器 ====== */
+let embedPipe = null;
+async function getEmbedder(){
+  if (embedPipe) return embedPipe;
+  embedPipe = await window.transformers.pipeline("feature-extraction","Xenova/all-MiniLM-L6-v2");
+  return embedPipe;
+}
+
+/* ====== 建立索引 ====== */
+async function buildIndex(){
+  // 1) 載入程式庫
+  setStatus("步驟 1/6：載入程式庫…");
+  setLed(1,"yellow"); startWatch(1,15,"若卡住：檢查網路／CDN 是否被擋，或改用 4G/桌機。");
+  await sleep(200); // 讓 UI 有感
+  clearWatch(1); setLed(1,"green"); setTxt(1,"OK"); bar(8);
+
+  // 如果已存在索引，直接就緒
+  const cached = await DB.getItem(KEY_DATA);
+  if (cached && cached.length){
+    setStatus(`偵測到現有索引（${cached.length} 段），直接就緒。`);
+    setLed(2,"green"); setLed(3,"green"); setLed(4,"green"); setLed(5,"green"); setLed(6,"green");
+    setTxt(2,"略過"); setTxt(3,"略過"); setTxt(4,"略過"); setTxt(5,"略過"); setTxt(6,"OK");
+    bar(100); subbar(100,"已就緒"); $askBtn.disabled=false; return;
   }
-  $status.textContent = "解析內建 PDF…";
-  const chunks = await parseEmbeddedPDF();
-  $status.textContent = `共 ${chunks.length} 段，載入模型…`;
-  updateBar(45);
 
-  const pipe = await embedder();
-  updateBar(55);
+  // 2) 解析 PDF
+  setStatus("步驟 2/6：解析內建 PDF…");
+  setLed(2,"yellow"); startWatch(2,20,"PDF 解析較久：行動裝置可稍慢，請耐心等候或換桌機。");
+  const pages = await parsePDF(); clearWatch(2); setLed(2,"green"); setTxt(2,`共 ${pages.length} 頁`);
+  bar(20);
 
-  const total = chunks.length;
+  // 3) 分塊
+  setStatus("步驟 3/6：分塊（chunking）…");
+  setLed(3,"yellow"); startWatch(3,10);
+  const chunks = [];
+  const chunkChars = 900, overlap = 150;
+  for (let i=0;i<pages.length;i++){
+    const t = normalize(pages[i].text);
+    let j=0; const L = t.length;
+    while(j < L){
+      const end = Math.min(L, j+chunkChars);
+      chunks.push({ id: crypto.randomUUID(), doc: pages[i].doc, page: pages[i].page, text: t.slice(j,end) });
+      j = end - overlap; if (j<0) j=0; if (j>=L) break;
+    }
+    subbar(((i+1)/pages.length)*100, `處理第 ${i+1}/${pages.length} 頁`);
+    await sleep(2);
+  }
+  clearWatch(3); setLed(3,"green"); setTxt(3,`段落 ${chunks.length}`); bar(35);
+
+  // 4) 載入模型
+  setStatus("步驟 4/6：載入模型（WASM）…");
+  setLed(4,"yellow"); startWatch(4,30,"模型載入受網速影響（數十 MB）；若卡住，請切換網路或稍候。");
+  const pipe = await getEmbedder(); clearWatch(4); setLed(4,"green"); setTxt(4,"OK"); bar(50);
+
+  // 5) 產生向量
+  setStatus("步驟 5/6：產生向量（embedding）…");
+  setLed(5,"yellow"); startWatch(5,30,"向量計算較耗時；裝置較舊會慢，請保持畫面喚醒。");
   const stored = [];
   for (let i=0;i<chunks.length;i++){
-    const emb = await pipe(chunks[i].text, { pooling: "mean", normalize: true });
-    stored.push({ ...chunks[i], vector: toBase64Float32(emb.data) });
-    if ((i+1)%3===0 || i===chunks.length-1){
-      const pct = 55 + Math.floor(((i+1)/total)*45); // 55~100%：嵌入階段
-      updateBar(pct);
-      $status.textContent = `建立索引：${i+1}/${total}`;
-      await sleep(2);
-    }
+    const emb = await pipe(chunks[i].text, { pooling:"mean", normalize:true });
+    stored.push({ ...chunks[i], vector: toB64F32(emb.data) });
+    const p = ((i+1)/chunks.length)*100;
+    subbar(p, `嵌入 ${i+1}/${chunks.length}`);
+    if ((i+1)%3===0) await sleep(1);
   }
+  clearWatch(5); setLed(5,"green"); setTxt(5,`完成 ${stored.length}`); bar(85);
+
+  // 6) 寫入索引
+  setStatus("步驟 6/6：寫入索引…");
+  setLed(6,"yellow"); startWatch(6,10);
   await DB.setItem(KEY_DATA, stored);
-  await DB.setItem(KEY_META, { model: "Xenova/all-MiniLM-L6-v2", createdAt: Date.now(), totalChunks: stored.length });
+  await DB.setItem(KEY_META, { model:"Xenova/all-MiniLM-L6-v2", createdAt:Date.now(), totalChunks:stored.length });
   await DB.setItem(PREPACK_KEY, true);
-  $status.textContent = "完成，可開始提問";
+  clearWatch(6); setLed(6,"green"); setTxt(6,"OK"); bar(100); subbar(100,"完成");
+  setStatus("初始化完成，可以開始提問。");
   $askBtn.disabled = false;
-  updateBar(100);
 }
 
-/* ====== 檢索＋回答（抽取式） ====== */
+/* ====== 提問 ====== */
 $askBtn.onclick = async () => {
   const q = $q.value.trim();
   if (!q) return alert("請輸入問題");
   const data = await DB.getItem(KEY_DATA);
   if (!data || !data.length) return alert("索引尚未建立");
 
-  $status.textContent = "檢索中…";
-  const pipe = await embedder();
-  const qv = (await pipe(q, { pooling: "mean", normalize: true })).data;
+  setStatus("檢索中…");
+  const pipe = await getEmbedder();
+  const qv = (await pipe(q, { pooling:"mean", normalize:true })).data;
 
-  const scored = data.map(r => ({ ...r, score: cosine(qv, fromBase64Float32(r.vector)) }))
+  const scored = data.map(r => ({ ...r, score: cosine(qv, fromB64F32(r.vector)) }))
                      .sort((a,b)=> b.score - a.score);
 
   const k = parseInt($topk.value,10)||5;
   const clipLen = parseInt($cliplen.value,10)||360;
   const top = scored.slice(0,k);
 
-  const bullets = top.map(t => "• " + clipText(t.text.trim(), clipLen) + ` (p.${t.page}，${t.doc})`);
+  const bullets = top.map(t => "• " + clip(t.text.trim(), clipLen) + ` (p.${t.page}，${t.doc})`);
   $answer.textContent = ["【重點摘錄回答】", bullets.join("\n")].join("\n");
 
   const cites = []; const seen = new Set();
@@ -198,11 +275,28 @@ $askBtn.onclick = async () => {
     }
   }
   $cites.innerHTML = cites.length ? `<ol>${cites.join("")}</ol>` : "";
-  $status.textContent = "完成";
+  setStatus("完成");
 };
 
-/* 啟動 */
-ensureIndex();
+/* ====== 控件：重試 & 清空 ====== */
+document.getElementById("retry").onclick = async ()=>{
+  setHint(""); bar(0); subbar(0,"");
+  leds.forEach((_,i)=>setLed(i+1,"red")); ts.forEach(el=>el.textContent="—");
+  await buildIndex();
+};
+document.getElementById("clear").onclick = async ()=>{
+  await DB.removeItem(KEY_DATA);
+  await DB.removeItem(KEY_META);
+  await DB.removeItem(PREPACK_KEY);
+  setStatus("已清空索引。可按「重試初始化」重新建立。");
+  $askBtn.disabled = true; bar(0); subbar(0,""); leds.forEach((_,i)=>setLed(i+1,"red")); ts.forEach(el=>el.textContent="—");
+};
+
+/* ====== 啟動 ====== */
+(async function init(){
+  setStatus("開始初始化…");
+  await buildIndex();
+})();
 </script>
 </body>
 </html>
