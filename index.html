@@ -2,332 +2,519 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>極速純前端 RAG（單檔版｜LED＋進度｜TF-IDF）</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>MOMO雙贏策略</title>
 <style>
-  :root{
-    --deep:#0A1221; --gold:#C9A227; --ink:#e7ecf3; --muted:#a8b3c7;
-    --card:#0C152A; --line:rgba(233,209,138,.28);
-    --ok:#39C27A; --warn:#f59e0b; --bad:#ef4444;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--deep);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
-  .wrap{max-width:980px;margin:0 auto;padding:18px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .muted{color:var(--muted)}
-  .kv{background:#0b1226;border:1px solid var(--line);padding:8px 10px;border-radius:10px}
-  .progress{height:12px;border-radius:999px;background:#0b1226;border:1px solid var(--line);overflow:hidden}
-  .bar{height:100%;background:linear-gradient(90deg,#C9A227,#E9D18A);width:0%}
-  .subprogress{height:8px;border-radius:999px;background:#0b1226;border:1px solid var(--line);overflow:hidden}
-  .subbar{height:100%;background:linear-gradient(90deg,#6EE7B7,#34D399);width:0%}
-  .btn{padding:10px 14px;border:1px solid var(--gold);border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  input,textarea,select{background:#0b1226;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:10px}
-  textarea{width:100%;min-height:120px}
-  .answer{white-space:pre-wrap;line-height:1.7}
-  .cite{font-size:13px;color:var(--muted)}
-  .led{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px;border:1px solid rgba(255,255,255,.2)}
-  .red{background:var(--bad)} .yellow{background:var(--warn)} .green{background:var(--ok)}
-  .steps{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;margin-top:8px}
-  .step{padding:6px 8px;border:1px dashed var(--line);border-radius:10px}
-  .right{justify-self:end;color:var(--muted);font-size:12px}
-  code{background:#0b1226;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
+:root{--deep:#0A1221;--gold:#C9A227;--gold-soft:#E9D18A;--card:#0C152A;--pos:#39C27A;--neg:#E25A5A;--input:#071226;}
+html,body{margin:0;background:var(--deep);color:#fff;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+.wrap{max-width:540px;margin:0 auto;padding:12px 12px 84px}
+
+/* 頂部：分頁＋匯出 */
+.topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:10px 0}
+.tabs{display:flex;gap:8px;flex:1}
+.tab{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(201,162,39,.35);background:#0f1830;color:#E9D18A;font-weight:700}
+.tab[aria-selected="true"]{background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;border-color:transparent}
+.btn{padding:10px 12px;border:0;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;font-weight:700;white-space:nowrap}
+.btn.secondary{background:#1a2746;color:#E9D18A;border:1px solid rgba(201,162,39,.35)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* 表單 */
+.field{margin-bottom:10px}
+label{display:block;font-size:13px;color:#E9D18A;margin-bottom:6px}
+.control{width:100%;height:42px;border-radius:9px;border:1px solid rgba(233,209,138,.12);background:var(--input);color:#fff;font-size:15px;padding:0 10px;box-sizing:border-box}
+
+/* 表格 */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(201,162,39,.25);border-radius:10px;background:#0C152A}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{padding:6px 8px;text-align:left;font-size:14px;white-space:nowrap;vertical-align:middle}
+.table-grid th,.table-grid td{border:1px solid rgba(233,209,138,.35)}
+.table-grid thead th{background:rgba(201,162,39,.12);border-bottom:2px solid rgba(201,162,39,.8);color:#E9D18A}
+
+.pos{color:var(--pos);font-weight:700}
+.neg{color:var(--neg);font-weight:700}
+.gold{color:var(--gold);font-weight:700}
+.em{font-weight:700}
+.note{color:#b9c2d5;font-size:12px;margin-top:6px}
+
+/* 每月配息頁：可收合貸款區塊 */
+details.collapsible{border:1px solid rgba(201,162,39,.35);border-radius:10px;background:#0f1830;padding:8px 10px;margin:10px 0}
+details.collapsible summary{cursor:pointer;color:#E9D18A;font-weight:700;list-style:none}
+details.collapsible summary::-webkit-details-marker{display:none}
+.loan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.loan-grid .field{margin:0}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(201,162,39,.18);border:1px solid rgba(201,162,39,.35);color:#E9D18A;font-size:12px;margin-left:8px}
+
+/* 縮小表格內的輸入框（投組區） */
+#fundInputTable input.control{height:30px;padding:0 6px;font-size:13px;border-radius:7px;box-sizing:border-box}
+
+/* 匯出 PNG 不透明底色 */
+.exporting .table-wrap{background:#0A1221!important}
+
+/* 手機更緊湊 */
+@media (max-width:480px){
+  th,td{font-size:13px;padding:5px 6px}
+  #fundInputTable input.control{height:28px;font-size:12.5px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>⚡ 極速純前端文件問答（RAG）— 單檔版</h1>
 
-  <div class="card">
-    <div class="row"><strong>初始化</strong><span id="status" class="muted">尚未開始</span></div>
-    <div class="row" style="margin-top:8px">
-      <div class="progress" style="flex:1;min-width:240px"><div id="bar" class="bar"></div></div>
-      <span id="pct" class="kv">0%</span>
-      <span id="meta" class="kv">—</span>
+  <!-- Tabs + 匯出 -->
+  <div class="topbar">
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tab-cash" aria-selected="true">每月配息</button>
+      <button class="tab" id="tab-portfolio" aria-selected="false">投組分析</button>
     </div>
-    <div class="steps">
-      <span class="led red" id="led1"></span><div class="step">1) 載入內嵌資料／或準備抽取</div><div class="right" id="t1">—</div>
-      <span class="led red" id="led2"></span><div class="step">2) 建立 TF-IDF 索引（本機）</div><div class="right" id="t2">—</div>
-      <span class="led red" id="led3"></span><div class="step">3) 完成，就緒</div><div class="right" id="t3">—</div>
-    </div>
-
-    <div class="row" style="margin-top:10px">
-      <button id="initBtn" class="btn">開始初始化</button>
-      <button id="clearBtn" class="btn">重置</button>
-      <a id="downloadPdf" class="btn" download="document.pdf">下載內嵌 PDF</a>
-    </div>
+    <button class="btn" id="btnPng">匯出 PNG</button>
   </div>
 
-  <div class="card">
-    <div class="row"><strong>提問</strong><span class="muted">索引完成後即可使用</span></div>
-    <input id="question" type="text" placeholder="例如：經銷商的申請在哪裡設定？">
-    <div class="row" style="margin-top:8px">
-      <label>Top-k：<select id="topk"><option>3</option><option selected>5</option><option>7</option><option>10</option></select></label>
-      <label>每段字數上限：<select id="cliplen"><option>200</option><option selected>360</option><option>500</option></select></label>
-      <button id="askBtn" class="btn" disabled>送出問題</button>
+  <!-- 每月配息 -->
+  <section class="tabpanel active" id="panel-cash" role="tabpanel" aria-labelledby="tab-cash">
+    <div class="field"><label>投入本金（$）</label><input id="principal" type="number" class="control" value="1000000" step="1"></div>
+    <div class="field"><label>融資金額（$）</label><input id="loan" type="number" class="control" value="1500000" step="1"></div>
+    <div class="field">
+      <label>融資成數</label>
+      <select id="ratio" class="control">
+        <option value="0|0.0000">0 成</option>
+        <option value="0.1|0.1111111111">1 成</option>
+        <option value="0.2|0.25">2 成</option>
+        <option value="0.3|0.4285714286">3 成</option>
+        <option value="0.4|0.6666666667">4 成</option>
+        <option value="0.5|1.0">5 成</option>
+        <option value="0.6|1.5" selected>6 成</option>
+        <option value="custom|custom">自訂</option>
+      </select>
     </div>
-    <div id="answer" class="answer" style="margin-top:10px">（尚無回答）</div>
-    <div id="cites" class="cite"></div>
-  </div>
+    <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
+    <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
 
-  <div class="card">
-    <details>
-      <summary>📎 內嵌資料設定（可折疊）</summary>
-      <p class="muted">二選一：<br>1) 直接貼上 <b>資料集 JSON</b>（開頁即用，最快）<br>2) 僅貼 <b>PDF base64</b>，再按「抽取 PDF」→ 由頁面抽取並建索引（較慢）</p>
-      <h4>1) 內嵌資料集（可選）</h4>
-      <textarea id="datasetBox" placeholder='貼上你預先算好的 DATASET（格式見下方程式區塊說明）。留空表示改走「抽取 PDF」模式。'></textarea>
-      <h4>2) 內嵌 PDF base64（可選）</h4>
-      <textarea id="pdfBox" placeholder='貼上你的 PDF base64（例如：base64 -i 你的.pdf）。'></textarea>
-      <div class="row" style="margin-top:8px">
-        <button id="extractBtn" class="btn">抽取 PDF（用 base64 → 文字 → 分塊 → 建索引）</button>
+    <!-- ✅ 新增：貸款本利攤還（可收合） -->
+    <details class="collapsible" id="loan2Box" open>
+      <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
+      <div class="loan-grid" aria-labelledby="loan2Box">
+        <div class="field">
+          <label>是否啟用貸款</label>
+          <select id="loan2Enabled" class="control">
+            <option value="off" selected>未啟用</option>
+            <option value="on">啟用</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>貸款金額（$）</label>
+          <input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled>
+        </div>
+        <div class="field">
+          <label>年限（年）</label>
+          <input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled>
+        </div>
+        <div class="field">
+          <label>年利率（%）</label>
+          <input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>每月本息（自動計算）</label>
+          <input id="loan2Monthly" class="control" value="—" disabled>
+        </div>
       </div>
+      <p class="note">公式：若月利率 r=年利率/12，期數 n=年×12，月付額 = A·r / (1−(1+r)<sup>−n</sup>)；若 r=0 則 A/n。</p>
     </details>
-  </div>
 
-  <details class="card">
-    <summary>🔧 除錯資訊</summary>
-    <pre id="log" style="white-space:pre-wrap;font-size:12px;color:#a1a1aa"></pre>
-  </details>
+    <div class="table-wrap">
+      <table class="table-grid">
+        <tbody>
+          <tr><td>投入本金</td><td id="vPrincipal">—</td></tr>
+          <tr><td>融資成數</td><td id="vRatio">—</td></tr>
+          <tr><td>融資金額</td><td id="vLoan">—</td></tr>
+          <tr><td>總投入</td><td id="vTotal" class="em">—</td></tr>
+          <tr><td>年化配息率</td><td id="vRate">—</td></tr>
+          <tr><td>每月配息（毛）</td><td id="vMonthlyDivGross" class="pos">—</td></tr>
+          <tr><td>每月融資利息</td><td id="vMonthlyInt" class="neg">—</td></tr>
+          <!-- ✅ 新增：每月貸款本息 -->
+          <tr><td>每月貸款本息</td><td id="vMonthlyLoan2" class="neg">—</td></tr>
+          <!-- ✅ 新增：每月配息（淨）＝ 毛配息 − 貸款本息 -->
+          <tr><td>每月配息（淨）</td><td id="vMonthlyDivNet" class="em">—</td></tr>
+          <!-- 既有：最終每月淨現金流＝ 毛配息 − 融資利息 − 貸款本息 -->
+          <tr><td>每月淨現金流</td><td id="vMonthlyNet" class="em">—</td></tr>
+          <tr><td>預估報酬率（含息）</td><td id="vEstReturn" class="gold">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 投組分析（原樣保留，你的既有內容） -->
+  <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
+
+    <!-- 一鍵帶入 + Excel + 清除表格 -->
+    <div class="field">
+      <label>常用基金清單</label>
+      <select id="presetSelect" class="control">
+        <option value="">— 選擇常用基金 —</option>
+      </select>
+    </div>
+    <div class="actions" style="margin-bottom:6px">
+      <button class="btn" id="applyPresetBtn">帶入至下一個空列</button>
+      <button class="btn" id="btnExportXlsx">匯出 Excel</button>
+      <button class="btn" id="btnImportXlsx">匯入 Excel</button>
+      <button class="btn secondary" id="btnClearRows">清除表格</button>
+      <input type="file" id="importXlsx" accept=".xlsx,.xls" style="display:none" />
+    </div>
+
+    <!-- 顯示最後匯入日期 -->
+    <p id="uploadInfo" class="note"></p>
+
+    <div class="note">Excel 欄位：基金名稱、近1年%、近3年累積%、近5年累積%、配息率%。<br>數字/純數字字串一律 ×100；結尾含「%」維持原值。</div>
+
+    <!-- A~E 輸入表（靜態五列） -->
+    <div class="table-wrap" style="margin-top:10px">
+      <table id="fundInputTable" class="table-grid">
+        <thead>
+          <tr><th>基金名稱</th><th>近1年%</th><th>近3年%</th><th>近5年%</th><th>配息%</th><th>比重%</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><input class="control name" placeholder="基金A"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+          <tr><td><input class="control name" placeholder="基金B"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+          <tr><td><input class="control name" placeholder="基金C"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+          <tr><td><input class="control name" placeholder="基金D"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+          <tr><td><input class="control name" placeholder="基金E"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 投組指標 + LTV -->
+    <div class="table-wrap" style="margin-top:12px">
+      <table class="table-grid">
+        <thead><tr><th>投組指標（加權年化）</th><th>1年</th><th>3年</th><th>5年</th></tr></thead>
+        <tbody>
+          <tr><td>含息報酬率（CAGR）</td><td id="pf_cagr1" class="gold">—</td><td id="pf_cagr3" class="gold">—</td><td id="pf_cagr5" class="gold">—</td></tr>
+          <tr><td>配息率（加權）</td><td id="pf_div1" class="pos">—</td><td id="pf_div3" class="pos">—</td><td id="pf_div5" class="pos">—</td></tr>
+          <tr><td>資本成長率（含息−配息）</td><td id="pf_cap1" class="em">—</td><td id="pf_cap3" class="em">—</td><td id="pf_cap5" class="em">—</td></tr>
+          <tr><td>融資水位 LTV</td><td id="pf_ltv1" class="em">—</td><td id="pf_ltv3" class="em">—</td><td id="pf_ltv5" class="em">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">LTV > 80% 會以紅色標示；LTV 估算以「資本成長率」（CAGR−配息）為投組價值變動率。</div>
+  </section>
+
+  <p class="note">⚠️ 本頁僅為試算與教育用途，非投資建議。歷史績效不代表未來表現。</p>
 </div>
 
+<!-- 內建預設常用基金（無代碼） -->
+<script id="fundCatalogDefault" type="application/json">
+[
+  {"name":"鋒裕匯理基金新興市場債券 A 美元 (穩定月配息)","r1":8.56,"r3":39.91,"r5":15.07,"dy":17.16},
+  {"name":"高盛環球非投資等級債券基金X股美元(月配息)","r1":7.96,"r3":35.95,"r5":17.48,"dy":14.31}
+]
+</script>
+
+<!-- libs -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <script>
-/* ========== 你可以直接在下方兩個變數內「預先貼好內容」： ========== */
-/* === 內嵌資料集（可選）===
-格式：
-{
-  "doc": "聯盟行銷功能說明.pdf",
-  "createdAt": 1730000000000,
-  "pages": [{"page":1,"len":1234}, ...],
-  "chunks": [{"id":"1-0","doc":"...","page":1,"text":"..."}, ...]
+/* ===== Tabs ===== */
+const tabCash=document.getElementById('tab-cash');
+const tabPF=document.getElementById('tab-portfolio');
+function setTab(which){
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+  if(which==='cash'){tabCash.setAttribute('aria-selected','true');document.getElementById('panel-cash').classList.add('active');}
+  else{tabPF.setAttribute('aria-selected','true');document.getElementById('panel-portfolio').classList.add('active');}
 }
-*/
-const EMBEDDED_DATASET = null; // ← 若有預先算好的資料，直接放物件（不是字串）。否則保持 null。
+tabCash.addEventListener('click',()=>setTab('cash'),{passive:true});
+tabPF.addEventListener('click',()=>setTab('pf'),{passive:true});
 
-/* === 內嵌 PDF base64（可選）=== */
-const PDF_B64 = ""; // ← 把你的 PDF 轉成 base64，整段貼進字串（無需 data: 前綴）
+/* ===== 工具 ===== */
+const $=id=>document.getElementById(id);
+const twd=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
+function cagrFromTotalPct(totalPct,years){const x=parseFloat(totalPct); if(!isFinite(x)) return NaN; const d=x/100; if(d<=-1||years<=0) return NaN; return Math.pow(1+d,1/years)-1;}
+const r2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
 
-/* ========== UI/工具 ========== */
-const $status = document.getElementById("status");
-const $bar = document.getElementById("bar");
-const $pct = document.getElementById("pct");
-const $meta = document.getElementById("meta");
-const $askBtn = document.getElementById("askBtn");
-const $answer = document.getElementById("answer");
-const $cites = document.getElementById("cites");
-const $q = document.getElementById("question");
-const $topk = document.getElementById("topk");
-const $cliplen = document.getElementById("cliplen");
-const $log = document.getElementById("log");
-const leds = [1,2,3].map(i=>document.getElementById("led"+i));
-const ts = [1,2,3].map(i=>document.getElementById("t"+i));
-const $datasetBox = document.getElementById("datasetBox");
-const $pdfBox = document.getElementById("pdfBox");
-const $extractBtn = document.getElementById("extractBtn");
-const $initBtn = document.getElementById("initBtn");
-const $clearBtn = document.getElementById("clearBtn");
-const $downloadPdf = document.getElementById("downloadPdf");
+/* ===== 新增：貸款欄位啟用/停用控制 ===== */
+const loan2EnabledEl=$('loan2Enabled'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
 
-function log(s){ $log.textContent += new Date().toLocaleTimeString()+"  "+s+"\n"; }
-function bar(p){ $bar.style.width = p+"%"; $pct.textContent = Math.round(p)+"%"; }
-function setLed(i,color){ leds[i-1].className = "led " + color; }
-function setTxt(i,txt){ ts[i-1].textContent = txt; }
-function clip(t,n){ return t.length>n ? (t.slice(0,n)+'…') : t; }
-function normalize(s){ return (s||"").replace(/\s+/g," ").trim(); }
-function tokenize(s){ return (s.toLowerCase().match(/[a-z0-9\u4e00-\u9fa5]+/g) || []); }
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+/* 啟用/停用時切換可編輯狀態 */
+function refreshLoan2UI(){
+  const enabled = loan2EnabledEl.value==='on';
+  [loan2AmountEl,loan2YearsEl,loan2RateEl].forEach(el=>{el.disabled=!enabled;});
+  loan2Badge.textContent = enabled ? '已啟用' : '未啟用';
+}
 
-/* ========== TF-IDF ========== */
-function tfidfBuild(chunks, onProgress){
-  const N = chunks.length;
-  const tokenized = new Array(N);
-  const df = new Map();
-  for (let i=0;i<N;i++){
-    const toks = tokenize(chunks[i].text);
-    tokenized[i] = toks;
-    const uniq = new Set(toks);
-    uniq.forEach(t => df.set(t, (df.get(t)||0)+1));
-    if (onProgress && i%10===0) onProgress(40 + Math.floor((i/N)*30));
+/* 計算等額本息月繳 */
+function calcLoan2Monthly(){
+  const enabled = loan2EnabledEl.value==='on';
+  if(!enabled){ loan2MonthlyEl.value='—'; return 0; }
+  const A = Math.max(0, parseFloat(loan2AmountEl.value)||0);
+  const years = Math.max(1, parseInt(loan2YearsEl.value)||1);
+  const yRate = Math.max(0, parseFloat(loan2RateEl.value)||0)/100;
+  const r = yRate/12, n = years*12;
+  let pay = 0;
+  if(r===0){ pay = A/n; }
+  else{ const pow = Math.pow(1+r,-n); pay = A * (r/(1 - pow)); }
+  loan2MonthlyEl.value = twd(pay);
+  return pay;
+}
+
+/* ===== 每月配息（含融資成數自動帶入 + 新增貸款扣除） ===== */
+function parseRatioValue(val){
+  if(!val || val.startsWith('custom')) return null;
+  const p=val.split('|'); return p.length>=2?{ratio:parseFloat(p[0]),mult:parseFloat(p[1])}:null;
+}
+let autoApplied=true;
+function computeCashflow(){
+  const principalEl=$('principal'),loanEl=$('loan'),ratioEl=$('ratio'),rateEl=$('rate'),loanRateEl=$('loanRate');
+  const P=parseFloat(principalEl.value)||0;
+  let   L=parseFloat(loanEl.value)||0;
+  const r=parseFloat(rateEl.value)||0;
+  const i=parseFloat(loanRateEl.value)||0;
+
+  // 依融資成數自動回填「融資金額」
+  const ratioObj=parseRatioValue(ratioEl.value);
+  if(ratioObj && isFinite(ratioObj.mult)){
+    const calcLoan=Math.round(P*ratioObj.mult);
+    if(autoApplied || L===0 || L===calcLoan){
+      L=calcLoan; loanEl.value=L; autoApplied=true;
+    }
   }
-  const idf = new Map(); df.forEach((v,k)=> idf.set(k, Math.log((N+1)/(v+1))+1) );
-  return { tokenized, idf, chunks };
-}
-function tfidfVector(toks, idf){
-  const tf = new Map();
-  toks.forEach(t => tf.set(t, (tf.get(t)||0)+1));
-  const vec = new Map();
-  tf.forEach((f,t)=> vec.set(t, f * (idf.get(t)||0)) );
-  return vec;
-}
-function dotMap(a,b){ let s=0; if (a.size>b.size){ const tmp=a; a=b; b=tmp; } a.forEach((va,k)=>{ const vb=b.get(k)||0; s+=va*vb; }); return s; }
-function normMap(a){ let s=0; a.forEach(v=>s+=v*v); return Math.sqrt(s); }
-function cosineMap(a,b){ return dotMap(a,b)/(normMap(a)*normMap(b)+1e-12); }
 
-/* ========== PDF 文字抽取（純前端） ==========
-   說明：不使用 pdf.js；這裡提供極簡方案，只對含文字的 PDF 有效。
-   若 PDF 以向量或圖片為主，建議改走「預先抽取並貼入 DATASET」的路徑。
-   （這段方法對多數由 Word/Google Docs 轉出之 PDF 仍可抽到文字。）
-*/
-async function naiveExtractTextFromPDF(b64){
+  // 股息/利息（舊邏輯）
+  const total=P+L, annualDiv=total*r/100, annualInt=L*i/100;
+  const mDivGross=annualDiv/12, mInt=annualInt/12;
+
+  // ✅ 貸款月繳（新）
+  const mLoan2 = calcLoan2Monthly();
+
+  // 淨配息 & 淨現金流
+  const mDivNet = mDivGross - mLoan2;                   // 每月配息（淨）＝ 毛配息 − 貸款本息
+  const mNet    = mDivGross - mInt - mLoan2;            // 每月淨現金流 ＝ 毛配息 − 融資利息 − 貸款本息
+
+  // 預估含息報酬率（仍以： (年配息−年融資利息) / 本金 ），不把貸款月付併入報酬率，以避免與現金流概念混淆
+  // 若你要把貸款月付納入成本，可把 annualDiv-annualInt 改成 annualDiv-annualInt-(mLoan2*12)
+  const est=(P>0)?((annualDiv-annualInt)/P):NaN;
+
+  // 輸出
+  $('vPrincipal').textContent=twd(P);
+  $('vLoan').textContent=twd(L);
+  $('vTotal').textContent=twd(total);
+  $('vRate').textContent=r.toFixed(2)+'%';
+  $('vRatio').textContent=ratioObj?(ratioObj.ratio*100).toFixed(0)+'%':'自訂';
+
+  $('vMonthlyDivGross').textContent=twd(mDivGross);
+  $('vMonthlyInt').textContent=twd(mInt);
+  $('vMonthlyLoan2').textContent= mLoan2>0 ? twd(mLoan2) : '—';
+  $('vMonthlyDivNet').textContent=twd(mDivNet);
+  $('vMonthlyNet').textContent=twd(mNet);
+  $('vEstReturn').textContent=isFinite(est)?(est*100).toFixed(2)+'%':'—';
+}
+
+/* ===== 常用基金 Catalog（LocalStorage + Excel） ===== */
+let FUND_CATALOG=[];
+function populatePresetSelect(){
+  const sel=$('presetSelect');
+  sel.innerHTML=`<option value="">— 選擇常用基金 —</option>` + FUND_CATALOG.map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
+}
+function updateUploadInfo(){
+  const infoEl=$('uploadInfo');
+  const ts=localStorage.getItem('fundCatalogUploadTime');
+  if(ts){
+    infoEl.textContent='最後匯入時間：' + new Date(ts).toLocaleString('zh-TW');
+  }else{
+    infoEl.textContent='目前使用預設清單（尚未匯入 Excel）';
+  }
+}
+function loadCatalog(){
   try{
-    // 嘗試解析 PDF 的文字物件（非常簡化，非完整 PDF 解碼）
-    // 作法：把 base64 → Uint8Array → 以字串掃描常見的文字片段（TJ / Tj）
-    const bin = atob(b64);
-    const maybeText = [];
-    // 將可能的可視字元抽出（避免二進位造成效能問題）
-    for (let i=0;i<bin.length;i++){
-      const c = bin.charCodeAt(i);
-      if (c===10 || c===13 || (c>=32 && c<=126) || (c>=0x80)) {
-        maybeText.push(bin[i]);
-      } else {
-        maybeText.push(' ');
-      }
-    }
-    const s = maybeText.join('');
-    // 常見 PDF 字串文字寫法：(...)Tj / [(...)]TJ
-    const regex = /\(([^)]{1,2000})\)\s*Tj|\[\s*(?:\([^)]+\)\s*\d+\s*)+\]\s*TJ/g;
-    const parts = [];
-    let m;
-    while ((m = regex.exec(s)) !== null){
-      const grp = m[1] || "";
-      if (grp) parts.push(grp.replace(/\\([nrtbf()\\/])/g, '$1')); // 反斜線轉義還原
-      if (parts.length % 200 === 0) await sleep(1);
-    }
-    const textJoined = normalize(parts.join(' '));
-    if (!textJoined) throw new Error("未能從 PDF 抽到文字；此檔可能是掃描或圖像為主。");
-    // 粗略分頁（以常見 'Page ' or '/Type /Page' 出現數估計），此為近似
-    const pageCount = Math.max(1, (s.match(/\/Type\s*\/Page/g)||[]).length);
-    const perPageLen = Math.ceil(textJoined.length / pageCount);
-    const pages = [];
-    for (let i=0;i<pageCount;i++){
-      pages.push({page: i+1, text: textJoined.slice(i*perPageLen, (i+1)*perPageLen)});
-    }
-    return { pages, textJoined };
-  }catch(e){
-    throw e;
-  }
+    const ls=localStorage.getItem('fundCatalog');
+    FUND_CATALOG = ls? JSON.parse(ls) : JSON.parse($('fundCatalogDefault').textContent.trim());
+  }catch(e){FUND_CATALOG=[]}
+  populatePresetSelect();
+  updateUploadInfo();
 }
-
-function chunkPages(pages, chunkChars=900, overlap=150){
-  const out = [];
-  for (const p of pages){
-    const t = normalize(p.text);
-    if (!t) continue;
-    let i=0, L=t.length;
-    while (i<L){
-      const end = Math.min(L, i+chunkChars);
-      out.push({ id: `${p.page}-${i}`, doc: CURRENT_DOC, page: p.page, text: t.slice(i,end) });
-      i = end - overlap; if (i<0) i=0; if (i>=L) break;
-    }
+function nextEmptyRowIndex(){
+  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
+  for(let i=0;i<rows.length;i++){
+    const name=(rows[i].querySelector('.name').value||'').trim();
+    const hasData=name || [...rows[i].querySelectorAll('.fin')].some(x=>x.value);
+    if(!hasData) return i;
   }
+  return rows.length-1;
+}
+function applyPresetToRow(idx,presetIdx){
+  const p=FUND_CATALOG[presetIdx]; if(!p) return alert('找不到該基金');
+  const tr=document.querySelectorAll('#fundInputTable tbody tr')[idx]; if(!tr) return;
+  tr.querySelector('.name').value=p.name||'';
+  tr.querySelector('.r1').value=r2(p.r1);
+  tr.querySelector('.r3').value=r2(p.r3);
+  tr.querySelector('.r5').value=r2(p.r5);
+  tr.querySelector('.dy').value=r2(p.dy);
+  recomputePortfolio();
+}
+$('applyPresetBtn').addEventListener('click',()=>{
+  const sel=$('presetSelect').value;
+  if(sel===''){alert('請先選擇常用基金');return;}
+  const rowIdx=nextEmptyRowIndex();
+  applyPresetToRow(rowIdx,parseInt(sel,10));
+});
+
+/* 清除表格 */
+$('btnClearRows').addEventListener('click',()=>{
+  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
+  rows.forEach(tr=>{
+    tr.querySelector('.name').value='';
+    tr.querySelectorAll('.fin').forEach(inp=>inp.value='');
+  });
+  recomputePortfolio();
+});
+
+/* Excel 匯入/匯出 */
+const HEADER_MAP={name:['基金名稱','name','基金','名稱'],r1:['近1年%','r1','1Y'],r3:['近3年累積%','r3','3Y'],r5:['近5年累積%','r5','5Y'],dy:['配息率%','dy','Yield%']};
+function pick(row,keys){for(const k of keys){if(Object.prototype.hasOwnProperty.call(row,k)&&row[k]!=='')return row[k];}return undefined;}
+function parsePercentCell(v){
+  if (v===''||v==null) return null;
+  if (typeof v==='string'){
+    const s=v.trim();
+    if (s.endsWith('%')){const n=parseFloat(s.slice(0,-1));return isNaN(n)?null:n;}
+    const n=parseFloat(s); return isNaN(n)?null:n*100;
+  }
+  if (typeof v==='number') return v*100;
+  return null;
+}
+function sheetToCatalog(ws){
+  const rows=XLSX.utils.sheet_to_json(ws,{defval:''}), out=[];
+  rows.forEach(r=>{
+    const item={name:String(pick(r,HEADER_MAP.name)||'').trim(),
+      r1:parsePercentCell(pick(r,HEADER_MAP.r1)),
+      r3:parsePercentCell(pick(r,HEADER_MAP.r3)),
+      r5:parsePercentCell(pick(r,HEADER_MAP.r5)),
+      dy:parsePercentCell(pick(r,HEADER_MAP.dy))};
+    ['r1','r3','r5','dy'].forEach(k=>{if(item[k]!=null&&isFinite(item[k])) item[k]=Math.round(item[k]*100)/100;});
+    if(item.name) out.push(item);
+  });
   return out;
 }
-
-/* ========== 狀態 ========== */
-let INDEX = null;
-let CURRENT_DOC = "document.pdf";
-
-/* ========== 初始化流程 ========== */
-async function initialize({dataset, pdfb64}){
+document.getElementById('btnImportXlsx').addEventListener('click',()=>document.getElementById('importXlsx').click());
+document.getElementById('importXlsx').addEventListener('change',(e)=>{
+  const file=e.target.files[0]; if(!file) return;
+  const fr=new FileReader();
+  fr.onload=(evt)=>{
+    try{
+      const wb=XLSX.read(evt.target.result,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+      const arr=sheetToCatalog(ws); if(!arr.length) throw new Error('沒有有效資料列');
+      FUND_CATALOG=arr;
+      localStorage.setItem('fundCatalog', JSON.stringify(FUND_CATALOG));
+      localStorage.setItem('fundCatalogUploadTime', new Date().toISOString());
+      populatePresetSelect();
+      updateUploadInfo();
+      alert(`Excel 匯入完成：${arr.length} 筆（數字×100；含%維持；四捨五入至小數2位）`);
+    }catch(err){ alert('Excel 匯入失敗：'+err.message); }
+    e.target.value='';
+  };
+  fr.readAsArrayBuffer(file);
+});
+document.getElementById('btnExportXlsx').addEventListener('click',()=>{
   try{
-    setLed(1,"yellow"); setTxt(1,"準備中…"); bar(10);
-    if (dataset && Array.isArray(dataset.chunks) && dataset.chunks.length){
-      // 走已嵌入資料集（最快）
-      CURRENT_DOC = dataset.doc || CURRENT_DOC;
-      $meta.textContent = `段落 ${dataset.chunks.length}｜頁數 ${dataset.pages?.length ?? "—"}`;
-      setLed(1,"green"); setTxt(1,"載入內嵌資料 OK"); bar(25);
-      setLed(2,"yellow"); setTxt(2,"建立 TF-IDF 中…");
-      INDEX = tfidfBuild(dataset.chunks, p => bar(p));
-      setLed(2,"green"); setTxt(2,"索引 OK"); bar(90);
-    } else if (pdfb64) {
-      // 走 PDF 抽取
-      setTxt(1,"抽取 PDF 文字…"); bar(20);
-      const { pages } = await naiveExtractTextFromPDF(pdfb64);
-      if (!pages || !pages.length) throw new Error("抽取失敗：沒有文字可用。");
-      CURRENT_DOC = "嵌入 PDF";
-      setTxt(1, `抽取頁面 ${pages.length} 完成`); bar(35);
+    const header=['基金名稱','近1年%','近3年累積%','近5年累積%','配息率%'];
+    const n2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
+    const body=FUND_CATALOG.map(f=>[f.name||'',n2(f.r1),n2(f.r3),n2(f.r5),n2(f.dy)]);
+    const ws=XLSX.utils.aoa_to_sheet([header,...body]); const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'基金清單'); XLSX.writeFile(wb,'fund-catalog.xlsx');
+  }catch(err){ alert('Excel 匯出失敗：'+err.message); }
+});
 
-      setLed(2,"yellow"); setTxt(2,"分塊＆建索引…");
-      const chunks = chunkPages(pages, 900, 150);
-      $meta.textContent = `段落 ${chunks.length}｜頁數 ${pages.length}`;
-      INDEX = tfidfBuild(chunks, p => bar(p));
-      setLed(2,"green"); setTxt(2,"索引 OK"); bar(90);
-    } else {
-      throw new Error("沒有資料可用：請貼 DATASET 或 PDF base64。");
-    }
+/* ===== 投組計算 + LTV（原樣） ===== */
+function recomputePortfolio(){
+  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
+  const data=rows.map((tr,idx)=>({
+    name:(tr.querySelector('.name').value||`基金${'ABCDE'[idx]}`),
+    r1:parseFloat(tr.querySelector('.r1').value),
+    r3:parseFloat(tr.querySelector('.r3').value),
+    r5:parseFloat(tr.querySelector('.r5').value),
+    dy:parseFloat(tr.querySelector('.dy').value),
+    wt:parseFloat(tr.querySelector('.wt').value)
+  }));
+  const valid=data.filter(f=>isFinite(f.wt)&&f.wt>0);
+  const sumW=valid.reduce((s,f)=>s+f.wt,0);
+  const wAvg=fn=>{let acc=0,ws=0; valid.forEach(f=>{const v=fn(f); if(isFinite(v)){acc+=v*(f.wt/sumW); ws+=f.wt/sumW;}}); return ws>0?acc:NaN;};
 
-    setLed(3,"green"); setTxt(3,"就緒"); bar(100);
-    $status.textContent = "完成，可以開始提問。";
-    $askBtn.disabled = false;
-  }catch(e){
-    $status.textContent = "初始化失敗：" + e.message;
-    log("INIT ERROR: " + (e.stack || e.message));
-  }
+  const c1=wAvg(f=>isFinite(f.r1)?f.r1/100:NaN);
+  const c3=wAvg(f=>isFinite(f.r3)?cagrFromTotalPct(f.r3,3):NaN);
+  const c5=wAvg(f=>isFinite(f.r5)?cagrFromTotalPct(f.r5,5):NaN);
+  const dy=wAvg(f=>isFinite(f.dy)?f.dy/100:NaN);
+
+  const cap1=(isFinite(c1)&&isFinite(dy))?c1-dy:NaN;
+  const cap3=(isFinite(c3)&&isFinite(dy))?c3-dy:NaN;
+  const cap5=(isFinite(c5)&&isFinite(dy))?c5-dy:NaN;
+
+  const set=(id,v)=>$(id).textContent=isFinite(v)?(v*100).toFixed(2)+'%':'—';
+  set('pf_cagr1',c1); set('pf_cagr3',c3); set('pf_cagr5',c5);
+  set('pf_div1',dy);  set('pf_div3',dy);  set('pf_div5',dy);
+  set('pf_cap1',cap1);set('pf_cap3',cap3);set('pf_cap5',cap5);
+
+  updateLTV(cap1,cap3,cap5);
 }
 
-/* ========== 問答 ========== */
-document.getElementById("askBtn").onclick = () => {
-  const q = $q.value.trim();
-  if (!q) return alert("請輸入問題");
-  if (!INDEX) return alert("索引尚未建立");
-
-  const toks = tokenize(q);
-  const qv = tfidfVector(toks, INDEX.idf);
-  const scored = INDEX.chunks.map((c, i) => ({ ...c, score: cosineMap(qv, tfidfVector(INDEX.tokenized[i], INDEX.idf)) }))
-                             .sort((a,b)=> b.score - a.score);
-
-  const k = parseInt($topk.value,10)||5;
-  const clipLen = parseInt($cliplen.value,10)||360;
-  const top = scored.slice(0,k);
-
-  const bullets = top.map(t => "• " + clip(t.text.trim(), clipLen) + ` (p.${t.page}，${t.doc})`);
-  $answer.textContent = ["【重點摘錄回答】", bullets.join("\n")].join("\n");
-
-  const cites = []; const seen = new Set();
-  for (const t of top){
-    const key = t.doc+"#"+t.page;
-    if(!seen.has(key)){
-      seen.add(key);
-      cites.push(`<li><code>${t.doc}</code>．第 <b>${t.page}</b> 頁（相似度 ${t.score.toFixed(3)}）</li>`);
-    }
+// 單利 + 第3年起逐年併入本金
+function outstandingSeries(P0,r,N=5){
+  const B={},I={},O={};
+  for(let t=1;t<=N;t++){
+    if(t<=2){B[t]=P0;} else {let s=0; for(let k=1;k<=t-2;k++) s+=I[k]; B[t]=P0+s;}
+    I[t]=B[t]*r;
+    O[t]=B[t]+I[t]+(t>=2?I[t-1]:0);
   }
-  $cites.innerHTML = cites.length ? `<ol>${cites.join("")}</ol>` : "";
-};
+  return {B,I,O};
+}
+function updateLTV(cap1,cap3,cap5){
+  const P=parseFloat($('principal').value)||0;
+  const L=parseFloat($('loan').value)||0;
+  const i=(parseFloat($('loanRate').value)||0)/100;
 
-/* ========== 事件繫結 ========== */
-$initBtn.onclick = async ()=>{
-  $status.textContent = "開始初始化…";
-  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
-  // 優先順序：1) 內嵌物件 EMBEDDED_DATASET；2) textarea dataset；3) 內嵌 PDF_B64；4) textarea pdf
-  let ds = EMBEDDED_DATASET;
-  if (!ds) {
-    try { ds = JSON.parse($datasetBox.value || "null"); } catch { ds = null; }
-  }
-  let p64 = PDF_B64 || $pdfBox.value.trim();
-  // 設定 PDF 下載按鈕
-  $downloadPdf.href = p64 ? ("data:application/pdf;base64," + p64) : "data:application/pdf;base64,";
-  await initialize({dataset: ds, pdfb64: p64 || null});
-};
+  const V0=P+L, P0=L, r=i;
+  const els=[$('pf_ltv1'),$('pf_ltv3'),$('pf_ltv5')];
+  els.forEach(el=>{el.textContent='—'; el.classList.remove('neg');});
+  if(!(P0>0 && V0>0)) return;
 
-$extractBtn.onclick = async ()=>{
-  // 快速路：只貼 PDF base64，在頁面抽文字、建索引
-  const p64 = ($pdfBox.value || PDF_B64 || "").trim();
-  if (!p64){ alert("請先貼上 PDF base64"); return; }
-  $datasetBox.value = "";
-  $status.textContent = "抽取 PDF → 分塊 → 建索引…";
-  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
-  // 設定 PDF 下載按鈕
-  $downloadPdf.href = "data:application/pdf;base64," + p64;
-  await initialize({dataset: null, pdfb64: p64});
-};
+  const {O}=outstandingSeries(P0,r,5);
+  const ltv=(g,n)=>{ if(!isFinite(g)) return NaN; const Vn=V0*Math.pow(1+g,n); return (O[n]/Vn)*100; };
+  const l1=ltv(cap1,1), l3=ltv(cap3,3), l5=ltv(cap5,5);
+  const fmt=v=>isFinite(v)?v.toFixed(2)+'%':'—';
+  $('pf_ltv1').textContent=fmt(l1);
+  $('pf_ltv3').textContent=fmt(l3);
+  $('pf_ltv5').textContent=fmt(l5);
+  const paint=(el,v)=>{ el.classList.remove('neg'); if(isFinite(v)&&v>80) el.classList.add('neg'); };
+  paint($('pf_ltv1'),l1); paint($('pf_ltv3'),l3); paint($('pf_ltv5'),l5);
+}
 
-$clearBtn.onclick = ()=>{
-  INDEX = null;
-  $status.textContent = "已重置。可再次初始化。";
-  $answer.textContent = "(尚無回答)";
-  $cites.innerHTML = "";
-  bar(0); setLed(1,"red"); setLed(2,"red"); setLed(3,"red");
-};
+/* 匯出 PNG */
+async function exportPng(){
+  try{
+    document.body.classList.add('exporting');
+    await new Promise(r=>setTimeout(r,0));
+    const activePanel=document.querySelector('.tabpanel.active');
+    if(!activePanel) return alert('找不到要匯出的區塊');
+    const canvas=await html2canvas(activePanel,{backgroundColor:'#0A1221',scale:2,useCORS:true});
+    const a=document.createElement('a');
+    const isCash=activePanel.id==='panel-cash';
+    a.download=(isCash?'配息試算':'投組分析')+'.png';
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }catch(err){ alert('匯出 PNG 失敗：'+err.message); }
+  finally{ document.body.classList.remove('exporting'); }
+}
+document.getElementById('btnPng').addEventListener('click',exportPng);
+
+/* 綁定 + 初始化 */
+function bindInputs(){
+  document.querySelectorAll('.control').forEach(el=>{
+    el.addEventListener('input',()=>{computeCashflow();recomputePortfolio();},{passive:true});
+    el.addEventListener('change',()=>{computeCashflow();recomputePortfolio();},{passive:true});
+  });
+
+  // 貸款啟用切換
+  loan2EnabledEl.addEventListener('change',()=>{refreshLoan2UI();computeCashflow();},{passive:true});
+}
+function boot(){ loadCatalog(); bindInputs(); refreshLoan2UI(); computeCashflow(); recomputePortfolio(); }
+document.addEventListener('DOMContentLoaded',boot,{once:true});
+window.addEventListener('pageshow',e=>{ if(e.persisted) boot(); });
 </script>
 </body>
 </html>
