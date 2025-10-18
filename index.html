@@ -64,7 +64,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
 <body>
 <div class="wrap">
 
-  <!-- Tabs + 匯出 -->
   <div class="topbar">
     <div class="tabs" role="tablist">
       <button class="tab" id="tab-cash" aria-selected="true">每月配息</button>
@@ -73,7 +72,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <button class="btn" id="btnPng">匯出 PNG</button>
   </div>
 
-  <!-- ===== 每月配息（僅配息/融資/貸款與結果表） ===== -->
   <section class="tabpanel active" id="panel-cash" role="tabpanel" aria-labelledby="tab-cash">
     <div class="field"><label>投入本金（$）</label><input id="principal" type="number" class="control" value="1000000" step="1"></div>
     <div class="field"><label>融資金額（$）</label><input id="loan" type="number" class="control" value="1500000" step="1"></div>
@@ -93,7 +91,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
     <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
 
-    <!-- 貸款本利攤還（checkbox 啟用） -->
     <details class="collapsible" id="loan2Box" open>
       <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
       <div class="inline" style="margin-top:8px">
@@ -128,7 +125,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
     </div>
   </section>
 
-  <!-- ===== 投組分析（把常用基金＋表格＋指標全部移至此） ===== -->
   <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
 
     <div class="field">
@@ -140,6 +136,8 @@ details.collapsible summary::-webkit-details-marker{display:none}
 
     <div class="actions" style="margin-bottom:6px">
       <button class="btn" id="applyPresetBtn">帶入至下一個空列</button>
+      <button class="btn secondary" id="btnAddRow">新增一列</button>
+      <button class="btn secondary" id="btnRemoveRow">移除末列</button>
       <button class="btn" id="btnExportXlsx">匯出 Excel</button>
       <button class="btn" id="btnImportXlsx">匯入 Excel</button>
       <button class="btn secondary" id="btnClearRows">清除表格</button>
@@ -182,7 +180,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
   <p class="note">⚠️ 本頁僅為試算與教育用途，非投資建議。歷史績效不代表未來表現。</p>
 </div>
 
-<!-- 內建預設常用基金（無代碼） -->
 <script id="fundCatalogDefault" type="application/json">
 [
   {"name":"鋒裕匯理基金新興市場債券 A 美元 (穩定月配息)","r1":8.56,"r3":39.91,"r5":15.07,"dy":17.16},
@@ -190,7 +187,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
 ]
 </script>
 
-<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -203,6 +199,7 @@ function setTab(which){
   document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
   if(which==='cash'){tabCash.setAttribute('aria-selected','true');document.getElementById('panel-cash').classList.add('active');}
   else{tabPF.setAttribute('aria-selected','true');document.getElementById('panel-portfolio').classList.add('active');}
+  saveState(); // 切換分頁時儲存狀態
 }
 tabCash.addEventListener('click',()=>setTab('cash'),{passive:true});
 tabPF.addEventListener('click',()=>setTab('pf'),{passive:true});
@@ -212,6 +209,114 @@ const $=id=>document.getElementById(id);
 const twd=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
 function cagrFromTotalPct(totalPct,years){const x=parseFloat(totalPct); if(!isFinite(x)) return NaN; const d=x/100; if(d<=-1||years<=0) return NaN; return Math.pow(1+d,1/years)-1;}
 const r2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
+const fundTableBody = document.querySelector('#fundInputTable tbody');
+
+/* ===== 數據持久化（新增功能） ===== */
+const STATE_KEY = 'momo_winwin_state_v1';
+
+function collectState() {
+    const state = {};
+
+    // 1. 每月配息頁的輸入
+    const cashInputs = ['principal', 'loan', 'ratio', 'rate', 'loanRate', 'loan2EnabledCk', 'loan2Amount', 'loan2Years', 'loan2Rate'];
+    cashInputs.forEach(id => {
+        const el = $(id);
+        if (el) {
+            state[id] = (el.type === 'checkbox' || el.type === 'radio') ? el.checked : el.value;
+        }
+    });
+
+    // 2. 投組分析頁的基金數據
+    state.fundData = [...fundTableBody.querySelectorAll('tr')].map(tr => {
+        return {
+            name: tr.querySelector('.name').value,
+            r1: tr.querySelector('.r1').value,
+            r3: tr.querySelector('.r3').value,
+            r5: tr.querySelector('.r5').value,
+            dy: tr.querySelector('.dy').value,
+            wt: tr.querySelector('.wt').value
+        };
+    });
+
+    // 3. 當前活動分頁
+    const activeTabEl = document.querySelector('.tab[aria-selected="true"]');
+    state.activeTab = activeTabEl ? (activeTabEl.id === 'tab-cash' ? 'cash' : 'pf') : 'cash';
+    
+    // 4. 貸款可收合區塊狀態
+    state.loan2Open = $('loan2Box').open;
+
+    return state;
+}
+
+function saveState() {
+    try {
+        const state = collectState();
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    } catch (e) {
+        console.error("無法儲存狀態:", e);
+    }
+}
+
+function loadState() {
+    try {
+        const json = localStorage.getItem(STATE_KEY);
+        if (!json) return false;
+        const state = JSON.parse(json);
+
+        // 1. 載入每月配息頁的輸入
+        for (const id in state) {
+            const el = $(id);
+            if (el && id !== 'fundData' && id !== 'activeTab' && id !== 'loan2Open') {
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = state[id];
+                } else {
+                    el.value = state[id];
+                }
+            }
+        }
+        
+        // 2. 載入投組分析頁的基金數據
+        if (state.fundData && state.fundData.length > 0) {
+            // 清空所有舊列
+            while (fundTableBody.firstChild) { fundTableBody.removeChild(fundTableBody.firstChild); }
+            
+            // 重新建立列並填入數據
+            state.fundData.forEach(data => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = createFundRowHtml(); // 使用 helper 產生結構 (欄位)
+                fundTableBody.appendChild(newRow);
+
+                // 填充數據
+                newRow.querySelector('.name').value = data.name || '';
+                newRow.querySelector('.r1').value = data.r1 || '';
+                newRow.querySelector('.r3').value = data.r3 || '';
+                newRow.querySelector('.r5').value = data.r5 || '';
+                newRow.querySelector('.dy').value = data.dy || '';
+                newRow.querySelector('.wt').value = data.wt || '';
+            });
+        }
+        
+        // 3. 載入活動分頁
+        const activeTab = state.activeTab || 'cash';
+        // 這裡不直接呼叫 setTab，避免在頁面未完全渲染前觸發 DOM 錯誤
+        if (activeTab === 'pf') {
+             // 延遲設定分頁，確保 DOM 準備就緒
+             setTimeout(() => setTab('pf'), 0);
+        } else {
+             setTimeout(() => setTab('cash'), 0);
+        }
+        
+        // 4. 載入貸款可收合區塊狀態
+        $('loan2Box').open = state.loan2Open !== undefined ? state.loan2Open : true;
+
+        return true;
+    } catch (e) {
+        console.error("無法載入狀態:", e);
+        return false;
+    }
+}
+/* ===== 數據持久化 結束 ===== */
+
 
 /* ===== 勾選：貸款等額本息（第一頁用） ===== */
 const loan2EnabledCk=$('loan2EnabledCk'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
@@ -247,7 +352,15 @@ function computeCashflow(){
 
   if(ratioObj && isFinite(ratioObj.mult)){
     const calcLoan=Math.round(P*ratioObj.mult);
-    if(autoApplied || L===0 || L===calcLoan){ L=calcLoan; $('loan').value=L; autoApplied=true; }
+    // 只有當「融資金額」未被使用者手動修改，或者為 0 時，才自動同步
+    const isLoanFieldModified = document.activeElement && document.activeElement.id === 'loan';
+    if(!isLoanFieldModified && (autoApplied || L===0 || L===calcLoan)){ 
+        L=calcLoan; 
+        $('loan').value=L; 
+        autoApplied=true; 
+    } else {
+        autoApplied=false;
+    }
   }
 
   const total=P+L, annualDiv=total*r/100, annualInt=L*i/100;
@@ -271,6 +384,8 @@ function computeCashflow(){
   $('vMonthlyDivNet').textContent=twd(mDivNet);
   $('vMonthlyNet').textContent=twd(mNet);
   $('vEstReturn').textContent=isFinite(est)?(est*100).toFixed(2)+'%':'—';
+  
+  saveState(); // 計算後儲存狀態
 }
 
 /* ===== 常用基金 Catalog（供第二頁） ===== */
@@ -292,13 +407,13 @@ function loadCatalog(){
   populatePresetSelect(); updateUploadInfo();
 }
 function nextEmptyRowIndex(){
-  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
-  for(let i=0;i<rows.length;i++){
-    const name=(rows[i].querySelector('.name').value||'').trim();
-    const hasData=name || [...rows[i].querySelectorAll('.fin')].some(x=>x.value);
+  const rows = [...fundTableBody.querySelectorAll('tr')];
+  for(let i = 0; i < rows.length; i++){
+    const name = (rows[i].querySelector('.name').value || '').trim();
+    const hasData = name || [...rows[i].querySelectorAll('.fin')].some(x => x.value);
     if(!hasData) return i;
   }
-  return rows.length-1;
+  return rows.length - 1;
 }
 function applyPresetToRow(idx,presetIdx){
   const p=FUND_CATALOG[presetIdx]; if(!p) return alert('找不到該基金');
@@ -308,6 +423,7 @@ function applyPresetToRow(idx,presetIdx){
   tr.querySelector('.r3').value=r2(p.r3);
   tr.querySelector('.r5').value=r2(p.r5);
   tr.querySelector('.dy').value=r2(p.dy);
+  // 比重不自動帶入，讓使用者自行填寫
   recomputePortfolio();
 }
 $('applyPresetBtn').addEventListener('click',()=>{
@@ -317,9 +433,49 @@ $('applyPresetBtn').addEventListener('click',()=>{
   applyPresetToRow(rowIdx,parseInt(sel,10));
 });
 
+/* ===== 投組表格動態增減列（新增功能） ===== */
+const MIN_ROWS = 1; // 至少保留的列數
+
+// 輔助函式：創建一個新的表格列 HTML (只含欄位結構)
+function createFundRowHtml(placeholder = '基金') {
+  return `
+    <td><input class="control name" placeholder="${placeholder}"></td>
+    <td><input class="control fin r1" type="number" step="0.01"></td>
+    <td><input class="control fin r3" type="number" step="0.01"></td>
+    <td><input class="control fin r5" type="number" step="0.01"></td>
+    <td><input class="control fin dy" type="number" step="0.01"></td>
+    <td><input class="control fin wt" type="number" step="0.01"></td>
+  `;
+}
+
+// 函式：新增一列
+function addRow() {
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = createFundRowHtml('基金');
+  fundTableBody.appendChild(newRow); 
+  // 為新列中的所有控制項綁定重新計算事件
+  bindRowInputs(newRow);
+  recomputePortfolio();
+}
+
+// 函式：移除末列
+function removeRow() {
+  const rows = fundTableBody.querySelectorAll('tr');
+  if (rows.length > MIN_ROWS) {
+    fundTableBody.removeChild(rows[rows.length - 1]);
+    recomputePortfolio(); // 移除後重新計算投組
+  } else {
+    alert(`至少需要保留 ${MIN_ROWS} 列投組項目。`);
+  }
+}
+
+// 綁定按鈕事件
+document.getElementById('btnAddRow').addEventListener('click', addRow);
+document.getElementById('btnRemoveRow').addEventListener('click', removeRow);
+
 /* 清除表格（第二頁） */
 $('btnClearRows').addEventListener('click',()=>{
-  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
+  const rows = [...fundTableBody.querySelectorAll('tr')];
   rows.forEach(tr=>{
     tr.querySelector('.name').value='';
     tr.querySelectorAll('.fin').forEach(inp=>inp.value='');
@@ -383,7 +539,7 @@ document.getElementById('btnExportXlsx').addEventListener('click',()=>{
 
 /* ===== 投組計算 + LTV（第二頁渲染） ===== */
 function recomputePortfolio(){
-  const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
+  const rows=[...fundTableBody.querySelectorAll('tr')];
   const data=rows.map((tr,idx)=>({
     name:(tr.querySelector('.name').value||`基金${'ABCDE'[idx]}`),
     r1:parseFloat(tr.querySelector('.r1').value),
@@ -411,6 +567,7 @@ function recomputePortfolio(){
   set('pf_cap1',cap1);set('pf_cap3',cap3);set('pf_cap5',cap5);
 
   updateLTV(cap1,cap3,cap5);
+  saveState(); // 計算後儲存狀態
 }
 function outstandingSeries(P0,r,N=5){
   const B={},I={},O={};
@@ -460,17 +617,49 @@ async function exportPng(){
 }
 document.getElementById('btnPng').addEventListener('click',exportPng);
 
+/* 綁定單一列的輸入事件 */
+function bindRowInputs(rowElement){
+    rowElement.querySelectorAll('.control').forEach(el => {
+        el.addEventListener('input', recomputePortfolio, { passive: true });
+        el.addEventListener('change', recomputePortfolio, { passive: true });
+    });
+}
+
 /* 綁定 + 初始化 */
 function bindInputs(){
-  // 所有可輸入控制：變動即重新計算
-  document.querySelectorAll('.control').forEach(el=>{
+  // 綁定所有第一頁控制項
+  document.querySelectorAll('#panel-cash .control').forEach(el=>{
     el.addEventListener('input',()=>{computeCashflow();recomputePortfolio();},{passive:true});
     el.addEventListener('change',()=>{computeCashflow();recomputePortfolio();},{passive:true});
   });
-  // 勾選啟用貸款
+  // 勾選啟用貸款/收合狀態改變時
   loan2EnabledCk.addEventListener('change',()=>{refreshLoan2UI();computeCashflow();},{passive:true});
+  $('loan2Box').addEventListener('toggle', saveState, {passive: true});
+
+  // 綁定所有投組表格內的控制項 (包含預設的 5 列和未來新增的列)
+  fundTableBody.querySelectorAll('tr').forEach(bindRowInputs);
 }
-function boot(){ loadCatalog(); bindInputs(); refreshLoan2UI(); computeCashflow(); recomputePortfolio(); }
+
+function boot(){ 
+  loadCatalog(); 
+  
+  // 嘗試載入狀態。如果載入成功，則會覆寫初始值。
+  // 我們先執行 loadState 裡的 DOM 變動，但避免它裡面的 setTab 馬上執行
+  const loaded = loadState(); 
+  
+  // 重新綁定事件，確保載入的數據和新建立的列都能觸發計算和儲存
+  bindInputs(); 
+  
+  refreshLoan2UI(); 
+  
+  // 首次計算和渲染結果
+  computeCashflow(); 
+  recomputePortfolio();
+  
+  // 如果是第一次使用（未載入狀態），則儲存初始狀態
+  if (!loaded) saveState();
+}
+
 document.addEventListener('DOMContentLoaded',boot,{once:true});
 window.addEventListener('pageshow',e=>{ if(e.persisted) boot(); });
 </script>
