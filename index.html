@@ -15,7 +15,7 @@ html,body{margin:0;background:var(--deep);color:#fff;font-family:"Noto Sans TC",
 .tab{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(201,162,39,.35);background:#0f1830;color:#E9D18A;font-weight:700}
 .tab[aria-selected="true"]{background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;border-color:transparent}
 .btn{padding:10px 12px;border:0;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;font-weight:700;white-space:nowrap}
-.btn.secondary{background:#1a2746;color:#E9D18A;border:1px solid rgba(201,162,39,.35)}
+.btn.secondary{background:#1a2746;color:#E9D13A;border:1px solid rgba(201,162,39,.35)}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* 表單 */
@@ -53,6 +53,9 @@ details.collapsible summary::-webkit-details-marker{display:none}
 
 /* 匯出 PNG 不透明底色 */
 .exporting .table-wrap{background:#0A1221!important}
+/* 為了讓截圖背景一致，也對新增的包裹區塊設置背景 */
+.exporting #cashExportArea, .exporting #pfExportArea { background-color: var(--deep) !important; padding: 1px 0; }
+
 
 /* 手機更緊湊 */
 @media (max-width:480px){
@@ -94,39 +97,41 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
     <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
 
-    <details class="collapsible" id="loan2Box" open>
-      <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
-      <div class="inline" style="margin-top:8px">
-        <input id="loan2EnabledCk" type="checkbox" />
-        <label for="loan2EnabledCk">啟用貸款試算</label>
-      </div>
-      <div class="loan-grid" aria-labelledby="loan2Box">
-        <div class="field"><label>貸款金額（$）</label><input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled></div>
-        <div class="field"><label>年限（年）</label><input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled></div>
-        <div class="field"><label>年利率（%）</label><input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled></div>
-        <div class="field" style="grid-column:1/-1"><label>每月本息（自動計算）</label><input id="loan2Monthly" class="control" value="—" disabled></div>
-      </div>
-      <p class="note">公式：r=年利率/12、n=年×12；月付=A·r/(1-(1+r)<sup>-n</sup>)；r=0 則 A/n。</p>
-    </details>
+    <div id="cashExportArea">
+        <details class="collapsible" id="loan2Box" open>
+          <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
+          <div class="inline" style="margin-top:8px">
+            <input id="loan2EnabledCk" type="checkbox" />
+            <label for="loan2EnabledCk">啟用貸款試算</label>
+          </div>
+          <div class="loan-grid" aria-labelledby="loan2Box">
+            <div class="field"><label>貸款金額（$）</label><input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled></div>
+            <div class="field"><label>年限（年）</label><input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled></div>
+            <div class="field"><label>年利率（%）</label><input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled></div>
+            <div class="field" style="grid-column:1/-1"><label>每月本息（自動計算）</label><input id="loan2Monthly" class="control" value="—" disabled></div>
+          </div>
+          <p class="note">公式：r=年利率/12、n=年×12；月付=A·r/(1-(1+r)<sup>-n</sup>)；r=0 則 A/n。</p>
+        </details>
 
-    <div class="table-wrap">
-      <table class="table-grid">
-        <tbody>
-          <tr><td>投入本金</td><td id="vPrincipal">—</td></tr>
-          <tr><td>融資成數</td><td id="vRatio">—</td></tr>
-          <tr><td>融資金額</td><td id="vLoan">—</td></tr>
-          <tr><td>總投入</td><td id="vTotal" class="em">—</td></tr>
-          <tr><td>年化配息率</td><td id="vRate">—</td></tr>
-          <tr><td>每月配息（毛）</td><td id="vMonthlyDivGross" class="pos">—</td></tr>
-          <tr><td>每月融資利息</td><td id="vMonthlyInt" class="neg">—</td></tr>
-          <tr><td>每月貸款本息</td><td id="vMonthlyLoan2" class="neg">—</td></tr>
-          <tr><td>每月配息（淨）</td><td id="vMonthlyDivNet" class="em">—</td></tr>
-          <tr><td>每月淨現金流</td><td id="vMonthlyNet" class="em">—</td></tr>
-          <tr><td>預估報酬率（含息）</td><td id="vEstReturn" class="gold">—</td></tr>
-        </tbody>
-      </table>
+        <div class="table-wrap">
+          <table class="table-grid">
+            <tbody>
+              <tr><td>投入本金</td><td id="vPrincipal">—</td></tr>
+              <tr><td>融資成數</td><td id="vRatio">—</td></tr>
+              <tr><td>融資金額</td><td id="vLoan">—</td></tr>
+              <tr><td>總投入</td><td id="vTotal" class="em">—</td></tr>
+              <tr><td>年化配息率</td><td id="vRate">—</td></tr>
+              <tr><td>每月配息（毛）</td><td id="vMonthlyDivGross" class="pos">—</td></tr>
+              <tr><td>每月融資利息</td><td id="vMonthlyInt" class="neg">—</td></tr>
+              <tr><td>每月貸款本息</td><td id="vMonthlyLoan2" class="neg">—</td></tr>
+              <tr><td>每月配息（淨）</td><td id="vMonthlyDivNet" class="em">—</td></tr>
+              <tr><td>每月淨現金流</td><td id="vMonthlyNet" class="em">—</td></tr>
+              <tr><td>預估報酬率（含息）</td><td id="vEstReturn" class="gold">—</td></tr>
+            </tbody>
+          </table>
+        </div>
     </div>
-  </section>
+    </section>
 
   <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
 
@@ -150,33 +155,34 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <p id="uploadInfo" class="note"></p>
     <div class="note">Excel 欄位：基金名稱、近1年%、近3年累積%、近5年累積%、配息率%。<br>數字/純數字字串一律 ×100；結尾含「%」維持原值。</div>
 
-    <div class="table-wrap" style="margin-top:10px">
-      <table id="fundInputTable" class="table-grid">
-        <thead>
-          <tr><th>基金名稱</th><th>近1年%</th><th>近3年%</th><th>近5年%</th><th>配息%</th><th>比重%</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><input class="control name" placeholder="基金A"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-          <tr><td><input class="control name" placeholder="基金B"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-          <tr><td><input class="control name" placeholder="基金C"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-          <tr><td><input class="control name" placeholder="基金D"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-          <tr><td><input class="control name" placeholder="基金E"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-        </tbody>
-      </table>
-    </div>
+    <div id="pfExportArea">
+      <div class="table-wrap" style="margin-top:10px">
+        <table id="fundInputTable" class="table-grid">
+          <thead>
+            <tr><th>基金名稱</th><th>近1年%</th><th>近3年%</th><th>近5年%</th><th>配息%</th><th>比重%</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><input class="control name" placeholder="基金A"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+            <tr><td><input class="control name" placeholder="基金B"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+            <tr><td><input class="control name" placeholder="基金C"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+            <tr><td><input class="control name" placeholder="基金D"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+            <tr><td><input class="control name" placeholder="基金E"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="table-wrap" style="margin-top:12px">
-      <table class="table-grid">
-        <thead><tr><th>投組指標（加權年化）</th><th>1年</th><th>3年</th><th>5年</th></tr></thead>
-        <tbody>
-          <tr><td>含息報酬率（CAGR）</td><td id="pf_cagr1" class="gold">—</td><td id="pf_cagr3" class="gold">—</td><td id="pf_cagr5" class="gold">—</td></tr>
-          <tr><td>配息率（加權）</td><td id="pf_div1" class="pos">—</td><td id="pf_div3" class="pos">—</td><td id="pf_div5" class="pos">—</td></tr>
-          <tr><td>資本成長率（含息−配息）</td><td id="pf_cap1" class="em">—</td><td id="pf_cap3" class="em">—</td><td id="pf_cap5" class="em">—</td></tr>
-          <tr><td>融資水位 LTV</td><td id="pf_ltv1" class="em">—</td><td id="pf_ltv3" class="em">—</td><td id="pf_ltv5" class="em">—</td></tr>
-        </tbody>
-      </table>
+      <div class="table-wrap" style="margin-top:12px">
+        <table class="table-grid">
+          <thead><tr><th>投組指標（加權年化）</th><th>1年</th><th>3年</th><th>5年</th></tr></thead>
+          <tbody>
+            <tr><td>含息報酬率（CAGR）</td><td id="pf_cagr1" class="gold">—</td><td id="pf_cagr3" class="gold">—</td><td id="pf_cagr5" class="gold">—</td></tr>
+            <tr><td>配息率（加權）</td><td id="pf_div1" class="pos">—</td><td id="pf_div3" class="pos">—</td><td id="pf_div5" class="pos">—</td></tr>
+            <tr><td>資本成長率（含息−配息）</td><td id="pf_cap1" class="em">—</td><td id="pf_cap3" class="em">—</td><td id="pf_cap5" class="em">—</td></tr>
+            <tr><td>融資水位 LTV</td><td id="pf_ltv1" class="em">—</td><td id="pf_ltv3" class="em">—</td><td id="pf_ltv5" class="em">—</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
     <div class="note">LTV > 80% 會以紅色標示；LTV 估算以「資本成長率」（CAGR−配息）為投組價值變動率。</div>
   </section>
 
@@ -611,15 +617,34 @@ async function exportPng(){
   try{
     document.body.classList.add('exporting');
     await new Promise(r=>setTimeout(r,0));
+    
     const activePanel=document.querySelector('.tabpanel.active');
     if(!activePanel) return alert('找不到要匯出的區塊');
-    const canvas=await html2canvas(activePanel,{backgroundColor:'#0A1221',scale:2,useCORS:true});
+
+    let targetElement = activePanel; // 預設截圖整個分頁
+    let filename = 'MOMO試算';
+
+    // 根據活動分頁，指定要截圖的子區塊
+    if(activePanel.id === 'panel-cash'){
+        targetElement = document.getElementById('cashExportArea');
+        filename = '配息試算結果';
+    } else if (activePanel.id === 'panel-portfolio'){
+        targetElement = document.getElementById('pfExportArea');
+        filename = '投組分析指標';
+    }
+    
+    if(!targetElement) return alert('找不到目標匯出內容');
+
+    // 使用 allowTaint:true 來確保跨域圖片（如果有）不會導致 Canvas 被污染
+    const canvas=await html2canvas(targetElement,{backgroundColor:'#0A1221',scale:2,useCORS:true,allowTaint:true});
     const a=document.createElement('a');
-    const isCash=activePanel.id==='panel-cash';
-    a.download=(isCash?'配息試算':'投組分析')+'.png';
+    a.download = filename + '.png';
     a.href=canvas.toDataURL('image/png');
     a.click();
-  }catch(err){ alert('匯出 PNG 失敗：'+err.message); }
+  }catch(err){ 
+    console.error('匯出 PNG 失敗:', err);
+    alert('匯出 PNG 失敗：'+err.message); 
+  }
   finally{ document.body.classList.remove('exporting'); }
 }
 document.getElementById('btnPng').addEventListener('click',exportPng);
