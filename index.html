@@ -23,6 +23,10 @@ html,body{margin:0;background:var(--deep);color:#fff;font-family:"Noto Sans TC",
 label{display:block;font-size:13px;color:#E9D18A;margin-bottom:6px}
 .control{width:100%;height:42px;border-radius:9px;border:1px solid rgba(233,209,138,.12);background:var(--input);color:#fff;font-size:15px;padding:0 10px;box-sizing:border-box}
 
+/* 小型控制（checkbox行內） */
+.inline{display:flex;align-items:center;gap:10px}
+.inline label{margin:0}
+
 /* 表格 */
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(201,162,39,.25);border-radius:10px;background:#0C152A}
 table{width:100%;border-collapse:collapse;margin-top:10px}
@@ -44,7 +48,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
 .loan-grid .field{margin:0}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(201,162,39,.18);border:1px solid rgba(201,162,39,.35);color:#E9D18A;font-size:12px;margin-left:8px}
 
-/* 縮小表格內的輸入框（投組區） */
+/* 只縮小「表格內」輸入框（投組區） */
 #fundInputTable input.control{height:30px;padding:0 6px;font-size:13px;border-radius:7px;box-sizing:border-box}
 
 /* 匯出 PNG 不透明底色 */
@@ -69,7 +73,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <button class="btn" id="btnPng">匯出 PNG</button>
   </div>
 
-  <!-- 每月配息 -->
+  <!-- 每月配息（只放配息＋融資＋貸款收合） -->
   <section class="tabpanel active" id="panel-cash" role="tabpanel" aria-labelledby="tab-cash">
     <div class="field"><label>投入本金（$）</label><input id="principal" type="number" class="control" value="1000000" step="1"></div>
     <div class="field"><label>融資金額（$）</label><input id="loan" type="number" class="control" value="1500000" step="1"></div>
@@ -89,17 +93,16 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
     <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
 
-    <!-- ✅ 新增：貸款本利攤還（可收合） -->
+    <!-- ✅ 勾選啟用的「貸款本利攤還」 -->
     <details class="collapsible" id="loan2Box" open>
       <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
+
+      <div class="inline" style="margin-top:8px">
+        <input id="loan2EnabledCk" type="checkbox" />
+        <label for="loan2EnabledCk">啟用貸款試算</label>
+      </div>
+
       <div class="loan-grid" aria-labelledby="loan2Box">
-        <div class="field">
-          <label>是否啟用貸款</label>
-          <select id="loan2Enabled" class="control">
-            <option value="off" selected>未啟用</option>
-            <option value="on">啟用</option>
-          </select>
-        </div>
         <div class="field">
           <label>貸款金額（$）</label>
           <input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled>
@@ -117,7 +120,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
           <input id="loan2Monthly" class="control" value="—" disabled>
         </div>
       </div>
-      <p class="note">公式：若月利率 r=年利率/12，期數 n=年×12，月付額 = A·r / (1−(1+r)<sup>−n</sup>)；若 r=0 則 A/n。</p>
+      <p class="note">公式：若月利率 r=年利率/12，期數 n=年×12，月付額 = A·r / (1−(1+r)<sup>−n</sup>)；r=0 則 A/n。</p>
     </details>
 
     <div class="table-wrap">
@@ -130,11 +133,8 @@ details.collapsible summary::-webkit-details-marker{display:none}
           <tr><td>年化配息率</td><td id="vRate">—</td></tr>
           <tr><td>每月配息（毛）</td><td id="vMonthlyDivGross" class="pos">—</td></tr>
           <tr><td>每月融資利息</td><td id="vMonthlyInt" class="neg">—</td></tr>
-          <!-- ✅ 新增：每月貸款本息 -->
           <tr><td>每月貸款本息</td><td id="vMonthlyLoan2" class="neg">—</td></tr>
-          <!-- ✅ 新增：每月配息（淨）＝ 毛配息 − 貸款本息 -->
           <tr><td>每月配息（淨）</td><td id="vMonthlyDivNet" class="em">—</td></tr>
-          <!-- 既有：最終每月淨現金流＝ 毛配息 − 融資利息 − 貸款本息 -->
           <tr><td>每月淨現金流</td><td id="vMonthlyNet" class="em">—</td></tr>
           <tr><td>預估報酬率（含息）</td><td id="vEstReturn" class="gold">—</td></tr>
         </tbody>
@@ -142,7 +142,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
     </div>
   </section>
 
-  <!-- 投組分析（原樣保留，你的既有內容） -->
+  <!-- 投組分析（完整移回第二頁） -->
   <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
 
     <!-- 一鍵帶入 + Excel + 清除表格 -->
@@ -165,7 +165,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
 
     <div class="note">Excel 欄位：基金名稱、近1年%、近3年累積%、近5年累積%、配息率%。<br>數字/純數字字串一律 ×100；結尾含「%」維持原值。</div>
 
-    <!-- A~E 輸入表（靜態五列） -->
+    <!-- A~E 輸入表 -->
     <div class="table-wrap" style="margin-top:10px">
       <table id="fundInputTable" class="table-grid">
         <thead>
@@ -230,69 +230,53 @@ const twd=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maxi
 function cagrFromTotalPct(totalPct,years){const x=parseFloat(totalPct); if(!isFinite(x)) return NaN; const d=x/100; if(d<=-1||years<=0) return NaN; return Math.pow(1+d,1/years)-1;}
 const r2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
 
-/* ===== 新增：貸款欄位啟用/停用控制 ===== */
-const loan2EnabledEl=$('loan2Enabled'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
+/* ===== 勾選：貸款等額本息 ===== */
+const loan2EnabledCk=$('loan2EnabledCk'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
 
-/* 啟用/停用時切換可編輯狀態 */
 function refreshLoan2UI(){
-  const enabled = loan2EnabledEl.value==='on';
-  [loan2AmountEl,loan2YearsEl,loan2RateEl].forEach(el=>{el.disabled=!enabled;});
-  loan2Badge.textContent = enabled ? '已啟用' : '未啟用';
+  const enabled=loan2EnabledCk.checked;
+  [loan2AmountEl,loan2YearsEl,loan2RateEl].forEach(el=>el.disabled=!enabled);
+  loan2Badge.textContent=enabled?'已啟用':'未啟用';
 }
-
-/* 計算等額本息月繳 */
 function calcLoan2Monthly(){
-  const enabled = loan2EnabledEl.value==='on';
-  if(!enabled){ loan2MonthlyEl.value='—'; return 0; }
+  if(!loan2EnabledCk.checked){ loan2MonthlyEl.value='—'; return 0; }
   const A = Math.max(0, parseFloat(loan2AmountEl.value)||0);
   const years = Math.max(1, parseInt(loan2YearsEl.value)||1);
   const yRate = Math.max(0, parseFloat(loan2RateEl.value)||0)/100;
   const r = yRate/12, n = years*12;
-  let pay = 0;
-  if(r===0){ pay = A/n; }
-  else{ const pow = Math.pow(1+r,-n); pay = A * (r/(1 - pow)); }
-  loan2MonthlyEl.value = twd(pay);
+  let pay=0;
+  if(r===0){ pay=A/n; } else { const pow=Math.pow(1+r,-n); pay=A*(r/(1-pow)); }
+  loan2MonthlyEl.value=twd(pay);
   return pay;
 }
 
-/* ===== 每月配息（含融資成數自動帶入 + 新增貸款扣除） ===== */
+/* ===== 每月配息（含融資與貸款扣除） ===== */
 function parseRatioValue(val){
   if(!val || val.startsWith('custom')) return null;
   const p=val.split('|'); return p.length>=2?{ratio:parseFloat(p[0]),mult:parseFloat(p[1])}:null;
 }
 let autoApplied=true;
 function computeCashflow(){
-  const principalEl=$('principal'),loanEl=$('loan'),ratioEl=$('ratio'),rateEl=$('rate'),loanRateEl=$('loanRate');
-  const P=parseFloat(principalEl.value)||0;
-  let   L=parseFloat(loanEl.value)||0;
-  const r=parseFloat(rateEl.value)||0;
-  const i=parseFloat(loanRateEl.value)||0;
+  const P=parseFloat($('principal').value)||0;
+  let   L=parseFloat($('loan').value)||0;
+  const r=parseFloat($('rate').value)||0;
+  const i=parseFloat($('loanRate').value)||0;
+  const ratioObj=parseRatioValue($('ratio').value);
 
-  // 依融資成數自動回填「融資金額」
-  const ratioObj=parseRatioValue(ratioEl.value);
   if(ratioObj && isFinite(ratioObj.mult)){
     const calcLoan=Math.round(P*ratioObj.mult);
-    if(autoApplied || L===0 || L===calcLoan){
-      L=calcLoan; loanEl.value=L; autoApplied=true;
-    }
+    if(autoApplied || L===0 || L===calcLoan){ L=calcLoan; $('loan').value=L; autoApplied=true; }
   }
 
-  // 股息/利息（舊邏輯）
   const total=P+L, annualDiv=total*r/100, annualInt=L*i/100;
   const mDivGross=annualDiv/12, mInt=annualInt/12;
 
-  // ✅ 貸款月繳（新）
-  const mLoan2 = calcLoan2Monthly();
+  const mLoan2=calcLoan2Monthly();
+  const mDivNet=mDivGross - mLoan2;
+  const mNet=mDivGross - mInt - mLoan2;
 
-  // 淨配息 & 淨現金流
-  const mDivNet = mDivGross - mLoan2;                   // 每月配息（淨）＝ 毛配息 − 貸款本息
-  const mNet    = mDivGross - mInt - mLoan2;            // 每月淨現金流 ＝ 毛配息 − 融資利息 − 貸款本息
-
-  // 預估含息報酬率（仍以： (年配息−年融資利息) / 本金 ），不把貸款月付併入報酬率，以避免與現金流概念混淆
-  // 若你要把貸款月付納入成本，可把 annualDiv-annualInt 改成 annualDiv-annualInt-(mLoan2*12)
   const est=(P>0)?((annualDiv-annualInt)/P):NaN;
 
-  // 輸出
   $('vPrincipal').textContent=twd(P);
   $('vLoan').textContent=twd(L);
   $('vTotal').textContent=twd(total);
@@ -301,7 +285,7 @@ function computeCashflow(){
 
   $('vMonthlyDivGross').textContent=twd(mDivGross);
   $('vMonthlyInt').textContent=twd(mInt);
-  $('vMonthlyLoan2').textContent= mLoan2>0 ? twd(mLoan2) : '—';
+  $('vMonthlyLoan2').textContent=mLoan2>0?twd(mLoan2):'—';
   $('vMonthlyDivNet').textContent=twd(mDivNet);
   $('vMonthlyNet').textContent=twd(mNet);
   $('vEstReturn').textContent=isFinite(est)?(est*100).toFixed(2)+'%':'—';
@@ -316,19 +300,14 @@ function populatePresetSelect(){
 function updateUploadInfo(){
   const infoEl=$('uploadInfo');
   const ts=localStorage.getItem('fundCatalogUploadTime');
-  if(ts){
-    infoEl.textContent='最後匯入時間：' + new Date(ts).toLocaleString('zh-TW');
-  }else{
-    infoEl.textContent='目前使用預設清單（尚未匯入 Excel）';
-  }
+  infoEl.textContent = ts ? ('最後匯入時間：'+new Date(ts).toLocaleString('zh-TW')) : '目前使用預設清單（尚未匯入 Excel）';
 }
 function loadCatalog(){
   try{
     const ls=localStorage.getItem('fundCatalog');
     FUND_CATALOG = ls? JSON.parse(ls) : JSON.parse($('fundCatalogDefault').textContent.trim());
   }catch(e){FUND_CATALOG=[]}
-  populatePresetSelect();
-  updateUploadInfo();
+  populatePresetSelect(); updateUploadInfo();
 }
 function nextEmptyRowIndex(){
   const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
@@ -421,7 +400,7 @@ document.getElementById('btnExportXlsx').addEventListener('click',()=>{
   }catch(err){ alert('Excel 匯出失敗：'+err.message); }
 });
 
-/* ===== 投組計算 + LTV（原樣） ===== */
+/* ===== 投組計算 + LTV（第二頁用） ===== */
 function recomputePortfolio(){
   const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
   const data=rows.map((tr,idx)=>({
@@ -452,8 +431,6 @@ function recomputePortfolio(){
 
   updateLTV(cap1,cap3,cap5);
 }
-
-// 單利 + 第3年起逐年併入本金
 function outstandingSeries(P0,r,N=5){
   const B={},I={},O={};
   for(let t=1;t<=N;t++){
@@ -504,13 +481,13 @@ document.getElementById('btnPng').addEventListener('click',exportPng);
 
 /* 綁定 + 初始化 */
 function bindInputs(){
+  // 只在輸入變動時重新計算
   document.querySelectorAll('.control').forEach(el=>{
     el.addEventListener('input',()=>{computeCashflow();recomputePortfolio();},{passive:true});
     el.addEventListener('change',()=>{computeCashflow();recomputePortfolio();},{passive:true});
   });
-
-  // 貸款啟用切換
-  loan2EnabledEl.addEventListener('change',()=>{refreshLoan2UI();computeCashflow();},{passive:true});
+  // 勾選啟用貸款
+  loan2EnabledCk.addEventListener('change',()=>{refreshLoan2UI();computeCashflow();},{passive:true});
 }
 function boot(){ loadCatalog(); bindInputs(); refreshLoan2UI(); computeCashflow(); recomputePortfolio(); }
 document.addEventListener('DOMContentLoaded',boot,{once:true});
