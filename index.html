@@ -59,6 +59,9 @@ details.collapsible summary::-webkit-details-marker{display:none}
   th,td{font-size:13px;padding:5px 6px}
   #fundInputTable input.control{height:28px;font-size:12.5px}
 }
+
+/* 確保分頁切換機制在 CSS 中正確運作 */
+.tabpanel:not(.active) { display: none; }
 </style>
 </head>
 <body>
@@ -195,10 +198,19 @@ details.collapsible summary::-webkit-details-marker{display:none}
 const tabCash=document.getElementById('tab-cash');
 const tabPF=document.getElementById('tab-portfolio');
 function setTab(which){
+  // 移除所有 tab 的選中狀態，移除所有 panel 的 active 狀態
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
   document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
-  if(which==='cash'){tabCash.setAttribute('aria-selected','true');document.getElementById('panel-cash').classList.add('active');}
-  else{tabPF.setAttribute('aria-selected','true');document.getElementById('panel-portfolio').classList.add('active');}
+  
+  // 設定當前選中的 tab 和 panel
+  if(which==='cash'){
+    tabCash.setAttribute('aria-selected','true');
+    document.getElementById('panel-cash').classList.add('active');
+  }
+  else{
+    tabPF.setAttribute('aria-selected','true');
+    document.getElementById('panel-portfolio').classList.add('active');
+  }
   saveState(); // 切換分頁時儲存狀態
 }
 tabCash.addEventListener('click',()=>setTab('cash'),{passive:true});
@@ -298,13 +310,8 @@ function loadState() {
         
         // 3. 載入活動分頁
         const activeTab = state.activeTab || 'cash';
-        // 這裡不直接呼叫 setTab，避免在頁面未完全渲染前觸發 DOM 錯誤
-        if (activeTab === 'pf') {
-             // 延遲設定分頁，確保 DOM 準備就緒
-             setTimeout(() => setTab('pf'), 0);
-        } else {
-             setTimeout(() => setTab('cash'), 0);
-        }
+        // 由於 DOMContentLoaded 時 setTab 能夠正常工作，這裡無需延遲
+        setTab(activeTab);
         
         // 4. 載入貸款可收合區塊狀態
         $('loan2Box').open = state.loan2Open !== undefined ? state.loan2Open : true;
@@ -644,7 +651,6 @@ function boot(){
   loadCatalog(); 
   
   // 嘗試載入狀態。如果載入成功，則會覆寫初始值。
-  // 我們先執行 loadState 裡的 DOM 變動，但避免它裡面的 setTab 馬上執行
   const loaded = loadState(); 
   
   // 重新綁定事件，確保載入的數據和新建立的列都能觸發計算和儲存
