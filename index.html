@@ -73,7 +73,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <button class="btn" id="btnPng">匯出 PNG</button>
   </div>
 
-  <!-- 每月配息（只放配息＋融資＋貸款收合） -->
+  <!-- ===== 每月配息（僅配息/融資/貸款與結果表） ===== -->
   <section class="tabpanel active" id="panel-cash" role="tabpanel" aria-labelledby="tab-cash">
     <div class="field"><label>投入本金（$）</label><input id="principal" type="number" class="control" value="1000000" step="1"></div>
     <div class="field"><label>融資金額（$）</label><input id="loan" type="number" class="control" value="1500000" step="1"></div>
@@ -93,34 +93,20 @@ details.collapsible summary::-webkit-details-marker{display:none}
     <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
     <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
 
-    <!-- ✅ 勾選啟用的「貸款本利攤還」 -->
+    <!-- 貸款本利攤還（checkbox 啟用） -->
     <details class="collapsible" id="loan2Box" open>
       <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
-
       <div class="inline" style="margin-top:8px">
         <input id="loan2EnabledCk" type="checkbox" />
         <label for="loan2EnabledCk">啟用貸款試算</label>
       </div>
-
       <div class="loan-grid" aria-labelledby="loan2Box">
-        <div class="field">
-          <label>貸款金額（$）</label>
-          <input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled>
-        </div>
-        <div class="field">
-          <label>年限（年）</label>
-          <input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled>
-        </div>
-        <div class="field">
-          <label>年利率（%）</label>
-          <input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled>
-        </div>
-        <div class="field" style="grid-column:1/-1">
-          <label>每月本息（自動計算）</label>
-          <input id="loan2Monthly" class="control" value="—" disabled>
-        </div>
+        <div class="field"><label>貸款金額（$）</label><input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled></div>
+        <div class="field"><label>年限（年）</label><input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled></div>
+        <div class="field"><label>年利率（%）</label><input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled></div>
+        <div class="field" style="grid-column:1/-1"><label>每月本息（自動計算）</label><input id="loan2Monthly" class="control" value="—" disabled></div>
       </div>
-      <p class="note">公式：若月利率 r=年利率/12，期數 n=年×12，月付額 = A·r / (1−(1+r)<sup>−n</sup>)；r=0 則 A/n。</p>
+      <p class="note">公式：r=年利率/12、n=年×12；月付=A·r/(1-(1+r)<sup>-n</sup>)；r=0 則 A/n。</p>
     </details>
 
     <div class="table-wrap">
@@ -142,16 +128,16 @@ details.collapsible summary::-webkit-details-marker{display:none}
     </div>
   </section>
 
-  <!-- 投組分析（完整移回第二頁） -->
+  <!-- ===== 投組分析（把常用基金＋表格＋指標全部移至此） ===== -->
   <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
 
-    <!-- 一鍵帶入 + Excel + 清除表格 -->
     <div class="field">
       <label>常用基金清單</label>
       <select id="presetSelect" class="control">
         <option value="">— 選擇常用基金 —</option>
       </select>
     </div>
+
     <div class="actions" style="margin-bottom:6px">
       <button class="btn" id="applyPresetBtn">帶入至下一個空列</button>
       <button class="btn" id="btnExportXlsx">匯出 Excel</button>
@@ -160,12 +146,9 @@ details.collapsible summary::-webkit-details-marker{display:none}
       <input type="file" id="importXlsx" accept=".xlsx,.xls" style="display:none" />
     </div>
 
-    <!-- 顯示最後匯入日期 -->
     <p id="uploadInfo" class="note"></p>
-
     <div class="note">Excel 欄位：基金名稱、近1年%、近3年累積%、近5年累積%、配息率%。<br>數字/純數字字串一律 ×100；結尾含「%」維持原值。</div>
 
-    <!-- A~E 輸入表 -->
     <div class="table-wrap" style="margin-top:10px">
       <table id="fundInputTable" class="table-grid">
         <thead>
@@ -181,7 +164,6 @@ details.collapsible summary::-webkit-details-marker{display:none}
       </table>
     </div>
 
-    <!-- 投組指標 + LTV -->
     <div class="table-wrap" style="margin-top:12px">
       <table class="table-grid">
         <thead><tr><th>投組指標（加權年化）</th><th>1年</th><th>3年</th><th>5年</th></tr></thead>
@@ -193,6 +175,7 @@ details.collapsible summary::-webkit-details-marker{display:none}
         </tbody>
       </table>
     </div>
+
     <div class="note">LTV > 80% 會以紅色標示；LTV 估算以「資本成長率」（CAGR−配息）為投組價值變動率。</div>
   </section>
 
@@ -230,9 +213,8 @@ const twd=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maxi
 function cagrFromTotalPct(totalPct,years){const x=parseFloat(totalPct); if(!isFinite(x)) return NaN; const d=x/100; if(d<=-1||years<=0) return NaN; return Math.pow(1+d,1/years)-1;}
 const r2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
 
-/* ===== 勾選：貸款等額本息 ===== */
+/* ===== 勾選：貸款等額本息（第一頁用） ===== */
 const loan2EnabledCk=$('loan2EnabledCk'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
-
 function refreshLoan2UI(){
   const enabled=loan2EnabledCk.checked;
   [loan2AmountEl,loan2YearsEl,loan2RateEl].forEach(el=>el.disabled=!enabled);
@@ -250,7 +232,7 @@ function calcLoan2Monthly(){
   return pay;
 }
 
-/* ===== 每月配息（含融資與貸款扣除） ===== */
+/* ===== 每月配息（第一頁計算：含融資與貸款扣除） ===== */
 function parseRatioValue(val){
   if(!val || val.startsWith('custom')) return null;
   const p=val.split('|'); return p.length>=2?{ratio:parseFloat(p[0]),mult:parseFloat(p[1])}:null;
@@ -291,7 +273,7 @@ function computeCashflow(){
   $('vEstReturn').textContent=isFinite(est)?(est*100).toFixed(2)+'%':'—';
 }
 
-/* ===== 常用基金 Catalog（LocalStorage + Excel） ===== */
+/* ===== 常用基金 Catalog（供第二頁） ===== */
 let FUND_CATALOG=[];
 function populatePresetSelect(){
   const sel=$('presetSelect');
@@ -335,7 +317,7 @@ $('applyPresetBtn').addEventListener('click',()=>{
   applyPresetToRow(rowIdx,parseInt(sel,10));
 });
 
-/* 清除表格 */
+/* 清除表格（第二頁） */
 $('btnClearRows').addEventListener('click',()=>{
   const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
   rows.forEach(tr=>{
@@ -345,7 +327,7 @@ $('btnClearRows').addEventListener('click',()=>{
   recomputePortfolio();
 });
 
-/* Excel 匯入/匯出 */
+/* Excel 匯入/匯出（第二頁） */
 const HEADER_MAP={name:['基金名稱','name','基金','名稱'],r1:['近1年%','r1','1Y'],r3:['近3年累積%','r3','3Y'],r5:['近5年累積%','r5','5Y'],dy:['配息率%','dy','Yield%']};
 function pick(row,keys){for(const k of keys){if(Object.prototype.hasOwnProperty.call(row,k)&&row[k]!=='')return row[k];}return undefined;}
 function parsePercentCell(v){
@@ -382,8 +364,7 @@ document.getElementById('importXlsx').addEventListener('change',(e)=>{
       FUND_CATALOG=arr;
       localStorage.setItem('fundCatalog', JSON.stringify(FUND_CATALOG));
       localStorage.setItem('fundCatalogUploadTime', new Date().toISOString());
-      populatePresetSelect();
-      updateUploadInfo();
+      populatePresetSelect(); updateUploadInfo();
       alert(`Excel 匯入完成：${arr.length} 筆（數字×100；含%維持；四捨五入至小數2位）`);
     }catch(err){ alert('Excel 匯入失敗：'+err.message); }
     e.target.value='';
@@ -400,7 +381,7 @@ document.getElementById('btnExportXlsx').addEventListener('click',()=>{
   }catch(err){ alert('Excel 匯出失敗：'+err.message); }
 });
 
-/* ===== 投組計算 + LTV（第二頁用） ===== */
+/* ===== 投組計算 + LTV（第二頁渲染） ===== */
 function recomputePortfolio(){
   const rows=[...document.querySelectorAll('#fundInputTable tbody tr')];
   const data=rows.map((tr,idx)=>({
@@ -461,7 +442,7 @@ function updateLTV(cap1,cap3,cap5){
   paint($('pf_ltv1'),l1); paint($('pf_ltv3'),l3); paint($('pf_ltv5'),l5);
 }
 
-/* 匯出 PNG */
+/* 匯出 PNG（會輸出當前活動分頁） */
 async function exportPng(){
   try{
     document.body.classList.add('exporting');
@@ -481,7 +462,7 @@ document.getElementById('btnPng').addEventListener('click',exportPng);
 
 /* 綁定 + 初始化 */
 function bindInputs(){
-  // 只在輸入變動時重新計算
+  // 所有可輸入控制：變動即重新計算
   document.querySelectorAll('.control').forEach(el=>{
     el.addEventListener('input',()=>{computeCashflow();recomputePortfolio();},{passive:true});
     el.addEventListener('change',()=>{computeCashflow();recomputePortfolio();},{passive:true});
