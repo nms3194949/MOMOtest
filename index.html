@@ -722,8 +722,8 @@
     if(name.endsWith('.csv')){
       if(typeof XLSX==='undefined') throw new Error('SheetJS 未載入');
       const text=await file.text();
-      // 使用 CSV 專用解析器：避免因 CSV 格式問題導致欄位解析錯誤
-      const aoa = XLSX.utils.sheet_to_json(XLSX.read(text, {type:'string'}).Sheets.Sheet1, {header:1, raw:false});
+      // 使用 CSV 專用解析器。header:1 和 raw:true 有助於數字字串的解析。
+      const aoa = XLSX.utils.sheet_to_json(XLSX.read(text, {type:'string'}).Sheets.Sheet1, {header:1, raw:true});
       if(!aoa || !aoa.length) throw new Error('CSV 解析後無數據');
       return aoa;
     } else {
@@ -745,10 +745,21 @@
     return -1;
   }
 
+  // **修正後的 toNumberClean 函式**
   function toNumberClean(v){
+    // 如果 SheetJS 已經解析為數字，直接回傳
+    if(typeof v==='number' && isFinite(v)) return v; 
+    
     if(v==null||v==='') return NaN;
     if(typeof v==='number') return v;
-    if(typeof v==='string'){ const s=v.replace(/,/g,'').trim(); return Number(s); }
+
+    if(typeof v==='string'){ 
+      // 清除逗號、百分號，並移除尾隨的非數字/點字元（如 'K'）
+      let s=v.replace(/,/g,'').replace(/%/g,'').trim(); 
+      // 嘗試移除尾隨的非數字字元，例如 "5.80K" -> "5.80"
+      s = s.replace(/[^0-9.]+$/, '');
+      return Number(s); 
+    }
     return Number(v);
   }
 
@@ -757,12 +768,12 @@
     if(!rows||!rows.length) throw new Error('工作表沒有資料');
     const headers=rows[0].map(x=> String(x||'').trim());
 
+    // 由於您的檔案標題是中文，確保我們能找到它們
     const dateIdx = pickCol(headers,['日期','date','Date','DATE','時間','Time','Datetime']);
     const closeIdx= pickCol(headers,['收市','收盤','收盤價','Close','close','Adj Close','Adj close','收盤價(USD)']);
 
-    // ✅ 尋找「低」欄，找不到就 fallback 第 5 欄（索引 4）
+    // 尋找「低」欄，找不到就返回 -1
     let lowIdx  = pickCol(headers,['低','最低','最低價','Low','low','Low Price','Low price']);
-    // **已移除不安全的 lowIdx 檢查 (if (lowIdx === -1 && headers.length >= 5) lowIdx = 4;)**
 
     if(dateIdx===-1||closeIdx===-1) throw new Error('找不到欄位（需「日期」「收市」）');
 
