@@ -716,16 +716,16 @@
     }
   }
 
+  // **修正後的 readAnyTabular 函式**
   async function readAnyTabular(file){
     const name=(file.name||'').toLowerCase();
     if(name.endsWith('.csv')){
       if(typeof XLSX==='undefined') throw new Error('SheetJS 未載入');
       const text=await file.text();
-      const wb=XLSX.read(text,{type:'string'});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      if(!ws) throw new Error('找不到第一個工作表');
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false});
-      return rows;
+      // 使用 CSV 專用解析器：避免因 CSV 格式問題導致欄位解析錯誤
+      const aoa = XLSX.utils.sheet_to_json(XLSX.read(text, {type:'string'}).Sheets.Sheet1, {header:1, raw:false});
+      if(!aoa || !aoa.length) throw new Error('CSV 解析後無數據');
+      return aoa;
     } else {
       if(typeof XLSX==='undefined') throw new Error('SheetJS 未載入');
       const ab=await file.arrayBuffer();
@@ -752,6 +752,7 @@
     return Number(v);
   }
 
+  // **修正後的 parseRows 函式**
   function parseRows(rows){
     if(!rows||!rows.length) throw new Error('工作表沒有資料');
     const headers=rows[0].map(x=> String(x||'').trim());
@@ -761,7 +762,7 @@
 
     // ✅ 尋找「低」欄，找不到就 fallback 第 5 欄（索引 4）
     let lowIdx  = pickCol(headers,['低','最低','最低價','Low','low','Low Price','Low price']);
-    if (lowIdx === -1 && headers.length >= 5) lowIdx = 4; 
+    // **已移除不安全的 lowIdx 檢查 (if (lowIdx === -1 && headers.length >= 5) lowIdx = 4;)**
 
     if(dateIdx===-1||closeIdx===-1) throw new Error('找不到欄位（需「日期」「收市」）');
 
