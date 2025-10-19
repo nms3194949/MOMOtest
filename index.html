@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>資產負債表試算（含匯出 PNG）</title>
-<!-- 匯出功能套件 -->
+<title>資產負債表試算（含彙整表與匯出 PNG）</title>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   :root{
@@ -14,21 +13,25 @@
   }
   html,body{margin:0;background:var(--deep);color:var(--ink);
     font-family:"Noto Sans TC","PingFang TC",sans-serif;}
-  .wrap{max-width:800px;margin:0 auto;padding:24px;}
-  h2{margin-top:24px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px;}
+  .wrap{max-width:900px;margin:0 auto;padding:24px;}
+  h2{margin:28px 0 8px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px;}
   table{width:100%;border-collapse:collapse;margin-top:12px;}
-  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:center;}
+  th,td{border-bottom:1px solid var(--line);padding:10px;text-align:center;vertical-align:top}
   th{background:#111a2f;}
   select,input{background:#0f1a33;color:var(--ink);
-    border:1px solid var(--line);border-radius:6px;padding:6px;width:100%;}
+    border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;}
   input[type="number"]{text-align:right;}
-  tfoot td{font-weight:700;}
-  .summary{margin-top:24px;padding:12px;border:1px solid var(--line);
+  .btn{background:var(--gold);color:#000;padding:9px 14px;border:none;border-radius:8px;
+    font-weight:600;cursor:pointer;margin:10px 0 0 0}
+  .btn:hover{opacity:.95;}
+  .summary, .report, .actions{margin-top:20px;padding:14px;border:1px solid var(--line);
     border-radius:8px;background:var(--card);}
-  .pos{color:var(--pos)}.neg{color:var(--neg)}
-  .btn{background:var(--gold);color:#000;padding:8px 14px;
-    border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:12px;}
-  .btn:hover{opacity:.9;}
+  .kv{display:flex;gap:18px;flex-wrap:wrap}
+  .kv p{margin:0}
+  .pos{color:var(--pos);font-weight:700}
+  .neg{color:var(--neg);font-weight:700}
+  .ul{list-style:disc;margin:6px 0 0 22px;padding:0}
+  .actions{text-align:center}
 </style>
 </head>
 <body>
@@ -36,7 +39,7 @@
   <h2>資產</h2>
   <table id="tblAsset">
     <thead>
-      <tr><th>資產</th><th>金額（萬元）</th><th>月配息（元/月）</th></tr>
+      <tr><th style="width:160px">資產</th><th>金額（萬元）</th><th>月配息（元/月）</th></tr>
     </thead>
     <tbody>
       <tr>
@@ -60,7 +63,7 @@
   <h2>負債</h2>
   <table id="tblDebt">
     <thead>
-      <tr><th>負債</th><th>金額（萬元）</th><th>月支出（元/月）</th></tr>
+      <tr><th style="width:160px">負債</th><th>金額（萬元）</th><th>月支出（元/月）</th></tr>
     </thead>
     <tbody>
       <tr>
@@ -79,14 +82,42 @@
   </table>
   <button class="btn" onclick="addRow('tblDebt')">＋ 新增負債列</button>
 
+  <!-- 小計區：資產、負債、現金流三項 -->
   <div class="summary">
-    <p>資產總額：<span id="sumAsset">0</span> 萬元</p>
-    <p>負債總額：<span id="sumDebt">0</span> 萬元</p>
-    <p>每月淨現金流：<span id="netFlow" class="pos">0</span> 元/月</p>
+    <div class="kv">
+      <p>資產總額：<span id="sumAsset">0.00</span> 萬元</p>
+      <p>負債總額：<span id="sumDebt">0.00</span> 萬元</p>
+      <p>每月收入現金流：<span id="flowIn">0</span> 元/月</p>
+      <p>每月支出演金流：<span id="flowOut">0</span> 元/月</p>
+      <p>每月淨現金流：<span id="netFlow" class="pos">0</span> 元/月</p>
+    </div>
+  </div>
+
+  <!-- 彙整表：第一行資產、第二行負債，條列填入資訊 -->
+  <div class="report">
+    <h2>彙整表</h2>
+    <table id="tblReport">
+      <thead>
+        <tr>
+          <th style="width:120px">類別</th>
+          <th>條列明細（項目｜金額（萬元）｜月現金流）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>資產</td>
+          <td><ul id="listAsset" class="ul"></ul></td>
+        </tr>
+        <tr>
+          <td>負債</td>
+          <td><ul id="listDebt" class="ul"></ul></td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
-<div style="text-align:center;">
+<div class="actions">
   <button class="btn" onclick="exportPNG()">📸 匯出 PNG</button>
 </div>
 
@@ -99,47 +130,78 @@ function addRow(tblId){
   clone.querySelectorAll("select").forEach(s=>s.value="");
   tbl.appendChild(clone);
   bindInputs();
+  calc();
 }
 
 function bindInputs(){
-  document.querySelectorAll("input").forEach(el=>{
+  document.querySelectorAll("input,select").forEach(el=>{
     el.removeEventListener("input",calc);
     el.addEventListener("input",calc);
+    el.removeEventListener("change",calc);
+    el.addEventListener("change",calc);
   });
 }
+
+const nf0 = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
+const nf2 = new Intl.NumberFormat('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function calc(){
   let sumAsset=0,sumDebt=0,flowIn=0,flowOut=0;
+  const assetList = document.getElementById("listAsset");
+  const debtList  = document.getElementById("listDebt");
+  assetList.innerHTML = ""; debtList.innerHTML = "";
+
+  // 資產：金額（萬元）、月配息（元/月）＝收入現金流
   document.querySelectorAll("#tblAsset tbody tr").forEach(r=>{
-    const v1=parseFloat(r.children[1].querySelector("input").value)||0;
-    const v2=parseFloat(r.children[2].querySelector("input").value)||0;
-    sumAsset+=v1; flowIn+=v2;
+    const name=(r.children[0].querySelector("select").value||"").trim();
+    const amt =parseFloat(r.children[1].querySelector("input").value)||0;
+    const mon =parseFloat(r.children[2].querySelector("input").value)||0;
+    sumAsset+=amt; flowIn+=mon;
+    if(name || amt>0 || mon>0){
+      const li=document.createElement("li");
+      li.innerHTML=`${name||"未選擇"} ｜ ${nf2.format(amt)} 萬 ｜ 月配息 ${nf0.format(mon)} 元`;
+      assetList.appendChild(li);
+    }
   });
+
+  // 負債：金額（萬元）、月支出（元/月）＝支出演金流
   document.querySelectorAll("#tblDebt tbody tr").forEach(r=>{
-    const v1=parseFloat(r.children[1].querySelector("input").value)||0;
-    const v2=parseFloat(r.children[2].querySelector("input").value)||0;
-    sumDebt+=v1; flowOut+=v2;
+    const name=(r.children[0].querySelector("select").value||"").trim();
+    const amt =parseFloat(r.children[1].querySelector("input").value)||0;
+    const mon =parseFloat(r.children[2].querySelector("input").value)||0;
+    sumDebt+=amt; flowOut+=mon;
+    if(name || amt>0 || mon>0){
+      const li=document.createElement("li");
+      li.innerHTML=`${name||"未選擇"} ｜ ${nf2.format(amt)} 萬 ｜ 月支出 ${nf0.format(mon)} 元`;
+      debtList.appendChild(li);
+    }
   });
+
   const net=flowIn-flowOut;
-  document.getElementById("sumAsset").textContent=sumAsset.toFixed(2);
-  document.getElementById("sumDebt").textContent=sumDebt.toFixed(2);
+
+  document.getElementById("sumAsset").textContent=nf2.format(sumAsset);
+  document.getElementById("sumDebt").textContent =nf2.format(sumDebt);
+  document.getElementById("flowIn").textContent  =nf0.format(flowIn);
+  document.getElementById("flowOut").textContent =nf0.format(flowOut);
+
   const netEl=document.getElementById("netFlow");
-  netEl.textContent=net.toFixed(0);
+  netEl.textContent=nf0.format(net);
   netEl.className=net>=0?"pos":"neg";
 }
 
-// 匯出 PNG
+// 匯出 PNG（包含彙整表）
 function exportPNG(){
   const target=document.getElementById("captureArea");
   html2canvas(target,{scale:2,backgroundColor:"#0A1221"}).then(canvas=>{
     const link=document.createElement("a");
-    link.download="資產負債表.png";
+    link.download="資產負債_現金流彙整.png";
     link.href=canvas.toDataURL("image/png");
     link.click();
   });
 }
 
 bindInputs();
+calc();
 </script>
 </body>
 </html>
