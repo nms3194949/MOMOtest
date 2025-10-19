@@ -3,177 +3,143 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>基金績效（API 直連版）</title>
+<title>資產負債表試算（含匯出 PNG）</title>
+<!-- 匯出功能套件 -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-  :root{--deep:#0A1221;--card:#0C152A;--ink:#EDEFF5;--muted:#9AA4B2;--line:#2a3550;--pos:#e25a3c;--neg:#39C27A;}
-  html,body{margin:0;background:var(--deep);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif}
-  .wrap{max-width:900px;margin:0 auto;padding:18px}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
-  h1{margin:0 0 12px;font-size:20px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
-  input,button{background:#0f1a33;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-  input{flex:1;min-width:260px}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{border-bottom:1px solid var(--line);padding:10px;text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  .pos{color:var(--pos);font-weight:700}
-  .neg{color:var(--neg);font-weight:700}
-  .muted{color:var(--muted)}
-  .note{font-size:12px;color:var(--muted);margin-top:10px}
-  .error{color:#ffb4b4;margin-top:8px}
+  :root{
+    --deep:#0A1221;--card:#0C152A;--line:#2a3550;
+    --ink:#EDEFF5;--muted:#9AA4B2;
+    --pos:#39C27A;--neg:#E25A5A;--gold:#C9A227;
+  }
+  html,body{margin:0;background:var(--deep);color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC",sans-serif;}
+  .wrap{max-width:800px;margin:0 auto;padding:24px;}
+  h2{margin-top:24px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:4px;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;}
+  th,td{border-bottom:1px solid var(--line);padding:8px;text-align:center;}
+  th{background:#111a2f;}
+  select,input{background:#0f1a33;color:var(--ink);
+    border:1px solid var(--line);border-radius:6px;padding:6px;width:100%;}
+  input[type="number"]{text-align:right;}
+  tfoot td{font-weight:700;}
+  .summary{margin-top:24px;padding:12px;border:1px solid var(--line);
+    border-radius:8px;background:var(--card);}
+  .pos{color:var(--pos)}.neg{color:var(--neg)}
+  .btn{background:var(--gold);color:#000;padding:8px 14px;
+    border:none;border-radius:8px;font-weight:600;cursor:pointer;margin-top:12px;}
+  .btn:hover{opacity:.9;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="panel">
-    <h1>基金績效（API 直連）</h1>
-    <div class="row">
-      <input id="apiUrl" placeholder="貼上 API 端點（JSON）" />
-      <button id="btnLoad">載入資料</button>
-      <button id="btnDemo">載入示範資料</button>
-    </div>
-    <div id="meta" class="muted"></div>
-    <table id="tbl" aria-label="基金績效表">
-      <thead><tr><th>績效期間</th><th>基金績效</th><th>同組平均</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <div id="msg" class="error"></div>
-    <div class="note">
-      說明：此頁預期直接取得 JSON。若瀏覽器顯示 CORS 錯誤，代表對方未開放跨網域；請改用代理（例如 Cloudflare Workers）或改為官方公開 API。
-    </div>
+<div class="wrap" id="captureArea">
+  <h2>資產</h2>
+  <table id="tblAsset">
+    <thead>
+      <tr><th>資產</th><th>金額（萬元）</th><th>月配息（元/月）</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><select>
+          <option value="">請選擇</option>
+          <option>活存</option>
+          <option>定存</option>
+          <option>股票</option>
+          <option>台幣保單</option>
+          <option>外幣保單</option>
+          <option>不動產</option>
+          <option>租金</option>
+        </select></td>
+        <td><input type="number" step="0.01" placeholder="0"></td>
+        <td><input type="number" step="1" placeholder="0"></td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn" onclick="addRow('tblAsset')">＋ 新增資產列</button>
+
+  <h2>負債</h2>
+  <table id="tblDebt">
+    <thead>
+      <tr><th>負債</th><th>金額（萬元）</th><th>月支出（元/月）</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><select>
+          <option value="">請選擇</option>
+          <option>信貸</option>
+          <option>車貸</option>
+          <option>房貸</option>
+          <option>學貸</option>
+          <option>孝親費</option>
+        </select></td>
+        <td><input type="number" step="0.01" placeholder="0"></td>
+        <td><input type="number" step="1" placeholder="0"></td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn" onclick="addRow('tblDebt')">＋ 新增負債列</button>
+
+  <div class="summary">
+    <p>資產總額：<span id="sumAsset">0</span> 萬元</p>
+    <p>負債總額：<span id="sumDebt">0</span> 萬元</p>
+    <p>每月淨現金流：<span id="netFlow" class="pos">0</span> 元/月</p>
   </div>
 </div>
 
+<div style="text-align:center;">
+  <button class="btn" onclick="exportPNG()">📸 匯出 PNG</button>
+</div>
+
 <script>
-/** 你可以把這個常數換成實際端點（例如鉅亨的基金績效 API）。 */
-const API_URL = "";  // 例如： "https://api._____ /fund/B2abw8B/performance"
-
-const PERIOD_LABELS = [
-  ["1m","1月"], ["3m","3月"], ["6m","6月"], ["ytd","今年以來"],
-  ["1y","1年"], ["3y","3年"], ["5y","5年"], ["10y","10年"]
-];
-
-/** 嘗試在各種常見 JSON 結構中，把績效數字取出 */
-function extractPerformance(json){
-  // 嘗試抓到包含績效資料的物件
-  const data = json?.data || json?.result || json?.items || json;
-  // 常見欄位名稱猜測
-  const perf = data?.performance || data?.perf || data;
-
-  // 允許兩種型態：
-  // A) { "1m": {fund: 0.0031, peer: 0.0113}, "3m": {...}, ... }
-  // B) [ {period:"1m", fund:0.0031, peer:0.0113}, ... ]
-  const map = {};
-
-  if (Array.isArray(perf)) {
-    perf.forEach(r=>{
-      const k = (r.period || r.key || "").toLowerCase();
-      if(!k) return;
-      map[k] = {
-        fund: r.fund ?? r.navReturn ?? r.value ?? null,
-        peer: r.peer ?? r.category ?? r.benchmark ?? null
-      };
-    });
-    return map;
-  }
-
-  if (typeof perf === "object" && perf !== null) {
-    for (const k of Object.keys(perf)) {
-      const row = perf[k];
-      if (row && typeof row === "object") {
-        map[k.toLowerCase()] = {
-          fund: row.fund ?? row.navReturn ?? row.value ?? null,
-          peer: row.peer ?? row.category ?? row.benchmark ?? null
-        };
-      } else {
-        // 如果是純數字 { "1m": 0.0031, ... }
-        map[k.toLowerCase()] = { fund: row, peer: null };
-      }
-    }
-    return map;
-  }
-
-  return {};
+function addRow(tblId){
+  const tbl=document.getElementById(tblId).querySelector("tbody");
+  const first=tbl.querySelector("tr");
+  const clone=first.cloneNode(true);
+  clone.querySelectorAll("input").forEach(i=>i.value="");
+  clone.querySelectorAll("select").forEach(s=>s.value="");
+  tbl.appendChild(clone);
+  bindInputs();
 }
 
-function fmtPct(x){
-  if (x === null || x === undefined || Number.isNaN(Number(x))) return "--";
-  const v = Number(x);
-  // 如果來源是 0.0345 當成 3.45%
-  const pct = Math.abs(v) < 1 ? (v*100) : v;
-  const sign = pct > 0 ? "+" : (pct < 0 ? "" : "");
-  const cls = pct > 0 ? "pos" : (pct < 0 ? "neg" : "");
-  return `<span class="${cls}">${sign}${pct.toFixed(2)}%</span>`;
-}
-
-function renderTable(map){
-  const tbody = document.querySelector("#tbl tbody");
-  tbody.innerHTML = "";
-  PERIOD_LABELS.forEach(([k,label])=>{
-    const r = map[k] || {};
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${label}</td>
-      <td>${fmtPct(r.fund)}</td>
-      <td>${fmtPct(r.peer)}</td>
-    `;
-    tbody.appendChild(tr);
+function bindInputs(){
+  document.querySelectorAll("input").forEach(el=>{
+    el.removeEventListener("input",calc);
+    el.addEventListener("input",calc);
   });
 }
 
-async function load(url){
-  const msg = document.getElementById("msg");
-  const meta = document.getElementById("meta");
-  msg.textContent = ""; meta.textContent = "";
-  try{
-    const res = await fetch(url, { mode: "cors" });
-    if(!res.ok) throw new Error("HTTP "+res.status);
-    const json = await res.json();
-    const map = extractPerformance(json);
-    renderTable(map);
-
-    // 顯示一些來源資訊（若有）
-    const updated = json?.data?.updatedAt || json?.updatedAt || "";
-    const name = json?.data?.name || json?.name || "";
-    meta.textContent = [name && `基金：${name}`, updated && `更新時間：${updated}`].filter(Boolean).join("　");
-  }catch(err){
-    console.error(err);
-    msg.textContent = "讀取失敗：" + (err?.message || err);
-    if (String(err).includes("TypeError: Failed to fetch") || String(err).toLowerCase().includes("cors")) {
-      msg.textContent += "（可能是被 CORS 擋住）";
-    }
-  }
+function calc(){
+  let sumAsset=0,sumDebt=0,flowIn=0,flowOut=0;
+  document.querySelectorAll("#tblAsset tbody tr").forEach(r=>{
+    const v1=parseFloat(r.children[1].querySelector("input").value)||0;
+    const v2=parseFloat(r.children[2].querySelector("input").value)||0;
+    sumAsset+=v1; flowIn+=v2;
+  });
+  document.querySelectorAll("#tblDebt tbody tr").forEach(r=>{
+    const v1=parseFloat(r.children[1].querySelector("input").value)||0;
+    const v2=parseFloat(r.children[2].querySelector("input").value)||0;
+    sumDebt+=v1; flowOut+=v2;
+  });
+  const net=flowIn-flowOut;
+  document.getElementById("sumAsset").textContent=sumAsset.toFixed(2);
+  document.getElementById("sumDebt").textContent=sumDebt.toFixed(2);
+  const netEl=document.getElementById("netFlow");
+  netEl.textContent=net.toFixed(0);
+  netEl.className=net>=0?"pos":"neg";
 }
 
-document.getElementById("btnLoad").addEventListener("click", ()=>{
-  const u = document.getElementById("apiUrl").value.trim() || API_URL;
-  if(!u){ alert("請先輸入 API 端點 URL"); return; }
-  load(u);
-});
+// 匯出 PNG
+function exportPNG(){
+  const target=document.getElementById("captureArea");
+  html2canvas(target,{scale:2,backgroundColor:"#0A1221"}).then(canvas=>{
+    const link=document.createElement("a");
+    link.download="資產負債表.png";
+    link.href=canvas.toDataURL("image/png");
+    link.click();
+  });
+}
 
-document.getElementById("btnDemo").addEventListener("click", ()=>{
-  // 本地示範資料（數值用小數＝百分比/100）
-  const demo = {
-    data: {
-      name: "安聯收益成長基金-AMg7月收(美元)",
-      updatedAt: "2025-10-19T00:00:00Z",
-      performance: {
-        "1m": { fund: 0.0031, peer: 0.0113 },
-        "3m": { fund: 0.0361, peer: 0.0860 },
-        "6m": { fund: 0.1448, peer: 0.1038 },
-        "ytd": { fund: 0.0858, peer: 0.0394 },
-        "1y": { fund: 0.0931, peer: 0.0342 },
-        "3y": { fund: 0.4305, peer: 0.3668 },
-        "5y": { fund: 0.3928, peer: 0.3916 },
-        "10y": { fund: null,  peer: 0.7151 }
-      }
-    }
-  };
-  const map = extractPerformance(demo);
-  renderTable(map);
-  document.getElementById("msg").textContent = "";
-  document.getElementById("meta").textContent = "（示範資料）";
-});
+bindInputs();
 </script>
 </body>
 </html>
