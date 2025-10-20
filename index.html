@@ -1,207 +1,139 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>資產負債表試算（含彙整表與匯出 PNG）</title>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<style>
-  :root{
-    --deep:#0A1221;--card:#0C152A;--line:#2a3550;
-    --ink:#EDEFF5;--muted:#9AA4B2;
-    --pos:#39C27A;--neg:#E25A5A;--gold:#C9A227;
-  }
-  html,body{margin:0;background:var(--deep);color:var(--ink);
-    font-family:"Noto Sans TC","PingFang TC",sans-serif;}
-  .wrap{max-width:900px;margin:0 auto;padding:24px;}
-  h2{margin:28px 0 8px;color:var(--gold);border-bottom:1px solid var(--line);padding-bottom:6px;}
-  table{width:100%;border-collapse:collapse;margin-top:12px;}
-  th,td{border-bottom:1px solid var(--line);padding:10px;text-align:center;vertical-align:top}
-  th{background:#111a2f;}
-  select,input{background:#0f1a33;color:var(--ink);
-    border:1px solid var(--line);border-radius:6px;padding:8px;width:100%;}
-  input[type="number"]{text-align:right;}
-  .btn{background:var(--gold);color:#000;padding:9px 14px;border:none;border-radius:8px;
-    font-weight:600;cursor:pointer;margin:10px 0 0 0}
-  .btn:hover{opacity:.95;}
-  .summary, .report, .actions{margin-top:20px;padding:14px;border:1px solid var(--line);
-    border-radius:8px;background:var(--card);}
-  .kv{display:flex;gap:18px;flex-wrap:wrap}
-  .kv p{margin:0}
-  .pos{color:var(--pos);font-weight:700}
-  .neg{color:var(--neg);font-weight:700}
-  .ul{list-style:disc;margin:6px 0 0 22px;padding:0}
-  .actions{text-align:center}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MOMO｜台股收盤 Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --deep:#0A1221; --card:#0C152A;
+      --gold:#E5C45A; --muted:#9AA4B2;
+      --up:#4CAF50; --down:#F44336;
+    }
+    body{background:var(--deep);color:#EDEFF5;font-family:"Noto Sans TC",sans-serif;margin:0;padding:20px;}
+    h1{color:var(--gold);margin-bottom:6px;}
+    .container{max-width:900px;margin:auto;}
+    .card{background:var(--card);padding:16px;border-radius:12px;margin-top:16px;border:1px solid rgba(233,209,138,0.2);}
+    .row{display:flex;gap:8px;flex-wrap:wrap;}
+    input,button,select{
+      background:#121C33;color:#EDEFF5;border:1px solid #2E3A55;border-radius:8px;padding:8px;
+    }
+    button{background:var(--gold);color:var(--deep);font-weight:700;cursor:pointer;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    th,td{padding:6px 8px;border-bottom:1px solid #2E3A55;text-align:right;}
+    th{text-align:center;color:var(--gold);}
+    td.name{text-align:left;}
+    .up{color:var(--up);} .down{color:var(--down);}
+    canvas{margin-top:16px;}
+  </style>
 </head>
 <body>
-<div class="wrap" id="captureArea">
-  <h2>資產</h2>
-  <table id="tblAsset">
-    <thead>
-      <tr><th style="width:160px">資產</th><th>金額（萬元）</th><th>月配息（元/月）</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><select>
-          <option value="">請選擇</option>
-          <option>活存</option>
-          <option>定存</option>
-          <option>股票</option>
-          <option>台幣保單</option>
-          <option>外幣保單</option>
-          <option>不動產</option>
-          <option>租金</option>
-        </select></td>
-        <td><input type="number" step="0.01" placeholder="0"></td>
-        <td><input type="number" step="1" placeholder="0"></td>
-      </tr>
-    </tbody>
-  </table>
-  <button class="btn" onclick="addRow('tblAsset')">＋ 新增資產列</button>
-
-  <h2>負債</h2>
-  <table id="tblDebt">
-    <thead>
-      <tr><th style="width:160px">負債</th><th>金額（萬元）</th><th>月支出（元/月）</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><select>
-          <option value="">請選擇</option>
-          <option>信貸</option>
-          <option>車貸</option>
-          <option>房貸</option>
-          <option>學貸</option>
-          <option>孝親費</option>
-        </select></td>
-        <td><input type="number" step="0.01" placeholder="0"></td>
-        <td><input type="number" step="1" placeholder="0"></td>
-      </tr>
-    </tbody>
-  </table>
-  <button class="btn" onclick="addRow('tblDebt')">＋ 新增負債列</button>
-
-  <!-- 小計區：資產、負債、現金流三項 -->
-  <div class="summary">
-    <div class="kv">
-      <p>資產總額：<span id="sumAsset">0.00</span> 萬元</p>
-      <p>負債總額：<span id="sumDebt">0.00</span> 萬元</p>
-      <p>每月收入現金流：<span id="flowIn">0</span> 元/月</p>
-      <p>每月支出演金流：<span id="flowOut">0</span> 元/月</p>
-      <p>每月淨現金流：<span id="netFlow" class="pos">0</span> 元/月</p>
+  <div class="container">
+    <h1>💎 MOMO｜每日台股收盤 Dashboard</h1>
+    <div class="card">
+      <div class="row">
+        <label>股票代號（逗號分隔）</label>
+        <input id="codes" value="2330,2317,2615,2377,3481" style="flex:1"/>
+        <button onclick="loadData()">查詢</button>
+      </div>
+      <div id="dateInfo" style="margin-top:8px;color:var(--muted)">資料載入中...</div>
+      <table id="stockTable"></table>
+      <canvas id="barChart" height="200"></canvas>
+      <canvas id="lineChart" height="220"></canvas>
     </div>
   </div>
 
-  <!-- 彙整表：第一行資產、第二行負債，條列填入資訊 -->
-  <div class="report">
-    <h2>彙整表</h2>
-    <table id="tblReport">
-      <thead>
-        <tr>
-          <th style="width:120px">類別</th>
-          <th>條列明細（項目｜金額（萬元）｜月現金流）</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>資產</td>
-          <td><ul id="listAsset" class="ul"></ul></td>
-        </tr>
-        <tr>
-          <td>負債</td>
-          <td><ul id="listDebt" class="ul"></ul></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="actions">
-  <button class="btn" onclick="exportPNG()">📸 匯出 PNG</button>
-</div>
-
 <script>
-function addRow(tblId){
-  const tbl=document.getElementById(tblId).querySelector("tbody");
-  const first=tbl.querySelector("tr");
-  const clone=first.cloneNode(true);
-  clone.querySelectorAll("input").forEach(i=>i.value="");
-  clone.querySelectorAll("select").forEach(s=>s.value="");
-  tbl.appendChild(clone);
-  bindInputs();
-  calc();
+const api = "https://api.finmindtrade.com/api/v4/data";
+const token = ""; // ← 可填入你的 FinMind token（非必須，但會增加配額）
+
+async function fetchStock(code){
+  const end = new Date().toISOString().slice(0,10);
+  const start = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  const url = `${api}?dataset=TaiwanStockPrice&data_id=${code}&start_date=${start}&end_date=${end}${token ? "&token="+token : ""}`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if(!j.data || j.data.length===0) return null;
+  return j.data;
 }
 
-function bindInputs(){
-  document.querySelectorAll("input,select").forEach(el=>{
-    el.removeEventListener("input",calc);
-    el.addEventListener("input",calc);
-    el.removeEventListener("change",calc);
-    el.addEventListener("change",calc);
-  });
+async function loadData(){
+  const codes = document.getElementById("codes").value.trim().split(",").map(c=>c.trim());
+  const rows = [];
+  const chartLabels = [], chartSets = [];
+  let lastDate = "";
+
+  for(const code of codes){
+    const data = await fetchStock(code);
+    if(!data) continue;
+    const last = data[data.length-1];
+    const prev = data[data.length-2];
+    const close = last.close;
+    const change = ((close - prev.close) / prev.close * 100).toFixed(2);
+    lastDate = last.date;
+    rows.push({code,close,change});
+    chartLabels.push(code);
+    chartSets.push(Number(change));
+  }
+
+  renderTable(rows, lastDate);
+  renderBar(chartLabels, chartSets, lastDate);
+
+  // 折線圖：顯示第一檔（預設2330）
+  if(codes[0] && rows.length>0){
+    const firstData = await fetchStock(codes[0]);
+    renderLine(firstData, codes[0]);
+  }
 }
 
-const nf0 = new Intl.NumberFormat('zh-TW', { maximumFractionDigits: 0 });
-const nf2 = new Intl.NumberFormat('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function renderTable(rows, date){
+  const el = document.getElementById("stockTable");
+  document.getElementById("dateInfo").textContent = `TW close ${date}`;
+  let html = "<tr><th>代號</th><th>收盤</th><th>漲跌幅</th></tr>";
+  for(const r of rows){
+    const cls = r.change>0?"up":(r.change<0?"down":"");
+    html += `<tr><td class="name">${r.code}</td><td>${r.close}</td><td class="${cls}">${r.change>0?"+":""}${r.change}%</td></tr>`;
+  }
+  el.innerHTML = html;
+}
 
-function calc(){
-  let sumAsset=0,sumDebt=0,flowIn=0,flowOut=0;
-  const assetList = document.getElementById("listAsset");
-  const debtList  = document.getElementById("listDebt");
-  assetList.innerHTML = ""; debtList.innerHTML = "";
-
-  // 資產：金額（萬元）、月配息（元/月）＝收入現金流
-  document.querySelectorAll("#tblAsset tbody tr").forEach(r=>{
-    const name=(r.children[0].querySelector("select").value||"").trim();
-    const amt =parseFloat(r.children[1].querySelector("input").value)||0;
-    const mon =parseFloat(r.children[2].querySelector("input").value)||0;
-    sumAsset+=amt; flowIn+=mon;
-    if(name || amt>0 || mon>0){
-      const li=document.createElement("li");
-      li.innerHTML=`${name||"未選擇"} ｜ ${nf2.format(amt)} 萬 ｜ 月配息 ${nf0.format(mon)} 元`;
-      assetList.appendChild(li);
+function renderBar(labels, data, date){
+  const ctx = document.getElementById("barChart").getContext("2d");
+  if(window.barChart) window.barChart.destroy();
+  window.barChart = new Chart(ctx, {
+    type:"bar",
+    data:{
+      labels,
+      datasets:[{
+        label:`日漲跌幅 (%)`,
+        data,
+        backgroundColor:data.map(v=>v>0?"#4CAF50":v<0?"#F44336":"#9E9E9E")
+      }]
+    },
+    options:{
+      plugins:{title:{display:true,text:`台股收盤 (${date})`,color:"#E5C45A"}},
+      scales:{y:{ticks:{color:"#EDEFF5"},grid:{color:"rgba(255,255,255,.1)"}},
+              x:{ticks:{color:"#EDEFF5"}}}
     }
   });
-
-  // 負債：金額（萬元）、月支出（元/月）＝支出演金流
-  document.querySelectorAll("#tblDebt tbody tr").forEach(r=>{
-    const name=(r.children[0].querySelector("select").value||"").trim();
-    const amt =parseFloat(r.children[1].querySelector("input").value)||0;
-    const mon =parseFloat(r.children[2].querySelector("input").value)||0;
-    sumDebt+=amt; flowOut+=mon;
-    if(name || amt>0 || mon>0){
-      const li=document.createElement("li");
-      li.innerHTML=`${name||"未選擇"} ｜ ${nf2.format(amt)} 萬 ｜ 月支出 ${nf0.format(mon)} 元`;
-      debtList.appendChild(li);
-    }
-  });
-
-  const net=flowIn-flowOut;
-
-  document.getElementById("sumAsset").textContent=nf2.format(sumAsset);
-  document.getElementById("sumDebt").textContent =nf2.format(sumDebt);
-  document.getElementById("flowIn").textContent  =nf0.format(flowIn);
-  document.getElementById("flowOut").textContent =nf0.format(flowOut);
-
-  const netEl=document.getElementById("netFlow");
-  netEl.textContent=nf0.format(net);
-  netEl.className=net>=0?"pos":"neg";
 }
 
-// 匯出 PNG（包含彙整表）
-function exportPNG(){
-  const target=document.getElementById("captureArea");
-  html2canvas(target,{scale:2,backgroundColor:"#0A1221"}).then(canvas=>{
-    const link=document.createElement("a");
-    link.download="資產負債_現金流彙整.png";
-    link.href=canvas.toDataURL("image/png");
-    link.click();
+function renderLine(data, code){
+  const ctx = document.getElementById("lineChart").getContext("2d");
+  if(window.lineChart) window.lineChart.destroy();
+  const labels = data.map(d=>d.date.slice(5));
+  const closes = data.map(d=>d.close);
+  window.lineChart = new Chart(ctx,{
+    type:"line",
+    data:{labels,datasets:[{label:`${code} 收盤價`,data:closes,borderColor:"#E5C45A",fill:false,tension:.2}]},
+    options:{plugins:{title:{display:true,text:`${code} 近30日收盤價`,color:"#E5C45A"}},
+              scales:{y:{ticks:{color:"#EDEFF5"},grid:{color:"rgba(255,255,255,.1)"}},
+                      x:{ticks:{color:"#EDEFF5"}}}}
   });
 }
 
-bindInputs();
-calc();
+loadData();
 </script>
 </body>
 </html>
