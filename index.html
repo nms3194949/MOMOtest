@@ -1,139 +1,94 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MOMO｜台股收盤 Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --deep:#0A1221; --card:#0C152A;
-      --gold:#E5C45A; --muted:#9AA4B2;
-      --up:#4CAF50; --down:#F44336;
-    }
-    body{background:var(--deep);color:#EDEFF5;font-family:"Noto Sans TC",sans-serif;margin:0;padding:20px;}
-    h1{color:var(--gold);margin-bottom:6px;}
-    .container{max-width:900px;margin:auto;}
-    .card{background:var(--card);padding:16px;border-radius:12px;margin-top:16px;border:1px solid rgba(233,209,138,0.2);}
-    .row{display:flex;gap:8px;flex-wrap:wrap;}
-    input,button,select{
-      background:#121C33;color:#EDEFF5;border:1px solid #2E3A55;border-radius:8px;padding:8px;
-    }
-    button{background:var(--gold);color:var(--deep);font-weight:700;cursor:pointer;}
-    table{width:100%;border-collapse:collapse;margin-top:12px;}
-    th,td{padding:6px 8px;border-bottom:1px solid #2E3A55;text-align:right;}
-    th{text-align:center;color:var(--gold);}
-    td.name{text-align:left;}
-    .up{color:var(--up);} .down{color:var(--down);}
-    canvas{margin-top:16px;}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>MOMO財商智庫｜月配息 × 資產增值 × 智能決策</title>
+<link rel="stylesheet" href="tokens.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;800&display=swap" rel="stylesheet" />
+<style>
+.wrap{max-width:1120px;margin:0 auto;padding:16px}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.logo{
+  display:flex;align-items:center;gap:10px;font-weight:800;
+}
+.logo::before{
+  content:"";width:28px;height:28px;border-radius:50%;
+  background:radial-gradient(120% 120% at 20% 20%, var(--gold) 0%, var(--gold-soft) 45%, transparent 46%), #1a1f2b;
+  border:1px solid var(--line);
+}
+.nav{display:flex;gap:10px;flex-wrap:wrap}
+.nav a{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#0e172b,#111a2f);
+  font-weight:600;
+}
+.nav a:hover{background:var(--gold-grad);color:#0A1221}
+.hero{
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:24px;
+  background:linear-gradient(120deg,rgba(201,162,39,.15),rgba(45,122,119,.12) 40%, transparent 100%), #0B1222;
+}
+.hero h1{margin:6px 0 8px;font-size:26px;background:var(--gold-grad);-webkit-background-clip:text;color:transparent}
+.section{margin-top:24px}
+.tools{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.footer{
+  margin-top:40px;
+  color:var(--muted);
+  font-size:13px;
+  text-align:center;
+  border-top:1px solid var(--line);
+  padding:20px 0;
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>💎 MOMO｜每日台股收盤 Dashboard</h1>
-    <div class="card">
-      <div class="row">
-        <label>股票代號（逗號分隔）</label>
-        <input id="codes" value="2330,2317,2615,2377,3481" style="flex:1"/>
-        <button onclick="loadData()">查詢</button>
+  <div class="wrap">
+    <header class="header">
+      <div class="logo">MOMO財商智庫</div>
+      <nav class="nav">
+        <a href="#">首頁</a>
+        <a href="#">智能工具</a>
+        <a href="#">基金研究</a>
+        <a href="#">財商知識庫</a>
+        <a href="#">關於MOMO</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <small style="color:var(--gold-soft)">品牌工具中心</small>
+      <h1>月配息 × 資產增值 × 智能決策</h1>
+      <p style="color:var(--muted)">MOMO財商智庫整合基金分析、回撤策略與權證監控，打造全方位財商系統。</p>
+      <a class="btn btn-gold" href="#tools">立即體驗</a>
+    </section>
+
+    <section class="section" id="tools">
+      <h2 style="margin-bottom:16px">智能工具</h2>
+      <div class="tools">
+        <div class="card">
+          <h3>BTC 回撤策略</h3>
+          <p style="color:var(--muted)">桌面版工具，用於模擬加密市場回撤與進出場策略。</p>
+          <a class="btn btn-gold" href="https://nms3194949.github.io/BTC_PC/" target="_blank">開啟工具</a>
+        </div>
+        <div class="card">
+          <h3>CAGR 行動試算</h3>
+          <p style="color:var(--muted)">行動版 CAGR 試算器，計算年化報酬與配息影響。</p>
+          <a class="btn btn-gold" href="https://nms3194949.github.io/CAGR_Mobile/" target="_blank">開啟工具</a>
+        </div>
+        <div class="card">
+          <h3>權證監控 API</h3>
+          <p style="color:var(--muted)">串接 Render API，查詢與設定權證警報。</p>
+          <a class="btn btn-gold" href="https://warrant-render-proxy-1.onrender.com/" target="_blank">開啟工具</a>
+        </div>
       </div>
-      <div id="dateInfo" style="margin-top:8px;color:var(--muted)">資料載入中...</div>
-      <table id="stockTable"></table>
-      <canvas id="barChart" height="200"></canvas>
-      <canvas id="lineChart" height="220"></canvas>
-    </div>
+    </section>
+
+    <footer class="footer">
+      © MOMO財商智庫｜投資一定有風險，基金與加密資產之淨值可能因市場波動而上下變動。
+    </footer>
   </div>
-
-<script>
-const api = "https://api.finmindtrade.com/api/v4/data";
-const token = ""; // ← 可填入你的 FinMind token（非必須，但會增加配額）
-
-async function fetchStock(code){
-  const end = new Date().toISOString().slice(0,10);
-  const start = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
-  const url = `${api}?dataset=TaiwanStockPrice&data_id=${code}&start_date=${start}&end_date=${end}${token ? "&token="+token : ""}`;
-  const r = await fetch(url);
-  const j = await r.json();
-  if(!j.data || j.data.length===0) return null;
-  return j.data;
-}
-
-async function loadData(){
-  const codes = document.getElementById("codes").value.trim().split(",").map(c=>c.trim());
-  const rows = [];
-  const chartLabels = [], chartSets = [];
-  let lastDate = "";
-
-  for(const code of codes){
-    const data = await fetchStock(code);
-    if(!data) continue;
-    const last = data[data.length-1];
-    const prev = data[data.length-2];
-    const close = last.close;
-    const change = ((close - prev.close) / prev.close * 100).toFixed(2);
-    lastDate = last.date;
-    rows.push({code,close,change});
-    chartLabels.push(code);
-    chartSets.push(Number(change));
-  }
-
-  renderTable(rows, lastDate);
-  renderBar(chartLabels, chartSets, lastDate);
-
-  // 折線圖：顯示第一檔（預設2330）
-  if(codes[0] && rows.length>0){
-    const firstData = await fetchStock(codes[0]);
-    renderLine(firstData, codes[0]);
-  }
-}
-
-function renderTable(rows, date){
-  const el = document.getElementById("stockTable");
-  document.getElementById("dateInfo").textContent = `TW close ${date}`;
-  let html = "<tr><th>代號</th><th>收盤</th><th>漲跌幅</th></tr>";
-  for(const r of rows){
-    const cls = r.change>0?"up":(r.change<0?"down":"");
-    html += `<tr><td class="name">${r.code}</td><td>${r.close}</td><td class="${cls}">${r.change>0?"+":""}${r.change}%</td></tr>`;
-  }
-  el.innerHTML = html;
-}
-
-function renderBar(labels, data, date){
-  const ctx = document.getElementById("barChart").getContext("2d");
-  if(window.barChart) window.barChart.destroy();
-  window.barChart = new Chart(ctx, {
-    type:"bar",
-    data:{
-      labels,
-      datasets:[{
-        label:`日漲跌幅 (%)`,
-        data,
-        backgroundColor:data.map(v=>v>0?"#4CAF50":v<0?"#F44336":"#9E9E9E")
-      }]
-    },
-    options:{
-      plugins:{title:{display:true,text:`台股收盤 (${date})`,color:"#E5C45A"}},
-      scales:{y:{ticks:{color:"#EDEFF5"},grid:{color:"rgba(255,255,255,.1)"}},
-              x:{ticks:{color:"#EDEFF5"}}}
-    }
-  });
-}
-
-function renderLine(data, code){
-  const ctx = document.getElementById("lineChart").getContext("2d");
-  if(window.lineChart) window.lineChart.destroy();
-  const labels = data.map(d=>d.date.slice(5));
-  const closes = data.map(d=>d.close);
-  window.lineChart = new Chart(ctx,{
-    type:"line",
-    data:{labels,datasets:[{label:`${code} 收盤價`,data:closes,borderColor:"#E5C45A",fill:false,tension:.2}]},
-    options:{plugins:{title:{display:true,text:`${code} 近30日收盤價`,color:"#E5C45A"}},
-              scales:{y:{ticks:{color:"#EDEFF5"},grid:{color:"rgba(255,255,255,.1)"}},
-                      x:{ticks:{color:"#EDEFF5"}}}}
-  });
-}
-
-loadData();
-</script>
 </body>
 </html>
