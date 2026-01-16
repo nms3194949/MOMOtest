@@ -1,1119 +1,1553 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>MOMO雙贏策略｜月配息 × 資產增值 × 智能決策</title>
-<style>
-:root{--deep:#0A1221;--gold:#C9A227;--gold-soft:#E9D18A;--card:#0F1830;--pos:#39C27A;--neg:#E25A5A;--input:#071226;}
-html,body{margin:0;background:var(--deep);color:#fff;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
-.wrap{max-width:540px;margin:0 auto;padding:12px 12px 84px}
+  <meta charset="utf-8" />
+  
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SEBWBQLV4Z"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-/* Tabs + Export */
-.topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:10px 0}
-.tabs{display:flex;gap:8px;flex:1}
-.tab{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(201,162,39,.35);background:#0f1830;color:#E9D18A;font-weight:700;cursor:pointer}
-.tab[aria-selected="true"]{background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;border-color:transparent}
-.btn{padding:10px 12px;border:0;border-radius:10px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));color:#0A1221;font-weight:700;white-space:nowrap;cursor:pointer}
-.btn.secondary{background:#1a2746;color:#E9D18A;border:1px solid rgba(201,162,39,.35)}
-.actions{display:flex;gap:8px;flex-wrap:wrap}
+    gtag('config', 'G-SEBWBQLV4Z');
+  </script>
 
-/* Form + Table */
-.field{margin-bottom:10px}
-label{display:block;font-size:13px;color:#E9D18A;margin-bottom:6px}
-.control{width:100%;height:42px;border-radius:9px;border:1px solid rgba(233,209,138,.12);background:var(--input);color:#fff;font-size:15px;padding:0 10px;box-sizing:border-box}
-.inline{display:flex;align-items:center;gap:10px}
+  <meta name="google-site-verification" content="請在此填入您的驗證碼" />
 
-.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid rgba(201,162,39,.25);border-radius:10px;background:#0C152A}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:6px 8px;text-align:left;font-size:14px;white-space:nowrap;vertical-align:middle}
-.table-grid th,.table-grid td{border:1px solid rgba(233,209,138,.35)}
-.table-grid thead th{background:rgba(201,162,39,.12);border-bottom:2px solid rgba(201,162,39,.8);color:#E9D18A}
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 
-.pos{color:var(--pos);font-weight:700}
-.neg{color:var(--neg);font-weight:700}
-.gold{color:var(--gold);font-weight:700}
-.em{font-weight:700}
-.note{color:#b9c2d5;font-size:12px;margin-top:6px}
+  <title>MOMO財商智庫｜月配息基金 × 股票試算 × AI智能投資策略</title>
+  <meta name="description" content="輸入本金即時試算月配息！MOMO財商智庫整合基金智能分析、台股配息計算與加密貨幣策略。提供年化配息率 8%-15% 的雙贏策略配置建議。">
+  <meta name="keywords" content="MOMO財商智庫,月配息,基金配息,股票試算,被動收入,資產配置,雙贏策略,AI投資工具,殖利率計算,MOMO FinSphere">
+  <meta name="robots" content="index,follow" />
+  <link rel="canonical" href="https://nms3194949.github.io/MOMO_FinSphere/">
 
-/* Collapsible */
-details.collapsible{border:1px solid rgba(201,162,39,.35);border-radius:10px;background:#0f1830;padding:8px 10px;margin:10px 0}
-details.collapsible summary{cursor:pointer;color:#E9D18A;font-weight:700;list-style:none}
-details.collapsible summary::-webkit-details-marker{display:none}
+  <meta property="og:title" content="MOMO財商智庫｜月配息 × AI智能決策系統">
+  <meta property="og:description" content="基金研究、回撤策略、權證篩選與智能工具一站完成。MOMO財商智庫打造的月配息 × AI智能決策平台。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nms3194949.github.io/MOMO_FinSphere/">
+  <meta property="og:image" content="https://nms3194949.github.io/MOMO_FinSphere/og-cover.jpg">
+  <meta property="og:locale" content="zh_TW">
 
-/* Loan grid */
-.loan-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-.loan-grid .field{margin:0}
-.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(201,162,39,.18);border:1px solid rgba(201,162,39,.35);color:#E9D18A;font-size:12px;margin-left:8px}
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="theme-color" content="#0A1221" />
 
-/* Inputs inside table smaller */
-#fundInputTable input.control{height:30px;padding:0 6px;font-size:13px;border-radius:7px;box-sizing:border-box}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-/* AI card */
-.ai-card{border:1px solid rgba(201,162,39,.35);border-radius:10px;background:#0f1830;padding:10px;margin-top:10px}
-.ai-card h4{margin:0 0 8px 0;color:#E9D18A}
-.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ai-mini{font-size:12px;color:#cbd3e6}
-.ai-pill{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(201,162,39,.18);border:1px solid rgba(201,162,39,.35);color:#E9D18A;font-size:12px;margin-right:6px}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
 
-/* Export background fix */
-.exporting .table-wrap{background:#0A1221!important}
-.exporting #cashExportArea,.exporting #pfExportArea,.exporting #pro_export_target{background-color:var(--deep)!important;padding:1px 0}
-.exporting [data-apply-pro]{display:none!important}
-/* 匯出時隱藏 AI 區塊中的相關係數明細，避免遮住表格 */
-.exporting #pro_export_target details.collapsible{display:none!important}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "MOMO FinSphere 財商智庫",
+        "url": "https://nms3194949.github.io/MOMO_FinSphere/",
+        "description": "整合月配息基金智能分析、台股 ETF 監控與加密貨幣策略，提供 MCS 景氣循環分數與資產配置建議。",
+        "author": {
+            "@type": "Person",
+            "name": "MOMO",
+            "jobTitle": "Financial Planner"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://nms3194949.github.io/MOMO_FinSphere/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "FinancialProduct",
+        "name": "MOMO 雙贏策略 (Win-Win Strategy)",
+        "description": "專為穩健型投資人設計的股債平衡配置策略，透過 AI 監控市場回撤，目標創造穩定的月配息現金流。",
+        "interestRate": {
+          "@type": "QuantitativeValue",
+          "value": "8.0",
+          "unitText": "PERCENT",
+          "description": "目標年化配息率"
+        },
+        "keywords": "月配息, 基金投資, 資產配置, 被動收入, 複利試算"
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "MOMO 雙贏策略適合新手嗎？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "非常適合。我們的策略包含「雙贏起步」模組，專為初入市場的投資人設計，透過低波動的月配息基金配置，降低市場震盪的心理壓力，同時建立穩定的現金流。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "這個月配息試算工具準確嗎？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "此工具基於歷史回測數據與 MOMO 財商智庫的 AI 模型運算。透過「年均成長率」與「配息率」的動態試算，能幫助您更具體地規劃退休目標與現金流需求。"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 
-@media (max-width:480px){
-  th,td{font-size:13px;padding:5px 6px}
-  #fundInputTable input.control{height:28px;font-size:12.5px}
-  .ai-grid{grid-template-columns:1fr}
-}
+  <style>
+  :root{
+    --deep:#0A1221; --card:#0C152A; --ink:#EDEFF5; --muted:#AAB2BF;
+    --gold:#C9A227; --gold-soft:#E9D18A; --line:rgba(233,209,138,.28);
+    --gold-grad:linear-gradient(90deg,#F9E27C 0%,#D9B84B 50%,#B88A1E 100%);
+    --accent:#2D7A77;
+    --danger: #ff6b6b; --safe: #3dd68c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--deep);color:var(--ink);font-family:"Noto Sans TC",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; position: relative; overflow-x: hidden;}
+  a{color:inherit;text-decoration:none}
 
-/* Tab panels */
-.tabpanel:not(.active){display:none}
+  /* --- 體驗優化：極光背景動態光暈 --- */
+  body::before {
+    content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(201, 162, 39, 0.05), transparent 60%),
+                radial-gradient(circle at 80% 20%, rgba(45, 122, 119, 0.05), transparent 50%);
+    animation: backgroundMove 25s linear infinite;
+    z-index: -1; pointer-events: none;
+  }
+  @keyframes backgroundMove { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* 排除清單 */
-#pro_exclude_checks{max-height:240px;overflow:auto;padding-right:4px}
-#pro_exclude_checks label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#0b1730;border:1px solid rgba(233,209,138,.12);margin:6px 0}
-#pro_exclude_checks input[type="checkbox"]{width:18px;height:18px}
+  .wrap{max-width:1120px;margin:0 auto;padding:16px}
+  .header{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800}
+  .logo::before{content:"";width:28px;height:28px;border-radius:50%;
+    background:radial-gradient(120% 120% at 20% 20%, var(--gold) 0%, var(--gold-soft) 45%, transparent 46%), #1a1f2b;
+    border:1px solid var(--line)}
+  .nav{display:flex;gap:10px;flex-wrap:nowrap;overflow:auto;padding-bottom:4px;scroll-snap-type:x mandatory}
+  .nav a{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:linear-gradient(180deg,#0e172b,#111a2f);font-weight:600;scroll-snap-align:start;flex:0 0 auto}
+  .nav a[aria-current="page"], .nav a:hover{background:var(--gold-grad);color:#0A1221}
 
-/* 隱藏自動重算 */
-#autorunWrap{display:none}
-</style>
+  .section{margin-top:24px}
+    
+  /* --- 體驗優化：卡片玻璃擬態與懸浮效果 --- */
+  .card, .card2, .tool-card, .panel, .factor-card, .mcs-hero-section {
+    background: rgba(12, 21, 42, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(233, 209, 138, 0.18);
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden; 
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .card:hover, .card2:hover, .tool-card:hover, .panel:hover, .factor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(201, 162, 39, 0.12), inset 0 0 20px rgba(201, 162, 39, 0.03);
+    border-color: rgba(233, 209, 138, 0.5);
+  }
+    
+  .btn{display:inline-block;padding:10px 16px;border-radius:10px;font-weight:600;transition:.2s}
+  .btn-gold{background:var(--gold-grad);color:#0A1221;border:none}
+  .btn-gold:hover{filter:brightness(1.1)}
+  .footer{margin-top:40px;color:var(--muted);font-size:13px;text-align:center;border-top:1px solid var(--line);padding:20px 0}
+
+  .hero{border:1px solid var(--line);border-radius:16px;padding:24px;
+    background:linear-gradient(120deg,rgba(201,162,39,.15),rgba(45,122,119,.12) 40%, transparent 100%), #0B1222;text-align:center}
+  .hero h1{margin:6px 0 8px;font-size:clamp(22px, 2.6vw, 32px);background:var(--gold-grad);-webkit-background-clip:text;color:transparent}
+  .hero p{color:var(--muted);margin:0}
+  .hero small{color:var(--gold-soft); font-size: 13px; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+    
+  /* 呼吸燈動畫 */
+  @keyframes breathe-dot { 
+    0% { opacity: 0.4; transform: scale(0.9); } 
+    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px currentColor; } 
+    100% { opacity: 0.4; transform: scale(0.9); } 
+  }
+
+  @keyframes pulse-gold-glow {
+    0% { box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.7); transform: scale(1); }
+    70% { box-shadow: 0 0 0 15px rgba(201, 162, 39, 0); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(201, 162, 39, 0); transform: scale(1); }
+  }
+  .hero .btn-line{
+    display:inline-block;margin-top:18px;padding:12px 20px;border-radius:999px;font-weight:800;
+    background:var(--gold-grad);color:#0A1221;border:none;
+    box-shadow:0 6px 14px rgba(0,0,0,.35);
+    transition:filter .2s;
+    animation: pulse-gold-glow 2s infinite;
+    position: relative; z-index: 1;
+  }
+  .hero .btn-line:hover{filter:brightness(1.15); animation: none; transform: scale(1.05);}
+
+  /* --- 體驗優化：MCS 戰情室 雷射掃描光束 --- */
+  .mcs-hero-section::after {
+    content: ""; position: absolute; top: -50%; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+    box-shadow: 0 0 15px var(--gold);
+    animation: scan-move 4s ease-in-out infinite;
+    pointer-events: none; z-index: 2; opacity: 0.6;
+  }
+  @keyframes scan-move { 
+    0% { top: -10%; opacity: 0; } 
+    15% { opacity: 1; } 
+    85% { opacity: 1; } 
+    100% { top: 110%; opacity: 0; } 
+  }
+  .mcs-hero-inner, .gauge-overlay { position: relative; z-index: 3; }
+
+  .mcs-hero-section::before {
+    content:""; position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.6;
+  }
+  .mcs-hero-inner { display: flex; align-items: stretch; gap: 30px; padding: 24px; }
+    
+  .hero-gauge-col {
+    flex: 0 0 180px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-right: 1px solid rgba(255,255,255,0.08); padding-right: 20px;
+  }
+  .gauge-container { position: relative; width: 140px; height: 140px; }
+  .gauge-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .gauge-val { font-size: 32px; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 0 15px rgba(201,162,39,0.3); }
+  .gauge-lbl { font-size: 10px; color: var(--muted); margin-top: 4px; letter-spacing: 1px; font-weight: 600; }
+  .hero-meta-row {
+    margin-top: 16px; font-size: 11px; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .source-tag { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-size: 10px; letter-spacing: 0.5px; transition: all 0.3s; }
+
+  .hero-info-col { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+  .status-group { display: flex; flex-direction: column; gap: 6px; }
+  .stage-badge {
+    align-self: flex-start; padding: 4px 12px; border-radius: 99px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;
+  }
+  .stage-badge.growth { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.5); color: #4ade80; }
+  .stage-badge.recession { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.5); color: #f87171; }
+  .stage-badge.slowdown { background: rgba(251,146,60,0.15); border-color: rgba(251,146,60,0.5); color: #fb923c; }
+  .stage-badge.heat { background: rgba(234,179,8,0.15); border-color: rgba(234,179,8,0.5); color: #facc15; }
+  .stage-title { margin: 0; font-size: 18px; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+  .stage-desc { margin: 0; font-size: 13px; color: #cbd5e1; line-height: 1.5; opacity: 0.9; }
+  .hero-divider { height: 1px; background: rgba(255,255,255,0.1); width: 100%; }
+
+  .ai-insight-box {
+    background: rgba(0, 0, 0, 0.2); border-left: 3px solid var(--gold);
+    padding: 10px 16px; border-radius: 0 8px 8px 0;
+  }
+  .ai-label { font-size: 12px; color: var(--gold); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .ai-label .icon { animation: pulse 2s infinite; }
+  .ai-content { font-size: 13px; line-height: 1.6; color: #e2e8f0; opacity: 0; transform: translateY(10px); }
+  .highlight { color: var(--gold); font-weight: 600; }
+  .warn { color: var(--danger); font-weight: 600; }
+  @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+  @media (max-width: 700px) {
+    .mcs-hero-inner { flex-direction: column; align-items: center; text-align: center; gap: 24px; }
+    .hero-gauge-col { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-right: 0; padding-bottom: 24px; width: 100%; }
+    .hero-info-col { width: 100%; }
+    .stage-badge { align-self: center; }
+    .ai-insight-box { text-align: left; }
+  }
+
+  .mcs-grid {
+    display:grid; gap:12px;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    margin-bottom:18px;
+  }
+  @media (max-width:900px){ .mcs-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:600px){ .mcs-grid { grid-template-columns:1fr; } }
+    
+  .tools{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  #ig-section{margin-top:60px;padding:40px 0;background: transparent}
+  #ig-section h2{font-size:22px;font-weight:700;margin:0 0 18px 0;color:var(--gold-soft)}
+  .embedsocial-hashtag{border:1px solid rgba(201,162,39,0.2);border-radius:18px;background:rgba(12,21,42,0.6);backdrop-filter:blur(10px);box-shadow:0 6px 18px rgba(0,0,0,.35);padding:18px;min-height:420px;display:grid;place-items:center}
+  @media(max-width:768px){.embedsocial-hashtag{padding:10px}}
+
+  #strategy .bar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  #strategy .bar-title{
+    font-size:16px;font-weight:800;letter-spacing:.5px;margin:0;padding-bottom:6px;
+    border-bottom:1px solid var(--gold-soft);
+    background:linear-gradient(90deg,#F9E27C 0%,#D9B84B 25%,#B88A1E 50%,#D9B84B 75%,#F9E27C 100%);
+    background-size:200% auto; -webkit-background-clip:text; color:transparent;
+    animation:goldflow 3s linear infinite;
+    will-change: background-position; 
+  }
+  @keyframes goldflow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+  #strategy .row{display:flex;gap:16px;flex-wrap:wrap}
+  .card2{
+    width:calc(50% - 8px);min-width:300px;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .card2 h3{margin:0 0 4px;font-size:20px;color:var(--gold-soft)}
+  .block{display:flex;flex-direction:column;gap:6px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .block:last-child{padding-bottom:0;border-bottom:0}
+  .block .label{font-size:13.5px;font-weight:800;color:rgba(233,209,138,.9)}
+  .gauge{width:100%}
+    
+  .gauge-bar {
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    will-change: width;
+  }
+
+  .readout{align-self:center;font-size:17px;font-weight:800;border:1px solid var(--gold-soft);border-radius:4px;padding:3px 10px;color:var(--ink)}
+  .tick-label{font-size:9.5px;font-weight:700;fill:var(--ink)}
+
+  @keyframes breatheGoldWhite{0%{stop-color:#FFFFFF;stop-opacity:.9}50%{stop-color:#E9D18A;stop-opacity:.82}100%{stop-color:#FFFFFF;stop-opacity:.9}}
+  .gradient-stop-animated{animation:breatheGoldWhite 2.0s ease-in-out infinite alternate}
+
+  @media(max-width:820px){.card2{width:100%}}
+  @media (prefers-reduced-motion: reduce){.gradient-stop-animated{animation:none}}
+
+  .cta-fixed{position:fixed;left:0;right:0;bottom:0;z-index:1000;background:rgba(10,18,33,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px env(safe-area-inset-right) calc(12px + env(safe-area-inset-bottom)) env(safe-area-inset-left);display:none}
+  .cta-fixed .btn-line{
+    display:block;text-align:center;padding:14px 18px;border-radius:999px;background:var(--gold-grad);color:#0A1221;font-weight:800;box-shadow:0 8px 16px rgba(0,0,0,.35);
+    animation: pulse-gold-glow 2s infinite;
+  }
+  @media(max-width:768px){
+    .cta-fixed{display:block} 
+    body.has-cta{padding-bottom:84px}
+  }
+
+  #calc .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  #calc h2{margin:0 0 6px;font-size:18px;color:var(--gold-soft)}
+  #calc p.desc{margin:0 0 12px;color:var(--muted)}
+  #calc label{display:block;font-weight:800;font-size:13px;color:rgba(233,209,138,.9);margin-bottom:6px}
+  #calc input[type="number"]{width:100%;background:rgba(14, 22, 42, 0.5);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px}
+  #calc .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    
+  /* --- 體驗優化：美化 Range Slider (金色質感) --- */
+  #calc input[type="range"]{
+    -webkit-appearance: none; width:100%; background: transparent; margin: 10px 0;
+  }
+  #calc input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; cursor: pointer;
+  }
+  #calc input[type="range"]::-webkit-slider-thumb {
+    height: 24px; width: 24px; border-radius: 50%;
+    background: radial-gradient(circle, #F9E27C 0%, #B88A1E 100%);
+    box-shadow: 0 0 10px rgba(201, 162, 39, 0.8);
+    cursor: grab; -webkit-appearance: none; margin-top: -9px; transition: transform 0.1s;
+  }
+  #calc input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.2); cursor: grabbing; }
+  #calc input[type="range"]::-moz-range-track { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 3px; cursor: pointer; }
+  #calc input[type="range"]::-moz-range-thumb {
+    height: 24px; width: 24px; border:none; border-radius: 50%;
+    background: radial-gradient(circle, #F9E27C 0%, #B88A1E 100%);
+    box-shadow: 0 0 10px rgba(201, 162, 39, 0.8); cursor: grab;
+  }
+
+  #calc .out{display:flex;flex-direction:column;gap:8px}
+  #calc .out .kv{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:rgba(11, 20, 39, 0.5)}
+  #calc .out .k{font-size:13px;color:rgba(233,209,138,.9);font-weight:800}
+  #calc .out .v{font-size:18px;font-weight:800}
+  #calc .mini{font-size:12px;color:var(--muted)}
+  #calc .pill{border:1px solid var(--line);padding:4px 8px;border-radius:999px;font-size:12px;color:var(--muted);cursor:pointer}
+  #calc .out-row{display:flex;gap:10px;flex-wrap:wrap}
+  #calc .out-row .kv{flex:1;min-width:240px}
+  #calc .actions{position:absolute;top:16px;right:16px;display:flex;gap:8px}
+  .btn-outline{background:transparent;border:1px solid var(--gold-soft);color:var(--gold-soft);padding:6px 10px;border-radius:10px; cursor:pointer; transition:.2s;}
+  .btn-outline:hover{background:rgba(233,209,138,.08)}
+
+  /* --- 體驗優化：數值閃爍動畫 --- */
+  @keyframes flashGold {
+    0% { color: #fff; text-shadow: 0 0 5px #fff; transform: scale(1); }
+    50% { color: #F9E27C; text-shadow: 0 0 20px #F9E27C; transform: scale(1.05); }
+    100% { color: inherit; transform: scale(1); }
+  }
+  .flash-anim { animation: flashGold 0.4s ease-out; }
+
+  .strategy-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .strategy-btn{border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px;background:#0e162a;color:var(--muted);cursor:pointer}
+  .strategy-btn.is-active{background:var(--gold-grad);border-color:transparent;color:#0A1221}
+
+  .goldCycle{
+    background:linear-gradient(90deg,#F9E27C 0%,#D9B84B 40%,#B88A1E 70%,#F9E27C 100%);
+    background-size:220% auto; -webkit-background-clip:text; color:transparent;
+    animation:goldSweep 1.8s linear infinite;
+  }
+  @keyframes goldSweep{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+  .goldPlain{background:none !important;-webkit-background-clip:border-box !important;color:var(--gold-soft) !important;}
+
+  .tool-card{display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 18px rgba(0,0,0,.45)}
+  .tool-pill-row{display:flex;gap:8px;margin-bottom:4px}
+  .tool-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;border:1px solid rgba(233,209,138,.45);font-size:11px;color:var(--gold-soft)}
+  .tool-title{font-size:18px;margin:0}
+  .tool-desc{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+  .tool-footer{margin-top:8px}
+
+  /* 捲動漸顯 */
+  .fade-in-section {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: opacity, transform;
+  }
+  .fade-in-section.visible { opacity: 1; transform: translateY(0); }
+
+  /* 懸浮 LINE 按鈕 */
+  .float-line-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #06C755; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: float-shake 5s infinite;
+  }
+  .float-line-btn:hover { transform: scale(1.1) rotate(-5deg); filter: brightness(1.1); }
+  .notification-dot {
+    position: absolute; top: -2px; right: -2px;
+    background: #FF3B30; color: white; font-size: 12px; font-weight: bold;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; border: 2px solid #0A1221;
+  }
+  .chat-tooltip {
+    position: absolute; right: 75px; background: white; color: #0A1221;
+    padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 800;
+    white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    opacity: 0; transform: translateX(10px);
+    animation: fade-in-tooltip 0.5s forwards 1.5s; pointer-events: none;
+  }
+  .chat-tooltip::after {
+    content: ""; position: absolute; right: -6px; top: 50%; transform: translateY(-50%);
+    border-width: 6px 0 6px 8px; border-style: solid; border-color: transparent transparent transparent white;
+  }
+  @keyframes float-shake {
+    0%, 80% { transform: rotate(0); }
+    85% { transform: rotate(-15deg); }
+    90% { transform: rotate(10deg); }
+    95% { transform: rotate(-5deg); }
+    100% { transform: rotate(0); }
+  }
+  @keyframes fade-in-tooltip { to { opacity: 1; transform: translateX(0); } }
+  @media(max-width: 768px) { .float-line-btn { bottom: 90px; right: 16px; width: 54px; height: 54px; } }
+    
+  /* FAQ 樣式 (SEO區塊) */
+  details { margin-bottom:10px; background:rgba(255,255,255,0.03); border-radius:10px; overflow:hidden; transition:background .2s; }
+  details:hover { background:rgba(255,255,255,0.05); }
+  summary { font-weight:bold; padding:14px; color:var(--ink); cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between; }
+  summary::after { content:"+"; color:var(--gold-soft); font-weight:800; font-size:18px; }
+  details[open] summary::after { content:"-"; }
+  .faq-content { padding:0 14px 14px; color:var(--muted); line-height:1.6; font-size:14px; }
+
+  /* 誘餌解鎖樣式 */
+  .unlock-overlay:hover > div { transform: scale(1.05); transition: transform 0.2s; }
+
+  /* --- 新增：配息明細橫向佈局樣式 --- */
+  .dividend-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr; /* 左寬右窄 */
+    gap: 20px;
+    margin-top: 16px;
+  }
+
+  /* 左側列表區塊 */
+  .dividend-list-card {
+    background: rgba(12, 21, 42, 0.6);
+    border: 1px solid rgba(233, 209, 138, 0.15);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .div-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: rgba(233, 209, 138, 0.05);
+    border-bottom: 1px solid rgba(233, 209, 138, 0.1);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .div-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+
+  .div-row:last-child { border-bottom: none; }
+  .div-row:hover { background: rgba(233, 209, 138, 0.02); }
+
+  .div-date { font-weight: 600; color: #fff; letter-spacing: 0.5px; }
+  .div-amount { font-weight: 700; color: #fff; font-family: monospace, sans-serif; font-size: 17px; }
+
+  /* 右側總結區塊 */
+  .dividend-summary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* --- 特效：本月配息總額區塊 --- */
+  /* 1. 外框：加入雷射呼吸光暈與極光背景 */
+  .total-box {
+    background: radial-gradient(circle at center, rgba(201, 162, 39, 0.15) 0%, rgba(12, 21, 42, 0.95) 70%);
+    border: 1px solid rgba(233, 209, 138, 0.3);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    animation: boxPulse 4s ease-in-out infinite; /* 呼吸燈動畫 */
+  }
+
+  /* 背景流動光束 (裝飾用) */
+  .total-box::before {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent 30%);
+    animation: rotateLight 6s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 確保內容在光束之上 */
+  .total-label, .total-amount { position: relative; z-index: 1; }
+
+  .total-label { 
+    color: var(--muted); 
+    font-size: 14px; 
+    margin-bottom: 8px; 
+    font-weight: 700; 
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* 2. 金額：流動金光文字特效 */
+  .total-amount { 
+    font-size: 48px; /* 稍微加大 */
+    font-weight: 900; 
+    font-family: "Noto Sans TC", sans-serif;
+      
+    /* 黃金漸層設定 */
+    background: linear-gradient(
+        90deg, 
+        #b88a1e 0%, 
+        #e9d18a 20%, 
+        #fff 50%, 
+        #e9d18a 80%, 
+        #b88a1e 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+      
+    /* 文字陰影增強立體感 */
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+      
+    /* 動畫 */
+    animation: shineText 3s linear infinite;
+  }
+
+  /* --- 動畫定義 Keyframes --- */
+
+  /* 文字流光 */
+  @keyframes shineText {
+    to { background-position: 200% center; }
+  }
+
+  /* 區塊呼吸燈 */
+  @keyframes boxPulse {
+    0% { box-shadow: 0 0 20px rgba(201, 162, 39, 0.1); border-color: rgba(233, 209, 138, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(201, 162, 39, 0.4); border-color: rgba(233, 209, 138, 0.8); transform: scale(1.02); }
+    100% { box-shadow: 0 0 20px rgba(201, 162, 39, 0.1); border-color: rgba(233, 209, 138, 0.3); }
+  }
+
+  /* 背景光束旋轉 */
+  @keyframes rotateLight {
+    100% { transform: rotate(360deg); }
+  }
+
+  /* 下方三個小指標 */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    background: rgba(12, 21, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px 10px;
+    text-align: center;
+  }
+
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .stat-val { font-size: 18px; font-weight: 800; color: var(--gold-soft); }
+  .stat-val.status { color: var(--safe); text-shadow: 0 0 10px rgba(61, 214, 140, 0.4); font-size: 15px; }
+
+  /* 標題 Pill */
+  .subtitle-pill {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  .subtitle-pill i { color: var(--gold); margin-right: 4px; font-style: normal; }
+
+  /* 手機版適應：變回直式堆疊 */
+  @media (max-width: 768px) {
+    .dividend-container { grid-template-columns: 1fr; gap: 16px; }
+    .total-amount { font-size: 40px; }
+  }
+
+  /* --- 策略情報卡樣式 --- */
+  .strategy-info-box {
+    margin-top: 24px;
+    padding: 16px;
+    border-radius: 12px;
+    background: rgba(233, 209, 138, 0.05); /* 淡金色背景 */
+    border: 1px solid rgba(233, 209, 138, 0.15);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .strategy-info-box:hover {
+    background: rgba(233, 209, 138, 0.08);
+    border-color: rgba(233, 209, 138, 0.3);
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 8px;
+  }
+
+  .info-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+  }
+
+  .info-desc {
+    margin: 0 0 16px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #ccc;
+    min-height: 42px; /* 預留高度避免跳動 */
+  }
+
+  .info-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .tag-label { color: var(--muted); }
+  .tag-val { color: #fff; font-weight: 600; }
+
+  .tag-bar-bg {
+    width: 100px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .tag-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease, background-color 0.5s ease;
+  }
+  </style>
 </head>
 <body>
-<div class="wrap">
 
-  <div class="topbar">
-    <div class="tabs" role="tablist">
-      <button class="tab" id="tab-cash" aria-selected="true">每月配息</button>
-      <button class="tab" id="tab-portfolio" aria-selected="false">投組分析</button>
-      <button class="tab" id="tab-ai" aria-selected="false">AI最佳化（Pro）</button>
-    </div>
-    <button class="btn" id="btnPng">匯出 PNG</button>
+  <main id="main" class="wrap" role="main">
+    <header class="header fade-in-section" role="banner">
+      <div class="logo">MOMO財商智庫</div>
+      <nav class="nav" role="navigation" aria-label="主選單">
+        <a href="#" aria-current="page">首頁</a>
+        <a href="#mcs-dashboard">景氣戰情</a>
+        <a href="#strategy">策略進度</a>
+        <a href="#calc">互動試算</a>
+        <a href="#tools">智能工具</a>
+        <a href="#ig-section">IG 精選</a>
+      </nav>
+    </header>
+
+    <section class="hero fade-in-section" aria-labelledby="hero-title">
+      <small>雙贏策略品牌中心</small>
+      <h1 id="hero-title">MOMO財商智庫｜月配息 × AI智能決策系統</h1>
+      <p>整合基金智能分析、虛擬貨幣策略與權證分析，打造全方位財商系統。</p>
+      <a href="https://portaly.cc/momo_82786" target="_blank" rel="noopener noreferrer" class="btn-line" aria-label="加入 MOMO 財商智庫官方 LINE" title="點擊加入 MOMO 官方 LINE 領取月配息策略">加入官方 LINE ▶</a>
+    </section>
+
+    <section id="msc-score" class="section fade-in-section" aria-labelledby="mcs-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px">
+          <h2 id="mcs-title" style="margin:0;color:var(--gold-soft)">MCS 景氣戰情中心</h2>
+          <a href="./tools/msc-score.html" class="btn-outline" style="font-size:12px;padding:6px 12px">查看完整圖表 ▶</a>
+      </div>
+
+      <div class="mcs-hero-section">
+        <div class="mcs-hero-inner">
+          <div class="hero-gauge-col">
+            <div class="gauge-container">
+              <canvas id="mcsGaugeChart"></canvas>
+              <div class="gauge-overlay">
+                <div class="gauge-val" id="gaugeScoreText">--</div>
+                <div class="gauge-lbl">MCS SCORE</div>
+              </div>
+            </div>
+            <div class="hero-meta-row">
+              <span id="mcsAsOf">更新：--</span>
+              <span class="source-tag" id="mcsSource">SOURCE: FRED</span>
+            </div>
+          </div>
+          <div class="hero-info-col">
+            <div class="status-group">
+              <div class="stage-badge" id="mcsStagePill">--</div>
+              <h2 class="stage-title" id="mcsStageTitle">景氣象限：--</h2>
+              <p class="stage-desc" id="mcsStageDesc">正在載入景氣數據...</p>
+            </div>
+            <div class="hero-divider"></div>
+            <div class="ai-insight-box">
+              <div class="ai-label"><span class="icon">✦</span> AI 策略觀點</div>
+              <div class="ai-content" id="aiSummaryText">正在運算策略建議...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:none;">
+        <div id="factor-credit"><span id="creditScore"></span><span id="creditBar"></span><span id="creditMeta"></span><span id="creditTrend"></span><span id="creditSummary"></span></div>
+        <div id="factor-rates"><span id="ratesScore"></span><span id="ratesBar"></span><span id="ratesMeta"></span><span id="ratesTrend"></span><span id="ratesSummary"></span></div>
+        <div id="factor-macro"><span id="macroScore"></span><span id="macroBar"></span><span id="macroMeta"></span><span id="macroTrend"></span><span id="macroSummary"></span></div>
+        <div id="factor-equity"><span id="equityScore"></span><span id="equityBar"></span><span id="equityMeta"></span><span id="equityTrend"></span><span id="equitySummary"></span></div>
+        <div id="factor-eps"><span id="epsScore"></span><span id="epsBar"></span><span id="epsMeta"></span><span id="epsTrend"></span><span id="epsSummary"></span></div>
+        <div id="factor-sentiment"><span id="sentimentScore"></span><span id="sentimentBar"></span><span id="sentimentMeta"></span><span id="sentimentTrend"></span><span id="sentimentSummary"></span></div>
+        <div id="factor-liquidity"><span id="liquidityScore"></span><span id="liquidityBar"></span><span id="liquidityMeta"></span><span id="liquidityTrend"></span><span id="liquiditySummary"></span></div>
+        <div id="allocEquityText"></div><div id="allocIncomeText"></div><div id="allocDefensiveText"></div>
+        <div id="allocEquityBar"></div><div id="allocIncomeBar"></div><div id="allocDefensiveBar"></div>
+        <div id="allocScoreChip"></div><div id="allocStageChip"></div>
+      </div>
+
+    </section>
+
+    <section id="strategy" class="section" aria-labelledby="strategy-title">
+      <div class="bar-header fade-in-section">
+        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h2 id="strategy-title" class="bar-title">MOMO 12月基金配息</h2>
+          <div class="subtitle-pill"><i>✨</i>打造你的被動現金流系統，讓錢為你工作</div>
+        </div>
+      </div>
+
+      <div class="dividend-container fade-in-section">
+          
+        <div class="dividend-list-card">
+          <div class="div-header">
+            <span>入帳日期</span>
+            <span>配息金額</span>
+          </div>
+          <div class="div-list-body">
+            <div class="div-row">
+              <span class="div-date">12/03</span>
+              <span class="div-amount">$9,282</span>
+            </div>
+            <div class="div-row">
+              <span class="div-date">12/04</span>
+              <span class="div-amount">$20,276</span>
+            </div>
+            <div class="div-row">
+              <span class="div-date">12/10</span>
+              <span class="div-amount">$45,141</span>
+            </div>
+            <div class="div-row">
+              <span class="div-date">12/22</span>
+              <span class="div-amount">$19,067</span>
+            </div>
+            <div class="div-row">
+              <span class="div-date">12/23</span>
+              <span class="div-amount">$13,112</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dividend-summary-col">
+          <div class="total-box">
+            <div class="total-label">本月配息總額</div>
+            <div class="total-amount">$106,878</div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">年化配息率</div>
+              <div class="stat-val">16%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">年均成長率</div>
+              <div class="stat-val">43%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">投資狀態</div>
+              <div class="stat-val status">策略進行中</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="calc" class="section fade-in-section" aria-labelledby="calc-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <h2 id="calc-title">配息許願</h2>
+        <div style="display:flex;gap:8px">
+            <button id="btn-share-link" class="btn-outline" type="button" aria-label="複製目前試算連結">複製連結 🔗</button>
+            <button id="btn-save-png" class="btn-outline" type="button" aria-label="匯出目前互動試算為 PNG">匯出 PNG</button>
+        </div>
+      </div>
+      <p class="desc">輸入本金，調整「配息率」拉桿，系統會即時計算：每月配息、<strong>每年的本金成長率</strong>、三年後本金、三年總領配息、三年總報酬與報酬率。</p>
+
+      <div class="grid" id="calc-capture">
+        <div class="panel" aria-labelledby="in-title">
+          <h3 id="in-title" style="margin:0 0 10px">輸入</h3>
+
+          <label style="display:block;margin-bottom:6px">策略選擇</label>
+          <div class="strategy-group" role="group" aria-label="策略選擇">
+            <button type="button" class="strategy-btn" data-strategy="start" aria-pressed="false">雙贏起步</button>
+            <button type="button" class="strategy-btn is-active" data-strategy="rise" aria-pressed="true">雙贏躍升</button>
+            <button type="button" class="strategy-btn" data-strategy="peak" aria-pressed="false">雙贏巔峰</button>
+          </div>
+
+          <label for="amt" style="margin-top:4px">投入本金（元）</label>
+          <input id="amt" type="number" inputmode="numeric" min="0" step="1000" value="1000000" />
+
+          <div class="row" style="margin-top:14px">
+            <label for="distRange" style="margin:0">配息率（%）</label>
+            <span id="distNow" class="pill" aria-live="polite">8%</span>
+          </div>
+          <input id="distRange" type="range" min="0" max="17" step="1" value="8" aria-valuemin="0" aria-valuemax="17" aria-valuenow="8" aria-label="配息率" aria-describedby="distNow"/>
+          <div class="mini">範圍 0–17%，步進 1%｜快捷：
+            <button type="button" id="dist5"  class="pill" aria-label="配息率設為5%">5%</button>
+            <button type="button" id="dist10" class="pill" aria-label="配息率設為10%">10%</button>
+            <button type="button" id="dist15" class="pill" aria-label="配息率設為15%">15%</button>
+          </div>
+
+          <div id="strategy-info-card" class="strategy-info-box fade-in-section">
+            <div class="info-header">
+              <span class="info-icon">💡</span>
+              <span class="info-title" id="info-title">策略特色解析</span>
+            </div>
+            <p class="info-desc" id="info-desc">
+              適合初入市場的投資人。配置高信評債券與低波動資產，優先確保本金安全，提供穩定的基礎現金流。
+            </p>
+              
+            <div class="info-tags">
+              <div class="tag-item">
+                <span class="tag-label">風險屬性</span>
+                <div class="tag-bar-bg"><div class="tag-bar-fill" id="bar-risk" style="width: 30%; background: #3dd68c;"></div></div>
+              </div>
+              <div class="tag-item">
+                <span class="tag-label">適合週期</span>
+                <span class="tag-val" id="text-term">長期持有 (3年以上)</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="panel" aria-labelledby="out-title">
+          <h3 id="out-title" style="margin:0 0 10px">結果</h3>
+          <div class="out" aria-live="polite">
+            <div class="kv"><div class="k">預估月配息</div><div class="v" id="out-monthly">—</div></div>
+              
+            <div class="kv locked-row" style="position:relative; overflow:hidden; border-color:rgba(201,162,39,0.4); background:linear-gradient(90deg, rgba(201,162,39,0.08), transparent); margin-top:8px;">
+                <div class="k" style="color:var(--gold);">
+                    <span style="margin-right:4px;">🔥</span>AI 智能優化後配息
+                </div>
+                <div class="v" id="out-optimized" style="filter:blur(5px); opacity:0.8; user-select:none;">$99,999</div>
+                  
+                <a href="https://portaly.cc/momo_82786" target="_blank" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); text-decoration:none; cursor:pointer; transition:0.3s; z-index:10;" class="unlock-overlay">
+                    <div style="background:var(--gold); color:#0A1221; padding:4px 12px; border-radius:99px; font-size:12px; font-weight:800; box-shadow:0 4px 12px rgba(0,0,0,0.6); display:flex; align-items:center; gap:4px;">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-9-2c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
+                        加入 LINE 解鎖
+                    </div>
+                </a>
+            </div>
+
+            <div id="life-mapping" style="padding:10px; background:rgba(233,209,138,0.05); border-radius:8px; display:flex; align-items:center; gap:12px; transition:all 0.3s; margin-top:12px;">
+                <div id="life-icon" style="font-size:24px;">☕</div>
+                <div style="flex:1;">
+                    <div style="font-size:12px; color:var(--muted);">相當於生活品質：</div>
+                    <div id="life-text" style="font-size:14px; font-weight:bold; color:var(--gold-soft);">每天一杯拿鐵</div>
+                </div>
+            </div>
+
+            <div class="kv"><div class="k">每年本金成長率</div><div class="v" id="out-grow">—</div></div>
+            <div class="kv"><div class="k">三年後本金（不含配息）</div><div class="v" id="out-3y">—</div></div>
+            <div class="kv"><div class="k">三年總領配息</div><div class="v" id="out-3y-div">—</div></div>
+            <div class="out-row">
+              <div class="kv"><div class="k">三年總報酬（本金+配息）</div><div class="v goldCycle" id="out-total">—</div></div>
+              <div class="kv"><div class="k">三年累積報酬率</div><div class="v goldCycle" id="out-total-rate">—</div></div>
+            </div>
+          </div>
+
+          <div id="calc-cta" style="width:100%; margin-top:16px; display:none; text-align:center;">
+            <p style="font-size:13px; color:#E9D18A; margin-bottom:8px;">
+                ✨ 試算結果不錯？想知道如何配置出這個現金流？
+            </p>
+            <a href="https://portaly.cc/momo_82786" target="_blank" class="btn-line" style="width:100%; display:block; text-align:center; padding:12px; box-sizing: border-box; font-size: 14px;">
+                詢問 MOMO 雙贏策略配置 ▶
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section fade-in-section" id="tools" aria-labelledby="tools-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px">
+        <h2 id="tools-title" style="margin:0;color:var(--gold-soft)">智能工具</h2>
+        <a href="./tools/" class="btn btn-gold" style="border-radius:999px;padding:10px 18px;font-size:14px">
+          查看全部工具 ▶
+        </a>
+      </div>
+      <div class="tools" id="home-tools-grid"></div>
+    </section>
+
+    <section id="seo-article-container" class="section fade-in-section" style="margin-bottom:20px;">
+      <article style="color:var(--muted); font-size:14px; line-height:1.8; background:rgba(255,255,255,0.02); padding:20px; border-radius:12px;">
+        <h3 style="color:var(--gold-soft); font-size:18px; margin-top:0;">為什麼需要月配息複利試算？</h3>
+        <p>
+          在規劃<strong>被動收入</strong>時，許多投資人忽略了<strong>本金成長</strong>的重要性。
+          MOMO FinSphere 系統整合了<strong>基金智能分析</strong>與<strong>股票/加密貨幣策略</strong>，
+          不同於傳統的儲蓄險或定存，我們透過 AI 監控市場回撤 (Drawdown)，協助您在領取<strong>月配息</strong>的同時，確保資產能抵抗通膨。
+        </p>
+        <p>
+          無論是退休規劃、現金流管理，透過本站的<strong>配息複利計算機</strong>，您可以一鍵預覽未來三年的資產變化，找到最適合自己的股債配置比例。
+        </p>
+      </article>
+    </section>
+
+    <section id="seo-faq-container" class="section fade-in-section" style="margin-bottom:40px;">
+      <h2 style="color:var(--gold-soft); margin-bottom:16px;">常見問題</h2>
+      <div class="card">
+        <details>
+          <summary>MOMO 雙贏策略適合新手嗎？</summary>
+          <div class="faq-content">非常適合。我們的策略包含「雙贏起步」模組，專為初入市場的投資人設計，透過低波動的月配息基金配置，降低市場震盪的心理壓力，同時建立穩定的現金流。</div>
+        </details>
+        <details>
+          <summary>這個月配息試算工具準確嗎？</summary>
+          <div class="faq-content">此工具基於歷史回測數據與 MOMO 財商智庫的 AI 模型運算。雖然過去績效不代表未來表現，但透過「年均成長率」與「配息率」的動態試算，能幫助您更具體地規劃退休目標與現金流需求。</div>
+        </details>
+        <details>
+          <summary>如何開始使用 MOMO 的財商工具？</summary>
+          <div class="faq-content">您可以直接點擊右下角的 LINE 按鈕加入官方帳號，我們會提供您專屬的配置建議與工具使用教學。</div>
+        </details>
+      </div>
+    </section>
+
+    <section id="ig-section" class="fade-in-section" aria-labelledby="ig-title">
+      <h2 id="ig-title">最新 IG 精選</h2>
+      <div class="embedsocial-hashtag" data-ref="42032a17319b8cd123ca39bbcf94096c57c120b0">
+        <a class="feed-powered-by-es feed-powered-by-es-feed-img es-widget-branding" href="https://embedsocial.com/social-media-aggregator/" target="_blank" title="Instagram widget">
+          <img src="https://embedsocial.com/cdn/icon/embedsocial-logo.webp" alt="EmbedSocial">
+          <div class="es-widget-branding-text">Instagram widget</div>
+        </a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      © MOMO財商智庫｜投資有風險，基金與加密資產無保證報酬，淨值可能因市場波動而變化，請依自身風險承受度謹慎評估。
+       
+      <div style="margin-top: 12px; font-size: 12px; opacity: 0.8;">
+        <span id="busuanzi_container_site_pv" style="display:none;">
+          <span style="color:var(--gold-soft);">✦</span> 本站總瀏覽量：
+          <span id="busuanzi_value_site_pv" style="color:#fff; font-weight:700;"></span> 次
+        </span>
+        <span style="margin: 0 8px; color:var(--line);">|</span>
+        <span id="busuanzi_container_site_uv" style="display:none;">
+          <span style="color:var(--gold-soft);">✦</span> 訪客人數：
+          <span id="busuanzi_value_site_uv" style="color:#fff; font-weight:700;"></span> 人
+        </span>
+      </div>
+    </footer>
+  </main>
+
+  <div class="cta-fixed" role="region" aria-label="加入官方 LINE">
+    <a href="https://portaly.cc/momo_82786" target="_blank" rel="noopener noreferrer" class="btn-line" aria-label="立即加入 MOMO 財商智庫官方 LINE">加入官方 LINE ▶</a>
   </div>
 
-  <section class="tabpanel active" id="panel-cash" role="tabpanel" aria-labelledby="tab-cash">
-    <div class="field"><label>投入本金（$）</label><input id="principal" type="number" class="control" value="1000000" step="1"></div>
-    <div class="field"><label>融資金額（$）</label><input id="loan" type="number" class="control" value="1500000" step="1"></div>
-    <div class="field">
-      <label>融資成數</label>
-      <select id="ratio" class="control">
-        <option value="0|0.0000">0 成</option><option value="0.1|0.1111111111">1 成</option>
-        <option value="0.2|0.25">2 成</option><option value="0.3|0.4285714286">3 成</option>
-        <option value="0.4|0.6666666667">4 成</option><option value="0.5|1.0">5 成</option>
-        <option value="0.6|1.5" selected>6 成</option><option value="custom|custom">自訂</option>
-      </select>
+  <a href="https://portaly.cc/momo_82786" target="_blank" rel="noopener noreferrer" class="float-line-btn" aria-label="加入 LINE 好友" title="加入 LINE 好友領取雙贏策略">
+    <div class="line-icon">
+      <svg viewBox="0 0 24 24" fill="#FFFFFF" width="32" height="32">
+        <path d="M12 2C6.48 2 2 5.58 2 10c0 2.38 1.19 4.47 3 6.16V20c0 .55.45 1 1 1 .34 0 .65-.17.84-.44L9.6 18.3c.76.22 1.56.36 2.4.36 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+      </svg>
     </div>
-    <div class="field"><label>年化配息率（%）</label><input id="rate" type="number" class="control" value="8.0" step="0.01"></div>
-    <div class="field"><label>融資年利率（%）</label><input id="loanRate" type="number" class="control" value="4.0" step="0.01"></div>
+    <div class="notification-dot">1</div>
+    <div class="chat-tooltip">領取雙贏策略 🎁</div>
+  </a>
 
-    <div id="cashExportArea">
-      <details class="collapsible" id="loan2Box" open>
-        <summary>貸款（等額本息）<span class="badge" id="loan2Badge">未啟用</span></summary>
-        <div class="inline" style="margin-top:8px"><input id="loan2EnabledCk" type="checkbox" /><label for="loan2EnabledCk">啟用貸款試算</label></div>
-        <div class="loan-grid">
-          <div class="field"><label>貸款金額（$）</label><input id="loan2Amount" type="number" class="control" value="500000" step="1" disabled></div>
-          <div class="field"><label>年限（年）</label><input id="loan2Years" type="number" class="control" value="5" step="1" min="1" disabled></div>
-          <div class="field"><label>年利率（%）</label><input id="loan2Rate" type="number" class="control" value="3.5" step="0.01" disabled></div>
-          <div class="field" style="grid-column:1/-1"><label>每月本息（自動計算）</label><input id="loan2Monthly" class="control" value="—" disabled></div>
-        </div>
-        <p class="note">r=年利率/12、n=年×12；月付=A·r/(1-(1+r)<sup>-n</sup>)；r=0 → A/n。</p>
-      </details>
+  <script>
+  const $ =(id)=>document.getElementById(id);
+  const nfTW = new Intl.NumberFormat('zh-TW');
+  const clamp =(v,min,max)=>Math.min(max,Math.max(min,v));
+  const money =(x)=>'＄'+nfTW.format(Math.round(x));
+  const pct =(x)=>(Math.round(x*100)/100).toFixed(2)+'%';
+  const passiveOpt={passive:true};
 
-      <div class="table-wrap">
-        <table class="table-grid">
-          <tbody>
-            <tr><td>投入本金</td><td id="vPrincipal">—</td></tr>
-            <tr><td>融資成數</td><td id="vRatio">—</td></tr>
-            <tr><td>融資金額</td><td id="vLoan">—</td></tr>
-            <tr><td>總投入</td><td id="vTotal" class="em">—</td></tr>
-            <tr><td>年化配息率</td><td id="vRate">—</td></tr>
-            <tr><td>每月配息（毛）</td><td id="vMonthlyDivGross" class="pos">—</td></tr>
-            <tr><td>每月融資利息</td><td id="vMonthlyInt" class="neg">—</td></tr>
-            <tr><td>每月貸款本息</td><td id="vMonthlyLoan2" class="neg">—</td></tr>
-            <tr><td>每月配息（淨）</td><td id="vMonthlyDivNet" class="em">—</td></tr>
-            <tr><td>每月淨現金流</td><td id="vMonthlyNet" class="em">—</td></tr>
-            <tr><td>預估報酬率（含息）</td><td id="vEstReturn" class="gold">—</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="tabpanel" id="panel-portfolio" role="tabpanel" aria-labelledby="tab-portfolio">
-
-    <div class="field">
-      <label>常用基金清單</label>
-      <select id="presetSelect" class="control"><option value="">— 選擇常用基金 —</option></select>
-    </div>
-
-    <div class="actions" style="margin-bottom:6px">
-      <button class="btn" id="applyPresetBtn">帶入至下一個空列</button>
-      <button class="btn secondary" id="btnAddRow">新增一列</button>
-      <button class="btn secondary" id="btnRemoveRow">移除末列</button>
-      <button class="btn" id="btnExportXlsx">匯出 Excel</button>
-      <button class="btn" id="btnImportXlsx">匯入 Excel</button>
-      <button class="btn secondary" id="btnClearRows">清除表格</button>
-      <input type="file" id="importXlsx" accept=".xlsx,.xls" style="display:none" />
-    </div>
-
-    <p id="uploadInfo" class="note"></p>
-    <div class="note">Excel 欄位：基金名稱、近1年%、近3年累積%、近5年累積%、配息率%。<br>數字/純數字字串一律 ×100；結尾含「%」維持原值。</div>
-
-    <div id="pfExportArea">
-      <div class="table-wrap" style="margin-top:10px">
-        <table id="fundInputTable" class="table-grid">
-          <thead><tr><th>基金名稱</th><th>近1年%</th><th>近3年%</th><th>近5年%</th><th>配息%</th><th>比重%</th></tr></thead>
-          <tbody>
-            <tr><td><input class="control name" placeholder="基金A"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-            <tr><td><input class="control name" placeholder="基金B"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-            <tr><td><input class="control name" placeholder="基金C"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-            <tr><td><input class="control name" placeholder="基金D"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-            <tr><td><input class="control name" placeholder="基金E"></td><td><input class="control fin r1" type="number" step="0.01"></td><td><input class="control fin r3" type="number" step="0.01"></td><td><input class="control fin r5" type="number" step="0.01"></td><td><input class="control fin dy" type="number" step="0.01"></td><td><input class="control fin wt" type="number" step="0.01"></td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="table-wrap" style="margin-top:12px">
-        <table class="table-grid">
-          <thead><tr><th>投組指標（加權年化）</th><th>1年</th><th>3年</th><th>5年</th></tr></thead>
-          <tbody>
-            <tr><td>含息報酬率（CAGR）</td><td id="pf_cagr1" class="gold">—</td><td id="pf_cagr3" class="gold">—</td><td id="pf_cagr5" class="gold">—</td></tr>
-            <tr><td>配息率（加權）</td><td id="pf_div1" class="pos">—</td><td id="pf_div3" class="pos">—</td><td id="pf_div5" class="pos">—</td></tr>
-            <tr><td>資本成長率（含息−配息）</td><td id="pf_cap1" class="em">—</td><td id="pf_cap3" class="em">—</td><td id="pf_cap5" class="em">—</td></tr>
-            <tr><td>融資水位 LTV</td><td id="pf_ltv1" class="em">—</td><td id="pf_ltv3" class="em">—</td><td id="pf_ltv5" class="em">—</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note">權重合計：<span id="wtSum">0%</span>（建議接近 100%）</p>
-    </div>
-    <div class="note">LTV > 80% 標紅；LTV 估算以「資本成長率」（CAGR−配息）為投組價值變動率。</div>
-
-  </section>
-
-  <section class="tabpanel" id="panel-ai" role="tabpanel" aria-labelledby="tab-ai">
-    <div class="ai-card">
-      <h4>AI 最佳化（Pro）</h4>
-
-      <div class="ai-grid">
-        <div class="field"><label>年化配息率（%）</label><input id="pro_minDy" type="number" class="control" value="7.0" step="0.1"></div>
-        <div class="field"><label>配息基金上限</label><input id="pro_maxDiv" type="number" class="control" value="2" step="1" min="1"></div>
-        <div class="field"><label>基金總檔數</label><input id="pro_maxTotal" type="number" class="control" value="4" step="1" min="1"></div>
-        <div class="field"><label>單檔權重上限（%）</label><input id="pro_wCap" type="number" class="control" value="80" step="1" min="10" max="100"></div>
-        <div class="field"><label>風險權重 λ</label><input id="pro_lambda" type="number" class="control" value="0.5" step="0.05" min="0"></div>
-        <div class="field"><label>資料來源</label>
-          <select id="pro_source" class="control">
-            <option value="catalog" selected>匯入的清單（FUND_CATALOG）</option>
-            <option value="table">目前表格內容</option>
-          </select>
-        </div>
-        <div class="field"><label>排序依據</label>
-          <select id="pro_sort" class="control">
-            <option value="ret_first" selected>加權CAGR</option>
-            <option value="corr_first">相關係數</option>
-          </select>
-        </div>
-
-        <!-- 相關係數來源 -->
-        <div class="field" style="grid-column:1/-1"><label>相關係數來源</label>
-          <select id="pro_corr_source" class="control">
-            <option value="3Y" selected>3年（建議）</option>
-            <option value="1Y">1年</option>
-            <option value="5Y">5年</option>
-            <option value="BLEND">加權穩定（0.6×3Y + 0.3×1Y + 0.1×5Y）</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="actions" style="margin-top:8px;gap:8px;flex-wrap:wrap">
-        <input type="file" id="pro_corr_file" accept=".xlsx,.xls,.csv,.tsv" style="display:none" />
-        <button class="btn secondary" id="pro_corr_import_btn">匯入相關係數</button>
-        <span id="corr_status_indicator" class="ai-pill">未載入</span>
-        <button class="btn secondary" id="pro_corr_load_btn">載入已儲存</button>
-        <button class="btn secondary" id="pro_corr_clear_btn">清空</button>
-        <button class="btn secondary" id="btn_clear_storage" style="background:#555; border-color:#888;">清理所有暫存</button>
-      </div>
-
-      <!-- 三期燈號 -->
-      <div class="inline" style="gap:6px;margin:4px 0 2px 0">
-        <span class="ai-pill" id="corr_state_1Y">1Y：未載入</span>
-        <span class="ai-pill" id="corr_state_3Y">3Y：未載入</span>
-        <span class="ai-pill" id="corr_state_5Y">5Y：未載入</span>
-      </div>
-
-      <!-- 預設排除基金：啟用切換 -->
-      <details class="collapsible" id="excludeBox">
-        <summary>排除基金（勾選即排除）</summary>
-        <div class="actions" style="margin:6px 0">
-          <button class="btn secondary" id="pro_exclude_sync">從資料來源同步名單</button>
-          <button class="btn secondary" id="pro_exclude_clear">取消所有勾選</button>
-        </div>
-
-        <div class="field" style="margin-top:6px">
-          <label>預設排除基金</label>
-          <select id="preset_exclude_toggle" class="control">
-            <option value="off" selected>停用（不自動勾選）</option>
-            <option value="on">啟用（以關鍵字自動勾選）</option>
-          </select>
-          <p class="note" id="preset_exclude_hint">關鍵字：由程式內的 DEFAULT_EXCLUDE_KEYWORDS 匹配（不分大小寫、包含比對）。</p>
-        </div>
-
-        <div id="pro_exclude_checks" class="field"></div>
-      </details>
-
-      <div id="autorunWrap" class="inline" style="margin:8px 0 4px 0">
-        <input id="pro_autorun" type="checkbox" checked />
-        <label for="pro_autorun">自動重算</label>
-      </div>
-
-      <p class="ai-mini" style="margin-top:4px">顯示：加權CAGR（≤3y 優先）、相關係數（加權平均正相關，越低越好，0~1 數值）。未提供或 0 的 ρ 不納入。</p>
-    </div>
-
-    <div id="pro_export_target">
-      <div id="pro_output"></div>
-    </div>
-
-    <details class="collapsible"><summary>相關係數說明</summary>
-      <p class="note">• ρ ∈ [-1,+1]；ρ>0 同漲同跌、ρ<0 可分散。<br>• 0 或未填者視為缺資料，不納入平均與風險；不在矩陣內的基金不參與計算。</p>
-    </details>
-  </section>
-
-  <p class="note">⚠️ 本頁僅為試算與教育用途，非投資建議。歷史績效不代表未來表現。</p>
-</div>
-
-<script id="fundCatalogDefault" type="application/json">
-[
-  {"name":"鋒裕匯理基金新興市場債券 A 美元 (穩定月配息)","r1":8.56,"r3":39.91,"r5":15.07,"dy":17.16},
-  {"name":"高盛環球非投資等級債券基金X股美元(月配息)","r1":7.96,"r3":35.95,"r5":17.48,"dy":14.31}
-]
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-<script>
-/* ========= 工具 ========= */
-const $=id=>document.getElementById(id);
-const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
-const twd=n=>new Intl.NumberFormat('zh-TW',{style:'currency',currency:'TWD',maximumFractionDigits:0}).format(n);
-const r2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2);
-
-// 統一浮點精度
-const FLOAT_PRECISION = 10;
-const roundToPrecision = v => Math.round(v * Math.pow(10, FLOAT_PRECISION)) / Math.pow(10, FLOAT_PRECISION);
-
-function cagrFromTotalPct(totalPct,years){
-  const x=parseFloat(totalPct); if(!isFinite(x)) return NaN;
-  const d=x/100; if(d<=-1||years<=0) return NaN;
-  return roundToPrecision(Math.pow(1+d,1/years)-1);
-}
-
-/* ========= 相關係數多期間設定 ========= */
-const LS_CORR_KEYS = {
-  '1Y': 'momo_corr_matrix_csv_1Y',
-  '3Y': 'momo_corr_matrix_csv_3Y',
-  '5Y': 'momo_corr_matrix_csv_5Y',
-};
-const DEFAULT_CORR_SRC = '3Y'; // 預設使用 3 年
-
-function getCorrText(period){ const key = LS_CORR_KEYS[period]; return localStorage.getItem(key) || ''; }
-function setCorrText(period, text){ const key = LS_CORR_KEYS[period]; localStorage.setItem(key, text || ''); }
-function hasCorr(period){ const t = getCorrText(period); return !!(t && t.trim().length>0); }
-function buildRhoMapFromCsv(csvOrTsvText){
-  const parsed = parseCorrMatrix(csvOrTsvText||'');
-  return parsed.rho; // { "A|B": rho, ... }
-}
-function buildBlendRhoMap(weights={w3:0.6,w1:0.3,w5:0.1}){
-  const r1 = buildRhoMapFromCsv(getCorrText('1Y'));
-  const r3 = buildRhoMapFromCsv(getCorrText('3Y'));
-  const r5 = buildRhoMapFromCsv(getCorrText('5Y'));
-  const allKeys = new Set([...Object.keys(r1),...Object.keys(r3),...Object.keys(r5)]);
-  const out = {};
-  for(const k of allKeys){
-    const has3=r3[k]!=null, has1=r1[k]!=null, has5=r5[k]!=null;
-    if(has3||has1||has5){
-      let num=0, den=0;
-      if(has3){ num+=weights.w3*r3[k]; den+=weights.w3; }
-      if(has1){ num+=weights.w1*r1[k]; den+=weights.w1; }
-      if(has5){ num+=weights.w5*r5[k]; den+=weights.w5; }
-      if(den>0) out[k]=clamp(num/den,-1,1);
+  async function ensureCanvas(){
+    if(!window.html2canvas){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'; s.crossOrigin='anonymous'; s.onload=res; s.onerror=()=>rej(new Error('load html2canvas failed')); document.head.appendChild(s);
+      });
     }
   }
-  return out;
-}
 
-/* ========= Tabs ========= */
-function setTab(which){
-  const id=(which==='pf'||which==='ai')?which:'cash';
-  const tabId=id==='cash'?'tab-cash':(id==='pf'?'tab-portfolio':'tab-ai');
-  const panelId=id==='cash'?'panel-cash':(id==='pf'?'panel-portfolio':'panel-ai');
-  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
-  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
-  $(tabId).setAttribute('aria-selected','true');
-  $(panelId).classList.add('active');
-  saveState();
-  if(id==='ai') proScheduleRun(true);
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  $('tab-cash').addEventListener('click',()=>setTab('cash'));
-  $('tab-portfolio').addEventListener('click',()=>setTab('pf'));
-  $('tab-ai').addEventListener('click',()=>setTab('ai'));
-});
+  /* === Gauge logic === */
+  const MOMO_PROGRESS_CONFIG = { monthly:75658, principal:6277633, dist:14, annual:45 };
+  function fmtAxis(v,u){ if(u=='%') return Math.round(v); if(u=='M') return (v/1e6).toFixed(0)+'M'; if(u=='K') return (v/1e3).toFixed(0)+'K'; return nfTW.format(v); }
+  function fmtRead(v,u){ return u=='%'?Number(v).toFixed(2)+'%':'＄'+nfTW.format(Math.round(v))+' 元' }
+  function autoStep(min,max,baseStep,containerWidth){ const ticks=(max-min)/baseStep; if(containerWidth<320&&ticks>8) return baseStep*2; if(containerWidth<280&&ticks>6) return baseStep*3; return baseStep; }
+  const uniqueId=(p='id')=>`${p}-${Math.random().toString(36).slice(2,9)}`;
 
-/* ========= 狀態保存 ========= */
-const STATE_KEY='momo_winwin_state_v3';
-const fundTableBody=document.querySelector('#fundInputTable tbody');
-
-function collectState(){
-  const s={};
-  ['principal','loan','ratio','rate','loanRate','loan2EnabledCk','loan2Amount','loan2Years','loan2Rate',
-   'pro_minDy','pro_maxDiv','pro_maxTotal','pro_wCap','pro_lambda','pro_source','pro_autorun','pro_sort','pro_corr_source',
-   'preset_exclude_toggle'
-  ].forEach(id=>{const el=$(id); if(el) s[id]=(el.type==='checkbox')?el.checked:el.value;});
-  s.fundData=[...fundTableBody.querySelectorAll('tr')].map(tr=>({
-    name:tr.querySelector('.name').value,r1:tr.querySelector('.r1').value,r3:tr.querySelector('.r3').value,
-    r5:tr.querySelector('.r5').value,dy:tr.querySelector('.dy').value,wt:tr.querySelector('.wt').value
-  }));
-  const activeTabEl=document.querySelector('.tab[aria-selected="true"]'); s.activeTab=activeTabEl?(activeTabEl.id==='tab-cash'?'cash':(activeTabEl.id==='tab-ai'?'ai':'pf')):'cash';
-  s.loan2Open=$('loan2Box').open; return s;
-}
-function saveState(){ try{ localStorage.setItem(STATE_KEY,JSON.stringify(collectState())); }catch(e){} }
-function loadState(){
-  try{
-    const json=localStorage.getItem(STATE_KEY); if(!json) return false;
-    const s=JSON.parse(json);
-    for(const id in s){const el=$(id); if(el && id!=='fundData'&&id!=='activeTab'&&id!=='loan2Open'){ if(el.type==='checkbox') el.checked=!!s[id]; else el.value=s[id];}}
-    if(s.fundData && s.fundData.length){ while(fundTableBody.firstChild) fundTableBody.removeChild(fundTableBody.firstChild);
-      s.fundData.forEach(d=>{const tr=document.createElement('tr'); tr.innerHTML=createFundRowHtml(); fundTableBody.appendChild(tr);
-        tr.querySelector('.name').value=d.name||''; tr.querySelector('.r1').value=d.r1||''; tr.querySelector('.r3').value=d.r3||''; tr.querySelector('.r5').value=d.r5||''; tr.querySelector('.dy').value=d.dy||''; tr.querySelector('.wt').value=d.wt||'';});
-    }
-    setTab(s.activeTab||'cash'); $('loan2Box').open = (s.loan2Open!==undefined)? s.loan2Open : true;
-    return true;
-  }catch(e){ return false; }
-}
-
-/* ========= 常用基金 ========= */
-let FUND_CATALOG=[];
-function populatePresetSelect(){
-  const sel=$('presetSelect');
-  sel.innerHTML=`<option value="">— 選擇常用基金 —</option>` + (FUND_CATALOG||[]).map((f,i)=>`<option value="${i}">${f.name}</option>`).join('');
-}
-function updateUploadInfo(){ const ts=localStorage.getItem('fundCatalogUploadTime'); $('uploadInfo').textContent= ts?('最後匯入時間：'+new Date(ts).toLocaleString('zh-TW')):'目前使用預設清單（尚未匯入 Excel）';}
-function loadCatalog(){ try{ const ls=localStorage.getItem('fundCatalog'); FUND_CATALOG= ls? JSON.parse(ls) : JSON.parse($('fundCatalogDefault').textContent.trim()); }catch(e){FUND_CATALOG=[]} populatePresetSelect(); updateUploadInfo(); }
-
-$('applyPresetBtn').addEventListener('click',()=>{
-  const v=$('presetSelect').value; if(v===''){alert('請先選擇常用基金');return;}
-  let idx=nextEmptyRowIndex(); if(idx===-1){ addRow(); idx=[...fundTableBody.querySelectorAll('tr')].length-1; }
-  applyPresetToRow(idx,parseInt(v,10));
-});
-
-/* ========= 表格增減 ========= */
-const MIN_ROWS=1;
-function createFundRowHtml(ph='基金'){ return `
-  <td><input class="control name" placeholder="${ph}"></td>
-  <td><input class="control fin r1" type="number" step="0.01"></td>
-  <td><input class="control fin r3" type="number" step="0.01"></td>
-  <td><input class="control fin r5" type="number" step="0.01"></td>
-  <td><input class="control fin dy" type="number" step="0.01"></td>
-  <td><input class="control fin wt" type="number" step="0.01"></td>`;}
-function addRow(){ const tr=document.createElement('tr'); tr.innerHTML=createFundRowHtml(); fundTableBody.appendChild(tr); recomputePortfolio(); }
-function removeRow(){ const rows=fundTableBody.querySelectorAll('tr'); if(rows.length>MIN_ROWS){ fundTableBody.removeChild(rows[rows.length-1]); recomputePortfolio(); } else alert(`至少需要保留 ${MIN_ROWS} 列投組項目。`); }
-$('btnAddRow').addEventListener('click',addRow);
-$('btnRemoveRow').addEventListener('click',removeRow);
-$('btnClearRows').addEventListener('click',()=>{ [...fundTableBody.querySelectorAll('tr')].forEach(tr=>{ tr.querySelector('.name').value=''; tr.querySelectorAll('.fin').forEach(inp=>inp.value='');}); recomputePortfolio(); });
-
-/* ========= Excel 匯入/匯出 ========= */
-const HEADER_MAP={name:['基金名稱','r1','1Y'],r1:['近1年%','r1','1Y'],r3:['近3年累積%','r3','3Y'],r5:['近5年累積%','r5','5Y'],dy:['配息率%','dy','Yield%']};
-function pick(row,keys){for(const k of keys){if(Object.prototype.hasOwnProperty.call(row,k)&&row[k]!=='') return row[k];}return undefined;}
-function parsePercentCell(v){
-  if(v===''||v==null) return null;
-  if(typeof v==='number') return v*100;
-  if(typeof v==='string'){
-    const s=v.trim();
-    if (s.endsWith('%')){
-      const n=parseFloat(s.slice(0,-1));
-      return isNaN(n)?null:n;
-    }
-    const n=parseFloat(s);
-    return isNaN(n)?null:n*100;
+  function animateValue(callback, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const currentVal = Math.floor(easeProgress * (end - start) + start);
+      callback(currentVal);
+      if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
   }
-  return null;
-}
-function sheetToCatalog(ws){
-  const rows=XLSX.utils.sheet_to_json(ws,{defval:''}), out=[];
-  rows.forEach(r=>{
-    const item={name:String(pick(r,HEADER_MAP.name)||'').trim(),
-      r1:parsePercentCell(pick(r,HEADER_MAP.r1)),
-      r3:parsePercentCell(pick(r,HEADER_MAP.r3)),
-      r5:parsePercentCell(pick(r,HEADER_MAP.r5)),
-      dy:parsePercentCell(pick(r,HEADER_MAP.dy))};
-    ['r1','r3','r5','dy'].forEach(k=>{if(item[k]!=null&&isFinite(item[k])) item[k]=Math.round(item[k]*100)/100;});
-    if(item.name) out.push(item);
-  }); return out;
-}
-$('btnImportXlsx').addEventListener('click',()=>$('importXlsx').click());
-$('importXlsx').addEventListener('change',(e)=>{ const f=e.target.files[0]; if(!f) return; const fr=new FileReader(); fr.onload=(evt)=>{
-  try{ const wb=XLSX.read(evt.target.result,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]]; const arr=sheetToCatalog(ws); if(!arr.length) throw new Error('沒有有效資料列');
-    FUND_CATALOG=arr; localStorage.setItem('fundCatalog',JSON.stringify(FUND_CATALOG)); localStorage.setItem('fundCatalogUploadTime',new Date().toISOString()); populatePresetSelect(); updateUploadInfo(); alert(`Excel 匯入完成：${arr.length} 筆`); proScheduleRun();
-  }catch(err){ alert('Excel 匯出/入失敗：'+err.message); } e.target.value=''; }; fr.readAsArrayBuffer(f);});
-$('btnExportXlsx').addEventListener('click',()=>{ try{ const header=['基金名稱','近1年%','近3年累積%','近5年累積%','配息率%']; const n2=v=>(v==null||!isFinite(v))?'':Number(v).toFixed(2); const body=(FUND_CATALOG||[]).map(f=>[f.name||'',n2(f.r1),n2(f.r3),n2(f.r5),n2(f.dy)]); const ws=XLSX.utils.aoa_to_sheet([header,...body]); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'基金清單'); XLSX.writeFile(wb,'fund-catalog.xlsx'); }catch(err){ alert('Excel 匯出失敗：'+err.message); }});
 
-/* ========= 配息試算 ========= */
-const loan2EnabledCk=$('loan2EnabledCk'), loan2AmountEl=$('loan2Amount'), loan2YearsEl=$('loan2Years'), loan2RateEl=$('loan2Rate'), loan2MonthlyEl=$('loan2Monthly'), loan2Badge=$('loan2Badge');
-function refreshLoan2UI(){ const en=loan2EnabledCk.checked; [loan2AmountEl,loan2YearsEl,loan2RateEl].forEach(el=>el.disabled=!en); loan2Badge.textContent=en?'已啟用':'未啟用'; }
-function calcLoan2Monthly(){ if(!loan2EnabledCk.checked){ loan2MonthlyEl.value='—'; return 0; } const A=Math.max(0,parseFloat(loan2AmountEl.value)||0); const years=Math.max(1,parseInt(loan2YearsEl.value)||1); const yRate=Math.max(0,parseFloat(loan2RateEl.value)||0)/100; const r=yRate/12,n=years*12; let pay=0; if(r===0){pay=A/n;}else{const pow=Math.pow(1+r,-n); pay=A*(r/(1-pow));} loan2MonthlyEl.value=twd(pay); return pay; }
-let autoApplied=true;
-function parseRatioValue(val){ if(!val || val.startsWith('custom')) return null; const p=val.split('|'); return p.length>=2?{ratio:parseFloat(p[0]),mult:parseFloat(p[1])}:null; }
-function computeCashflow(){
-  const P=parseFloat($('principal').value)||0; let L=parseFloat($('loan').value)||0;
-  const r=parseFloat($('rate').value)||0; const i=parseFloat($('loanRate').value)||0; const ratio=parseRatioValue($('ratio').value);
-  if(ratio && isFinite(ratio.mult)){ const calcLoan=Math.round(P*ratio.mult); const isLoanFieldModified = document.activeElement && document.activeElement.id==='loan'; if(!isLoanFieldModified && (autoApplied || L===0 || L===calcLoan)){ L=calcLoan; $('loan').value=L; autoApplied=true; } else { autoApplied=false; } }
-  const annualDiv=(P+L)*r/100, annualInt=L*i/100;
-  const mDivGross=annualDiv/12, mInt=annualInt/12, mLoan2=calcLoan2Monthly();
-  $('vPrincipal').textContent=twd(P); $('vLoan').textContent=twd(L); $('vTotal').textContent=twd(P+L);
-  $('vRate').textContent=r.toFixed(2)+'%'; $('vRatio').textContent=ratio?(ratio.ratio*100).toFixed(0)+'%':'自訂';
-  $('vMonthlyDivGross').textContent=twd(mDivGross); $('vMonthlyInt').textContent=twd(mInt); $('vMonthlyLoan2').textContent=mLoan2>0?twd(mLoan2):'—';
-  $('vMonthlyDivNet').textContent=twd(mDivGross-mLoan2); $('vMonthlyNet').textContent=twd(mDivGross-mInt-mLoan2);
-  const est=(P>0)?((annualDiv-annualInt)/P):NaN; $('vEstReturn').textContent=isFinite(est)?(est*100).toFixed(2)+'%':'—';
-  saveState();
-}
-
-/* ========= 投組計算 + LTV ========= */
-function nextEmptyRowIndex(){ const rows=[...fundTableBody.querySelectorAll('tr')]; for(let i=0;i<rows.length;i++){ const name=(rows[i].querySelector('.name').value||'').trim(); const hasNum=[...rows[i].querySelectorAll('.fin')].some(x=>x.value); if(!name && !hasNum) return i; } return -1; }
-function applyPresetToRow(idx,presetIdx){ const p=(FUND_CATALOG||[])[presetIdx]; if(!p) return alert('找不到該基金'); const tr=document.querySelectorAll('#fundInputTable tbody tr')[idx]; if(!tr) return;
-  tr.querySelector('.name').value=p.name||''; tr.querySelector('.r1').value=r2(p.r1); tr.querySelector('.r3').value=r2(p.r3); tr.querySelector('.r5').value=r2(p.r5); tr.querySelector('.dy').value=r2(p.dy); recomputePortfolio(); proScheduleRun(); }
-function recomputePortfolio(){
-  const rows=[...fundTableBody.querySelectorAll('tr')];
-  const data=rows.map((tr,idx)=>({ name:(tr.querySelector('.name').value||`基金${'ABCDE'[idx]||idx+1}`), r1:parseFloat(tr.querySelector('.r1').value), r3:parseFloat(tr.querySelector('.r3').value), r5:parseFloat(tr.querySelector('.r5').value), dy:parseFloat(tr.querySelector('.dy').value), wt:parseFloat(tr.querySelector('.wt').value)}));
-  const valid=data.filter(f=>isFinite(f.wt)&&f.wt>0);
-  const sumW=valid.reduce((s,f)=>s+f.wt,0);
-  const roundedSumW = roundToPrecision(sumW);
-  const wtSumEl=$('wtSum'); if(wtSumEl){ wtSumEl.textContent=`${(sumW||0).toFixed(2)}%`; wtSumEl.style.color=(Math.abs((sumW||0)-100)<=2)?'var(--pos)':'var(--neg)'; wtSumEl.style.fontWeight='700'; }
-  const wAvg=fn=>{let acc=0,ws=0; valid.forEach(f=>{const v=fn(f); if(isFinite(v)){acc += roundToPrecision(v * (f.wt / roundedSumW)); ws += roundToPrecision(f.wt / roundedSumW);}}); return ws>0?acc:NaN;};
-  const c1=wAvg(f=>isFinite(f.r1)?f.r1/100:NaN);
-  const c3=wAvg(f=>isFinite(f.r3)?cagrFromTotalPct(f.r3,3):NaN);
-  const c5=wAvg(f=>isFinite(f.r5)?cagrFromTotalPct(f.r5,5):NaN);
-  const dy=wAvg(f=>isFinite(f.dy)?f.dy/100:NaN);
-  const cap1=(isFinite(c1)&&isFinite(dy))?roundToPrecision(c1-dy):NaN;
-  const cap3=(isFinite(c3)&&isFinite(dy))?roundToPrecision(c3-dy):NaN;
-  const cap5=(isFinite(c5)&&isFinite(dy))?roundToPrecision(c5-dy):NaN;
-  const set=(id,v)=>$(id).textContent=isFinite(v)?(v*100).toFixed(2)+'%':'—';
-  set('pf_cagr1',c1); set('pf_cagr3',c3); set('pf_cagr5',c5); set('pf_div1',dy); set('pf_div3',dy); set('pf_div5',dy); set('pf_cap1',cap1); set('pf_cap3',cap3); set('pf_cap5',cap5);
-  updateLTV(cap1,cap3,cap5); saveState();
-}
-function outstandingSeries(P0,r,N=5){ const B={},I={},O={}; for(let t=1;t<=N;t++){ if(t<=2){B[t]=P0;} else {let s=0; for(let k=1;k<=t-2;k++) s+=I[k]; B[t]=P0+s;} I[t]=B[t]*r; O[t]=B[t]+I[t]+(t>=2?I[t-1]:0);} return {B,I,O}; }
-function updateLTV(cap1,cap3,cap5){ const P=parseFloat($('principal').value)||0; const L=parseFloat($('loan').value)||0; const i=(parseFloat($('loanRate').value)||0)/100; const V0=P+L,P0=L,r=i; const els=[$('pf_ltv1'),$('pf_ltv3'),$('pf_ltv5')]; els.forEach(el=>{el.textContent='—'; el.classList.remove('neg');}); if(!(P0>0&&V0>0)) return; const {O}=outstandingSeries(P0,r,5);
-  const l=(g,n)=>{ if(!isFinite(g)) return NaN; const Vn=V0*Math.pow(1+g,n); return (O[n]/Vn)*100; }; const l1=l(cap1,1), l3=l(cap3,3), l5=l(cap5,5);
-  const fmt=v=>isFinite(v)?v.toFixed(2)+'%':'—'; $('pf_ltv1').textContent=fmt(l1); $('pf_ltv3').textContent=fmt(l3); $('pf_ltv5').textContent=fmt(l5);
-  const paint=(el,v)=>{ el.classList.remove('neg'); if(isFinite(v)&&v>80) el.classList.add('neg'); }; paint($('pf_ltv1'),l1); paint($('pf_ltv3'),l3); paint($('pf_ltv5'),l5); }
-
-/* ========= PNG 匯出 ========= */
-async function exportPng(){
-  let target, filename, originalWrapOverflowY;
-  const active=document.querySelector('.tabpanel.active');
-  if(!active) return alert('找不到要匯出的區塊');
-
-  try{
-    document.body.classList.add('exporting');
-    if(active.id==='panel-cash'){ target=$('cashExportArea'); filename='配息試算結果'; }
-    else if(active.id==='panel-portfolio'){ target=$('pfExportArea'); filename='投組分析'; }
-    else { target=$('pro_export_target'); filename='AI最佳化投組'; }
-    const wrapEl = document.querySelector('.wrap');
-    if(wrapEl){ originalWrapOverflowY = wrapEl.style.overflowY; wrapEl.style.overflowY = 'visible'; }
-    await new Promise(r=>setTimeout(r,100));
-    const targetHeight = target.scrollHeight + 20;
-    const canvas=await html2canvas(target,{backgroundColor:'#0A1221',scale:2,useCORS:true,allowTaint:true,height: targetHeight});
-    const a=document.createElement('a'); a.download=filename+'.png'; a.href=canvas.toDataURL('image/png'); a.click();
-  }catch(err){ alert('匯出 PNG 失敗：'+err.message); }
-  finally{ document.body.classList.remove('exporting'); const wrapEl=document.querySelector('.wrap'); if(wrapEl){ wrapEl.style.overflowY = originalWrapOverflowY; } }
-}
-$('btnPng').addEventListener('click',exportPng);
-
-/* ========= 自動重算（加上 debounce） ========= */
-let __inputTimer=null;
-function tryCalcAll(){ try{computeCashflow();}catch(e){} try{recomputePortfolio();}catch(e){} saveState(); proScheduleRun(); }
-document.addEventListener('input',(e)=>{ if(e.target.classList?.contains('control')){ clearTimeout(__inputTimer); __inputTimer=setTimeout(()=>tryCalcAll(),250); }});
-document.addEventListener('change',(e)=>{ if(e.target.classList?.contains('control')){ clearTimeout(__inputTimer); __inputTimer=setTimeout(()=>tryCalcAll(),250); }});
-
-/* ========= 來源資料 ========= */
-function readSourceData(source){
-  const out=[];
-  if(source==='catalog'){
-    (FUND_CATALOG||[]).forEach(f=>{
-      const r1=isFinite(f.r1)?Number(f.r1)/100:NaN;
-      const r3=isFinite(f.r3)?cagrFromTotalPct(f.r3,3):NaN;
-      const dy=isFinite(f.dy)?Number(f.dy)/100:0;
-      if(f.name) out.push({name:String(f.name),r1:r1,r3CAGR:r3,dy:dy,isDividend:(dy>0)});
-    });
-  }else{
-    const rows=[...fundTableBody.querySelectorAll('tr')];
-    rows.forEach(tr=>{
-      const name=(tr.querySelector('.name').value||'').trim(); if(!name) return;
-      const r1=parseFloat(tr.querySelector('.r1').value);
-      const r3=parseFloat(tr.querySelector('.r3').value);
-      const dy=parseFloat(tr.querySelector('.dy').value);
-      out.push({name, r1:isFinite(r1)?r1/100:NaN, r3CAGR:isFinite(r3)?cagrFromTotalPct(r3,3):NaN, dy:isFinite(dy)?dy/100:0, isDividend:(isFinite(dy)?dy>0:false)});
-    });
-  }
-  return out.filter(x=>x.name);
-}
-function scoreCAGR3or1(f){ if(isFinite(f.r3CAGR)) return f.r3CAGR; if(isFinite(f.r1)) return f.r1; return -Infinity; }
-
-/* ========= 相關係數：基本工具 ========= */
-function parseCorrMatrix(text){
-  if(!text||!text.trim()) return {names:[],rho:{},covered:new Set()};
-  const lines=text.trim().split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  const sep=lines[0].includes('\t')?'\t':',';
-  const table=lines.map(l=>l.split(sep).map(s=>s.trim()));
-  const header=table[0].slice(1);
-  const rho={}, used=new Set();
-  for(let i=1;i<table.length;i++){
-    const row=table[i], rowName=row[0]; if(!rowName) continue;
-    for(let j=1;j<row.length;j++){
-      const colName=header[j-1]; if(!colName) continue;
-      let v=parseFloat(row[j]); if(!isFinite(v)) continue; v=clamp(v,-1,1);
-      if(v===0) continue; // 0 視為未提供
-      const key=[rowName,colName].sort().join('|'); rho[key]=v; used.add(rowName); used.add(colName);
+  function createGauge(el, { min, max, step, unit, breath = false }) {
+    const parentWidth = Math.max(260, el.clientWidth || 300);
+    const W = parentWidth, H = 64, BH = 14, X0 = 10, WB = W - 2 * X0, Y = 42, TYO = 10, TL = 6;
+    const stepUsed = autoStep(min, max, step, parentWidth);
+    const valueToX = v => { const t = (clamp(v, min, max) - min) / (max - min || 1); return X0 + t * WB; };
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); el.innerHTML = ''; el.appendChild(svg);
+    let fillAttr = '#E9D18A';
+    if (breath) {
+      const gradId = uniqueId('goldGrad');
+      const defs = document.createElementNS(NS, 'defs');
+      const g = document.createElementNS(NS, 'linearGradient'); g.setAttribute('id', gradId); g.setAttribute('x1', '0%'); g.setAttribute('y1', '0%'); g.setAttribute('x2', '100%'); g.setAttribute('y2', '0%');
+      const s1 = document.createElementNS(NS, 'stop'); s1.setAttribute('offset', '0%'); s1.setAttribute('style', 'stop-color:#E9D18A;stop-opacity:1');
+      const s2 = document.createElementNS(NS, 'stop'); s2.setAttribute('offset', '100%'); s2.setAttribute('class', 'gradient-stop-animated');
+      g.append(s1, s2); defs.append(g); svg.append(defs); fillAttr = `url(#${gradId})`;
     }
-  }
-  const allNames=[...new Set([...header, ...table.slice(1).map(r=>r[0])])].filter(Boolean);
-  return {names:allNames, rho, covered:used};
-}
-function getRho(rhoMap,a,b){ if(a===b) return 1; const key=[a,b].sort().join('|'); const v=rhoMap?rhoMap[key]:undefined; if(!isFinite(v)||v===0||v===undefined) return null; return clamp(v,-1,1); }
-function buildCorrMatrix(items,rhoMap){
-  const names=items.map(f=>f.name);
-  const mat=names.map((ri,i)=>names.map((cj,j)=>{
-      if(i===j) return 1;
-      const r=getRho(rhoMap,ri,cj);
-      return (r==null||r<=0)?0:r;
-  }));
-  return {names,mat,indexMap:names.reduce((m,n,i)=>(m[n]=i,m),{})};
-}
-function buildCorrSubmatrix(items,rhoMap){ const names=items.map(f=>f.name); const mat=names.map(ri=>names.map(cj=>{ if(ri===cj) return 1; const r=getRho(rhoMap,ri,cj); return (r==null)?null:r; })); return {names,mat}; }
-function corrStats(items,weights,rhoMap){
-  const {names,mat}=buildCorrSubmatrix(items,rhoMap);
-  let num=0,den=0,maxPair=null,minPair=null, seen=false;
-  for(let i=0;i<names.length;i++){
-    for(let j=i+1;j<names.length;j++){
-      const wi=weights[names[i]]||0, wj=weights[names[j]]||0; const rho=mat[i][j];
-      if(rho==null) continue; seen=true;
-      const pos=Math.max(0,rho); num+=wi*wj*pos; den+=wi*wj;
-      if(!maxPair||rho>maxPair.rho) maxPair={a:names[i],b:names[j],rho};
-      if(!minPair||rho<minPair.rho) minPair={a:names[i],b:names[j],rho};
-    }
-  }
-  const avgPosRho=(seen&&den>0)?(num/den):NaN;
-  return {names,mat,avgPosRho,maxPair,minPair};
-}
-function renderCorrTable(names,mat){
-  if(!names.length) return '';
-  const head='<tr><th></th>'+names.map(n=>`<th>${n}</th>`).join('')+'</tr>';
-  const body=names.map((ri,i)=>{
-    const row=mat[i].map(v=>{ if(v==null) return `<td>—</td>`; const s=(Math.abs(v)===1||v===0)?v.toFixed(0):v.toFixed(2); const cls=v>0.7?'neg':(v<0?'pos':''); return `<td class="${cls}">${s}</td>`; }).join('');
-    return `<tr><th>${ri}</th>${row}</tr>`;
-  }).join('');
-  return `<div class="table-wrap" style="margin-top:6px"><table class="table-grid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
-}
-
-/* ========= 多期間顯示區塊 ========= */
-function renderCorrBlockMultiPeriod(sug){
-  const periods = [
-    { label:'1Y', map: sug._rhoMap_1Y },
-    { label:'3Y', map: sug._rhoMap_3Y },
-    { label:'5Y', map: sug._rhoMap_5Y },
-  ];
-  if(!periods.some(p => p.map && Object.keys(p.map).length)) return '';
-  const rows = periods.map(p=>{
-    const st = corrStats(sug.items, sug.weights, p.map || {});
-    const avg = Number.isFinite(st.avgPosRho) ? st.avgPosRho.toFixed(2) : '—';
-    const maxStr = (st.maxPair)? `${st.maxPair.a}–${st.maxPair.b}：${st.maxPair.rho.toFixed(2)}`:'—';
-    const minStr = (st.minPair)? `${st.minPair.a}–${st.minPair.b}：${st.minPair.rho.toFixed(2)}`:'—';
-    const tableHtml = renderCorrTable(st.names, st.mat);
-    return `
-      <div class="ai-card" style="margin-top:8px">
-        <div class="ai-mini" style="margin-bottom:6px">
-          <span class="ai-pill">${p.label} 平均正相關：${avg}</span>
-          <span class="ai-pill">最高：${maxStr}</span>
-          <span class="ai-pill">最低：${minStr}</span>
-        </div>
-        ${tableHtml}
-      </div>`;
-  }).join('');
-  return `<details class="collapsible">
-    <summary>相關係數明細（1Y / 3Y / 5Y）</summary>
-    ${rows}
-    <p class="note">※ 顯示為 0~1；未提供或填 0 視為缺資料，不納入平均。</p>
-  </details>`;
-}
-
-/* ========= 目標函數 & 啟發式 ========= */
-function objective(items,w,lambda,corrMat){
-  const lamEff=Math.max(lambda||0,0);
-  let ret=0,risk=0;
-  const indexMap = corrMat.indexMap;
-  const mat = corrMat.mat;
-  for(let i=0;i<items.length;i++){
-    const fi=items[i], wi=w[fi.name]||0;
-    const ri=isFinite(fi.r3CAGR)?fi.r3CAGR:(isFinite(fi.r1)?fi.r1:0);
-    ret+=wi*ri;
-    const iIdx = indexMap[fi.name];
-    if(wi > 0 && isFinite(iIdx)){
-        for(let j=i+1;j<items.length;j++){
-            const fj=items[j], wj=w[fj.name]||0;
-            const jIdx = indexMap[fj.name];
-            if(wj > 0 && isFinite(jIdx)){
-                risk += wi * wj * mat[iIdx][jIdx];
-            }
-        }
-    }
-  }
-  return {ret,risk,obj:ret - lamEff*risk};
-}
-function pruneTinyWeights(items,weights,eps=0.005){ const act=items.filter(f=>(weights[f.name]||0)>=eps); if(act.length===0) return {items,weights}; const sum=act.reduce((s,f)=>s+(weights[f.name]||0),0); const w2={}; act.forEach(f=>w2[f.name]=(weights[f.name]||0)/(sum||1)); return {items:act,weights:w2}; }
-function weightHeuristic(items,minDy,wCap,rhoMap,lambda){
-  const s=(f)=>Math.max(0,isFinite(f.r3CAGR)?f.r3CAGR:(isFinite(f.r1)?f.r1:0));
-  let w={}; const den=Math.max(1e-9,items.reduce((s2,f)=>s2+s(f),0)); items.forEach(f=>w[f.name]=s(f)/den);
-  function normalizeCap(){ let sum=0; items.forEach(f=>{ w[f.name]=Math.min(wCap,w[f.name]); sum+=w[f.name];}); if(sum<=0){const u=1/items.length; items.forEach(f=>w[f.name]=u);} else { items.forEach(f=>w[f.name]/=sum); } }
-  normalizeCap();
-  function weightedDy(W=w){ return items.reduce((x,f)=>x+(W[f.name]||0)*(f.dy||0),0); }
-  const corrMat = buildCorrMatrix(items, rhoMap);
-  const getRhoRiskScore=(fund, currentWeights)=>{
-    let score = 0;
-    const iIdx = corrMat.indexMap[fund.name];
-    if(!isFinite(iIdx)) return 0;
-    for(const t of items){
-      if(fund.name === t.name) continue;
-      const jIdx = corrMat.indexMap[t.name];
-      if(!isFinite(jIdx)) continue;
-      score += (currentWeights[t.name]||0) * corrMat.mat[iIdx][jIdx];
-    }
-    return score;
-  };
-  const obj = (weights) => objective(items, weights, lambda, corrMat);
-
-  let guard=0;
-  while(weightedDy()<minDy && guard++<200){
-    const rhoRiskScores = {}; items.forEach(f => rhoRiskScores[f.name] = getRhoRiskScore(f, w));
-    const donors=[...items].sort((a,b)=>{
-      const wa=w[a.name]||0, wb=w[b.name]||0;
-      const ra=isFinite(a.r3CAGR)?a.r3CAGR:(isFinite(a.r1)?a.r1:0);
-      const rb=isFinite(b.r3CAGR)?b.r3CAGR:(isFinite(b.r1)?b.r1:0);
-      const rhoA = rhoRiskScores[a.name];
-      const rhoB = rhoRiskScores[b.name];
-      return ((a.dy||0)-(b.dy||0)) || (ra-rb) || (rhoA-rhoB) || ((wa-wb));
-    });
-    const receivers=[...items].filter(f=>(f.dy||0)>0).sort((a,b)=>(b.dy||0)-(a.dy||0));
-    if(!receivers.length) break;
-    const step=0.02; let moved=false;
-    for(const d of donors){
-      for(const r of receivers){
-        if(d.name===r.name) continue;
-        const wd=w[d.name]||0, wr=w[r.name]||0; if(wd<=1e-6) continue;
-        const delta=Math.min(step,wd,Math.max(0,wCap-wr)); if(delta<=1e-6) continue;
-        const wTry={...w}; wTry[d.name]-=delta; wTry[r.name]+=delta;
-        const before=obj(w).obj;
-        const after=obj(wTry).obj;
-        if(after>=before || weightedDy()<minDy){ w=wTry; moved=true; break; }
-      }
-      if(moved) break;
-    }
-    if(!moved) break;
-  }
-  function ok(W){ const dy=items.reduce((x,f)=>x+(W[f.name]||0)*(f.dy||0),0); return dy>=minDy && items.every(f=>(W[f.name]||0)<=wCap+1e-9); }
-  let improved=true,it=0;
-  while(improved && it++<200){
-    improved=false;
-    for(let i=0;i<items.length;i++){
-      for(let j=i+1;j<items.length;j++){
-        const a=items[i], b=items[j]; const step=0.01;
-        for(const dir of [+1,-1]){
-          const wa=w[a.name]||0, wb=w[b.name]||0; const delta= dir>0? Math.min(step,wb,Math.max(0,wCap-wa)) : Math.min(step,wa,Math.max(0,wCap-wb));
-          if(delta<=1e-6) continue; const W={...w}; if(dir>0){W[a.name]+=delta; W[b.name]-=delta;} else {W[a.name]-=delta; W[b.name]+=delta;}
-          if(!ok(W)) continue;
-          const before=obj(w).obj;
-          const after=obj(W).obj;
-          if(after>before+1e-9){ w=W; improved=true; }
-        }
+    const lblStep = stepUsed * 2; let lastMajorX = -1e9;
+    for (let v = min; v <= max; v += stepUsed) {
+      const x = valueToX(v); const isMajor = (Math.abs(((v - min) % lblStep)) < 1e-6) || v === min || v === max;
+      const ln = document.createElementNS(NS, 'line'); ln.setAttribute('x1', x); ln.setAttribute('y1', Y - BH / 2 - TYO); ln.setAttribute('x2', x); ln.setAttribute('y2', Y - BH / 2 - TYO + TL); ln.setAttribute('stroke', isMajor ? '#E9D18A' : 'rgba(233,209,138,.7)'); ln.setAttribute('stroke-width', isMajor ? '2.6' : '1'); svg.append(ln);
+      if (isMajor && Math.abs(x - lastMajorX) > 36) {
+          const t = document.createElementNS(NS, 'text'); t.setAttribute('x', x); t.setAttribute('y', Y - BH / 2 - TYO - 3); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'tick-label'); t.textContent = fmtAxis(v, unit); svg.append(t); lastMajorX = x;
       }
     }
-  }
-  let sTot=items.reduce((x,f)=>x+(w[f.name]||0),0); if(sTot<=0){ const u=1/items.length; items.forEach(f=>w[f.name]=u);} else items.forEach(f=>w[f.name]/=sTot);
-  return {weights: w, corrMat: corrMat};
-}
-
-/* ========= 候選與強化 ========= */
-function avgPositiveCorrAgainstPick(rhoMap,fund,picked){
-  let sum=0,den=0; for(const g of picked){ const r=getRho(rhoMap,fund.name,g.name); if(r!=null && r>0){ sum+=r; den++; } } return den>0? (sum/den) : 0;
-}
-function candidateSelection(universe,maxTotal,maxDiv,rhoMap,lambda,minDy){
-  const base=[...universe].sort((a,b)=>scoreCAGR3or1(b)-scoreCAGR3or1(a));
-  const selected=[]; let dCnt=0; const alpha=Math.max(lambda,0.8);
-  while(selected.length<maxTotal && base.length){
-    let bestIdx=-1, bestScore=-Infinity;
-    for(let i=0;i<base.length;i++){
-      const f=base[i]; if(f.isDividend && dCnt>=maxDiv) continue;
-      const corr = selected.length? avgPositiveCorrAgainstPick(rhoMap,f,selected) : 0;
-      const sc = scoreCAGR3or1(f) - alpha*corr;
-      if(sc>bestScore){ bestScore=sc; bestIdx=i; }
-    }
-    if(bestIdx<0) break;
-    const pick=base.splice(bestIdx,1)[0]; selected.push(pick); if(pick.isDividend) dCnt++;
-  }
-  if(minDy>0 && !selected.some(x=>x.isDividend)){ const divs=universe.filter(x=>x.isDividend); if(divs.length){ selected[selected.length-1]=divs[0]; } }
-  return selected;
-}
-
-/* ========= 預設排除（關鍵字） ========= */
-// 可自行調整的關鍵字清單（不分大小寫、包含比對）
-const DEFAULT_EXCLUDE_KEYWORDS = ['鋒裕', '高盛', '黃金', '野村', 'A1', '安本', 'AMg穩定月收'
-  // 範例：'鋒裕', '高盛', '黃金', 'QDII', 'A10美元(總報酬穩定配息)'
-];
-function keywordHit(name){
-  const n = String(name||'').toLowerCase();
-  return DEFAULT_EXCLUDE_KEYWORDS.some(kw => String(kw||'').trim() && n.includes(String(kw).toLowerCase()));
-}
-function applyDefaultExcludesIfEnabled(){
-  const toggle = $('preset_exclude_toggle');
-  if(!toggle || toggle.value!=='on') return;
-  const box=$('pro_exclude_checks');
-  box.querySelectorAll('input[type="checkbox"]').forEach(ch=>{
-    const val = ch.value || '';
-    if(keywordHit(val)) ch.checked = true;
-  });
-}
-
-/* ========= 多來源/多期：最佳化主流程 ========= */
-function getRhoMapBySource(src){
-  if(src==='BLEND') return buildBlendRhoMap({w3:0.6, w1:0.3, w5:0.1});
-  if(src==='1Y') return buildRhoMapFromCsv(getCorrText('1Y'));
-  if(src==='5Y') return buildRhoMapFromCsv(getCorrText('5Y'));
-  return buildRhoMapFromCsv(getCorrText('3Y')); // default 3Y
-}
-
-function localSwapImprove(items,universe,maxTotal,maxDiv,rhoMap,lambda,minDy,wCap, rho_1Y, rho_3Y, rho_5Y){
-  let curItems=[...items];
-  function evalItems(arr){
-    const {weights: w, corrMat} = weightHeuristic(arr,minDy,wCap,rhoMap,lambda);
-    const val=objective(arr,w,lambda,corrMat);
-    const dy=arr.reduce((x,f)=>x+(w[f.name]||0)*(f.dy||0),0);
-    const dcnt=arr.filter(x=>x.isDividend).length;
-    return {w,val,dy,dcnt, corrMat};
-  }
-  let cur=evalItems(curItems);
-  let improved=true, guard=0;
-  while(improved && guard++<50){
-    improved=false;
-    for(let i=0;i<curItems.length;i++){
-      for(const cand of universe){
-        if(curItems.find(x=>x.name===cand.name)) continue;
-        const next=[...curItems]; next[i]=cand;
-        const dcnt=next.filter(x=>x.isDividend).length; if(dcnt>maxDiv) continue;
-        const test=evalItems(next);
-        if(test.dy+1e-9<minDy) continue;
-        if(test.val.obj>cur.val.obj+1e-6){
-          curItems=next;
-          cur=test;
-          improved=true;
-          break;
-        }
-      }
-      if(improved) break;
-    }
-  }
-  const pruned=pruneTinyWeights(curItems,cur.w,0.005);
-  const val2=objective(pruned.items,pruned.weights,Number(lambda)||0, cur.corrMat);
-  const dy2=pruned.items.reduce((x,f)=>x+(pruned.weights[f.name]||0)*(f.dy||0),0);
-  const stats2=corrStats(pruned.items,pruned.weights,rhoMap);
-  return {items:pruned.items,weights:pruned.weights,...val2,dy:dy2,avgPos:stats2.avgPosRho,
-          _rhoMap: rhoMap, _rhoMap_1Y: rho_1Y, _rhoMap_3Y: rho_3Y, _rhoMap_5Y: rho_5Y};
-}
-
-function proOptimize(source,minDyPct,maxDiv,maxTotal,wCapPct,lambda,sortMode,corrSrc){
-  let {U}=universeWithNames(source); if(!U.length){ $('pro_output').innerHTML='<p class="ai-mini">（來源資料為空）</p>'; return []; }
-  const minDy=(isFinite(minDyPct)?Number(minDyPct)/100:0);
-  const wCap=clamp((isFinite(wCapPct)?Number(wCapPct)/100:0.4),0.1,1.0);
-  const rho = getRhoMapBySource(corrSrc);
-  const rho_1Y = buildRhoMapFromCsv(getCorrText('1Y'));
-  const rho_3Y = buildRhoMapFromCsv(getCorrText('3Y'));
-  const rho_5Y = buildRhoMapFromCsv(getCorrText('5Y'));
-
-  // 不再以 ρ 覆蓋集合來砍掉基金，避免配息檔被剔除
-
-  const excludeSet=getExcludeSet(); if(excludeSet.size){ U = U.filter(f=>!excludeSet.has(f.name)); }
-  if(!U.length){ $('pro_output').innerHTML='<p class="ai-mini">（排除過多，已無可計算標的。）</p>'; return []; }
-
-  // 若要求 minDy > 0，但資料源沒有任何配息檔，立即提示
-  if(minDy>0 && !U.some(x=>x.isDividend)){
-    $('pro_output').innerHTML='<p class="ai-mini">（資料源中沒有配息基金，無法滿足配息下限。請在來源填入配息% 或匯入含配息基金的 ρ）</p>';
-    return [];
+    const tr = document.createElementNS(NS, 'rect'); tr.setAttribute('x', X0); tr.setAttribute('y', Y - BH / 2); tr.setAttribute('width', WB); tr.setAttribute('height', BH); tr.setAttribute('rx', BH / 2); tr.setAttribute('fill', '#1a2337'); svg.append(tr);
+    const pr = document.createElementNS(NS, 'rect'); pr.setAttribute('class', 'gauge-bar'); pr.setAttribute('x', X0); pr.setAttribute('y', Y - BH / 2); pr.setAttribute('height', BH); pr.setAttribute('rx', BH / 2); pr.setAttribute('fill', fillAttr); pr.setAttribute('width', 0); svg.append(pr);
+    return function updateBarWidth(val) { const currentW = Math.max(0, valueToX(val) - X0); pr.setAttribute('width', currentW); };
   }
 
-  const universe=U, tryMaxTotal=Math.max(1,maxTotal|0), tryMaxDiv=Math.max(1,maxDiv|0), lam=Number(lambda)||0;
-  const results=[];
-  const seedA=candidateSelection(universe,tryMaxTotal,tryMaxDiv,rho,lam,minDy);
-  if(seedA.length){ results.push(localSwapImprove(seedA,universe,tryMaxTotal,tryMaxDiv,rho,lam,minDy,wCap, rho_1Y,rho_3Y,rho_5Y)); }
-  if(minDy>0){
-    const divs=universe.filter(x=>x.isDividend).sort((a,b)=>(b.dy||0)-(a.dy||0)).slice(0, Math.min(tryMaxDiv,3));
-    const others=universe.filter(x=>!divs.find(d=>d.name===x.name)).sort((a,b)=>scoreCAGR3or1(b)-scoreCAGR3or1(a)).slice(0,Math.max(tryMaxTotal-divs.length,0));
-    const seedB=[...divs,...others].slice(0,tryMaxTotal); if(seedB.length){ results.push(localSwapImprove(seedB,universe,tryMaxTotal,tryMaxDiv,rho,lam,minDy,wCap, rho_1Y,rho_3Y,rho_5Y)); }
+  function mountBlock(blockEl){
+    const key=blockEl.dataset.key; const min=+blockEl.dataset.min; const max=+blockEl.dataset.max; const step=+blockEl.dataset.step; const unit=blockEl.dataset.unit;
+    const gaugeEl=blockEl.querySelector('.gauge'); const readEl=blockEl.querySelector('.readout');
+    const initVal=clamp(Number(MOMO_PROGRESS_CONFIG[key]??0),min,max); blockEl._value=initVal;
+    let updateView = null;
+    const init = () => { updateView = createGauge(gaugeEl, { min, max, step, unit, value: blockEl._value, breath: (key==='monthly') }); updateView(blockEl._value); };
+    init();
+    if(key === 'principal' || key === 'monthly') { animateValue((val) => { readEl.textContent = fmtRead(val, unit); }, 0, initVal, 1500); } else { readEl.textContent = fmtRead(initVal, unit); }
+    blockEl._update=(v)=>{ const nv=clamp(v,min,max); blockEl._value=nv; if(updateView) updateView(nv); readEl.textContent=fmtRead(nv,unit); };
+    const ro=new ResizeObserver(()=>{ if(blockEl._resizeTimer) clearTimeout(blockEl._resizeTimer); blockEl._resizeTimer=setTimeout(init, 100); });
+    ro.observe(gaugeEl); blockEl._destroy=()=>{ ro.disconnect(); if(blockEl._resizeTimer) clearTimeout(blockEl._resizeTimer); };
   }
-  const RAND_STARTS=8;
-  for(let t=0;t<RAND_STARTS;t++){
-    const sortedByRet=[...universe].sort((a,b)=>scoreCAGR3or1(b)-scoreCAGR3or1(a));
-    const pick=[]; let dcnt=0;
-    for(const f of sortedByRet){
-      if(pick.length>=tryMaxTotal) break;
-      if(f.isDividend && dcnt>=tryMaxDiv) continue;
-      if(pick.length){
-        const avgPos=avgPositiveCorrAgainstPick(rho,f,pick);
-        const skipProb=Math.min(0.6,Math.max(0,avgPos));
-        if(Math.random()<skipProb) continue;
-      }
-      pick.push(f); if(pick.isDividend) dcnt++;
-    }
-    if(!pick.length) continue;
-    results.push(localSwapImprove(pick,universe,tryMaxTotal,tryMaxDiv,rho,lam,minDy,wCap, rho_1Y,rho_3Y,rho_5Y));
+
+  /* === Calc logic === */
+  const STRATEGY = { start:12.24, rise:27.29, peak:64.22 };
+  const SLOPE = 1; const MONTHLY_MULT = { start:1, rise:1, peak:2.5 };
+  const state = { baseCAGR: STRATEGY.rise, monthlyMul: MONTHLY_MULT.rise, principal: 1_000_000, dist: 8 };
+  function safeNum(v,def=0){ v=+v; return Number.isFinite(v)?v:def; }
+  function compute({principal, dist, baseCAGR, monthlyMul}){
+    const monthlyBase = principal*(dist/100)/12; const monthly = monthlyBase * (monthlyMul ?? 1);
+    const grow = Math.max(0, baseCAGR - SLOPE*dist); const after3y = principal*Math.pow(1+grow/100,3);
+    const div3y = principal*(dist/100)*3 * (monthlyMul ?? 1); const total = after3y + div3y;
+    const totalRate = principal>0 ? (total/principal - 1)*100 : 0; return { monthly, grow, after3y, div3y, total, totalRate };
   }
-  const seen=new Set(), uniq=[]; for(const r of results){ if(!r||!r.items||!r.items.length) continue; const key=[...r.items.map(x=>x.name)].sort().join('|'); if(!seen.has(key)){ seen.add(key); uniq.push(r);} }
-  const filtered = (minDy>0)? uniq.filter(s => (s && isFinite(s.dy) && s.dy + 1e-9 >= minDy)) : uniq;
-  const list = filtered.length ? filtered : uniq;
-  const normAvg=x=>Number.isFinite(x)?x:1e9;
-  if(sortMode==='corr_first'){
-    list.sort((a,b)=>{ const dCorr=normAvg(a.avgPos)-normAvg(b.avgPos); if(Math.abs(dCorr)>1e-9) return dCorr; const dRet=(b.ret||-1e-9)-(a.ret||-1e-9); if(Math.abs(dRet)>1e-9) return dRet; return (a.items.length||0)-(b.items.length||0); });
-  }else{
-    list.sort((a,b)=>{ const dRet=(b.ret||-1e-9)-(a.ret||-1e-9); if(Math.abs(dRet)>1e-9) return dRet; const dCorr=normAvg(a.avgPos)-normAvg(b.avgPos); if(Math.abs(dCorr)>1e-9) return dCorr; return (a.items.length||0)-(b.items.length||0); });
-  }
-  // 附帶回傳使用來源
-  list.forEach(s => s._corrSrc = corrSrc);
-  return list.slice(0,3);
-}
 
-/* ========= 渲染 ========= */
-function renderPro(list){
-  const box=$('pro_output'); box.innerHTML=''; if(!list.length){ box.innerHTML='<p class="ai-mini">（找不到符合條件的最佳化組合）</p>'; return; }
-  list=list.map(s=>{const p=pruneTinyWeights(s.items,s.weights,0.005); return {...s,items:p.items,weights:p.weights};});
-  list.forEach((sug,idx)=>{
-    const rows=sug.items.map(f=>{
-      const r3 = isFinite(f.r3CAGR)? (f.r3CAGR*100).toFixed(2)+'%' : '';
-      const r1 = isFinite(f.r1)     ? (f.r1*100).toFixed(2)+'%'     : '';
-      const c3show = r3 || (r1 ? (r1+'*') : '—');
-      const c1show = r1 || '—';
-      const dy     = isFinite(f.dy) ? (f.dy*100).toFixed(2)+'%' : '—';
-      const wt     = ((sug.weights[f.name]||0)*100).toFixed(1)+'%';
-      return `<tr><td>${f.name}</td><td>${c3show}</td><td>${c1show}</td><td>${dy}</td><td class="em">${wt}</td></tr>`;
-    }).join('');
-    const corrBlock=renderCorrBlockMultiPeriod(sug);
-    const usedSrc = sug._corrSrc || '3Y';
-    const html=`<div class="ai-card">
-      <h4>#${idx+1} 最佳化投組</h4>
-      <div class="ai-mini" style="margin-bottom:6px">
-        <span class="ai-pill">加權配息：${(sug.dy*100).toFixed(2)}%</span>
-        <span class="ai-pill">加權 CAGR(≤3y)：${(sug.ret*100).toFixed(2)}%</span>
-        <span class="ai-pill">最佳化使用 ρ：${usedSrc}</span>
-      </div>
-      <div class="table-wrap"><table class="table-grid">
-        <thead><tr><th>基金</th><th>3年CAGR</th><th>1年</th><th>配息</th><th>建議比重</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>
-      ${corrBlock}
-      <div class="actions" style="margin-top:8px"><button class="btn" data-apply-pro="${idx}">套用到表格</button></div>
-    </div>`;
-    box.insertAdjacentHTML('beforeend',html);
-  });
-  box.querySelectorAll('[data-apply-pro]').forEach(btn=>{
-    btn.addEventListener('click',()=>{ const i=parseInt(btn.getAttribute('data-apply-pro'),10); const sug=list[i]; const p=pruneTinyWeights(sug.items,sug.weights,0.005);
-      while(fundTableBody.firstChild) fundTableBody.removeChild(fundTableBody.firstChild);
-      p.items.forEach((f,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=createFundRowHtml(`基金${i+1}`); fundTableBody.appendChild(tr);
-        tr.querySelector('.name').value=f.name; tr.querySelector('.r1').value=isFinite(f.r1)?(f.r1*100).toFixed(2):''; tr.querySelector('.r3').value=isFinite(f.r3CAGR)?((Math.pow(1+f.r3CAGR,3)-1)*100).toFixed(2):''; tr.querySelector('.r5').value=''; tr.querySelector('.dy').value=isFinite(f.dy)?(f.dy*100).toFixed(2):''; tr.querySelector('.wt').value=((p.weights[f.name]||0)*100).toFixed(2); });
-      setTab('pf'); recomputePortfolio(); alert('已將最佳化投組（移除 0% 權重）套用至表格。');
-    });
-  });
-}
-
-/* ========= 排除清單 UI ========= */
-function collectFundNamesFromSource(source){
-  if(source==='catalog') return (FUND_CATALOG||[]).map(f=>String(f.name||'').trim()).filter(Boolean);
-  const rows=[...fundTableBody.querySelectorAll('tr')];
-  return rows.map(tr=>String(tr.querySelector('.name').value||'').trim()).filter(Boolean);
-}
-function syncExcludeList(){
-  const names=[...new Set(collectFundNamesFromSource($('pro_source').value))].sort((a,b)=>a.localeCompare(b,'zh-Hant'));
-  const box=$('pro_exclude_checks'); box.innerHTML='';
-  names.forEach((n,idx)=>{
-    const id='ex_'+idx; // 以索引生成，避免舊式 unescape 寫法
-    const wrap=document.createElement('label');
-    wrap.innerHTML=`<input type="checkbox" value="${n}" id="${id}"><span>${n}</span>`;
-    box.appendChild(wrap);
-  });
-  // 若啟用預設排除 → 依關鍵字自動勾選
-  applyDefaultExcludesIfEnabled();
-}
-$('pro_exclude_sync').addEventListener('click',()=>{ syncExcludeList(); proScheduleRun(); });
-$('pro_exclude_clear').addEventListener('click',()=>{ $('pro_exclude_checks').querySelectorAll('input[type="checkbox"]').forEach(ch=>ch.checked=false); proScheduleRun(); });
-$('pro_exclude_checks').addEventListener('change',()=>proScheduleRun());
-
-// 預設排除切換
-const PRESET_EXCLUDE_TOGGLE_KEY = 'momo_preset_exclude_toggle';
-function loadPresetExcludeToggle(){
-  const val = localStorage.getItem(PRESET_EXCLUDE_TOGGLE_KEY);
-  if(val){ const el=$('preset_exclude_toggle'); if(el) el.value = val; }
-}
-function savePresetExcludeToggle(){ const el=$('preset_exclude_toggle'); if(el){ localStorage.setItem(PRESET_EXCLUDE_TOGGLE_KEY, el.value||'off'); } }
-const presetToggleEl = $('preset_exclude_toggle');
-if(presetToggleEl){
-  presetToggleEl.addEventListener('change',()=>{ savePresetExcludeToggle(); syncExcludeList(); proScheduleRun(); });
-}
-
-/* ========= 相關係數燈號 ========= */
-function updateCorrStatusIndicator(){
-  const indicator = $('corr_status_indicator');
-  const pill1 = $('corr_state_1Y');
-  const pill3 = $('corr_state_3Y');
-  const pill5 = $('corr_state_5Y');
-  const deepColor = getComputedStyle(document.documentElement).getPropertyValue('--deep');
-  const posColor = getComputedStyle(document.documentElement).getPropertyValue('--pos');
-  const goldSoftColor = getComputedStyle(document.documentElement).getPropertyValue('--gold-soft');
-  const setPill = (el, loaded, label) => {
-    if(!el) return;
-    el.textContent = label + '：' + (loaded?'已載入':'未載入');
-    if(loaded){
-      el.style.background = posColor;
-      el.style.borderColor = posColor;
-      el.style.color = deepColor;
-    }else{
-      el.style.background = '#283556';
-      el.style.borderColor = 'rgba(233,209,138,.35)';
-      el.style.color = goldSoftColor;
+  /* 策略詳細資料庫 */
+  const STRATEGY_INFO = {
+    start: {
+        desc: "適合初階投資人。透過高評級債券與防禦型標的，優先建立安全護城河，創造穩定且持續的現金流。",
+        risk: 30, // 進度條寬度
+        riskColor: "#3dd68c", // 綠色 (低風險)
+        term: "長期持有 (3年以上)"
+    },
+    rise: {
+        desc: "適合穩健型投資人。股債平衡配置，在控制波動的同時，透過複利效應加速資產翻倍。",
+        risk: 60,
+        riskColor: "#E9D18A", // 金色 (中風險)
+        term: "中期爆發 (1-3年)"
+    },
+    peak: {
+        desc: "適合積極型投資人。聚焦高成長科技股與加密資產機會，雖然波動較大，但具備最高的潛在報酬率。",
+        risk: 90,
+        riskColor: "#ff6b6b", // 紅色 (高風險)
+        term: "波段操作 (靈活進出)"
     }
   };
-  const h1 = hasCorr('1Y'), h3 = hasCorr('3Y'), h5 = hasCorr('5Y');
-  setPill(pill1, h1, '1Y'); setPill(pill3, h3, '3Y'); setPill(pill5, h5, '5Y');
-  if (indicator){
-    const any = h1 || h3 || h5;
-    indicator.textContent = any ? '已載入（至少一個期間）' : '未載入';
-    if(any){ indicator.style.background = posColor; indicator.style.borderColor = posColor; indicator.style.color = deepColor; }
-    else{ indicator.style.background = '#283556'; indicator.style.borderColor = 'rgba(233,209,138,.35)'; indicator.style.color = goldSoftColor; }
-  }
-}
 
-/* ========= 匯入/載入/清空（多期間） ========= */
-function inferPeriodFromSheetName(name){
-  const n = String(name||'').toLowerCase();
-  if(n.includes('1y') || n.includes('近1') || n.includes('1 年') || n.includes('1年')) return '1Y';
-  if(n.includes('5y') || n.includes('近5') || n.includes('5 年') || n.includes('5年')) return '5Y';
-  return '3Y';
-}
-function importCorrFile(file){
-  const ext=(file.name.split('.').pop()||'').toLowerCase();
-  const fr=new FileReader();
-  fr.onload=(evt)=>{
-    try{
-      if(ext==='xlsx' || ext==='xls'){
-        const wb = XLSX.read(evt.target.result,{type:'array'});
-        const names = wb.SheetNames || [];
-        if(!names.length) throw new Error('檔案內沒有工作表');
-        const writes = [];
-        names.forEach(sn=>{
-          const ws = wb.Sheets[sn];
-          const arr = XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-          const tsv = arr.map(r=>r.map(v=>String(v)).join('\t')).join('\n');
-          if(!tsv.trim()) return;
-          const period = inferPeriodFromSheetName(sn);
-          writes.push({period, text: tsv});
+  /* 更新情報卡函式 */
+  function updateStrategyInfo(key) {
+    const data = STRATEGY_INFO[key] || STRATEGY_INFO['start'];
+      
+    // 更新文字
+    const descEl = document.getElementById('info-desc');
+    // 簡單的淡出淡入效果
+    descEl.style.opacity = 0;
+    setTimeout(() => {
+        descEl.textContent = data.desc;
+        descEl.style.opacity = 1;
+    }, 200);
+
+    document.getElementById('text-term').textContent = data.term;
+
+    // 更新風險條
+    const bar = document.getElementById('bar-risk');
+    bar.style.width = data.risk + '%';
+    bar.style.background = data.riskColor;
+  }
+    
+  /* --- 體驗優化：金色粒子爆炸特效 --- */
+  function explodeGold(x, y) {
+    const colors = ['#F9E27C', '#D9B84B', '#B88A1E', '#FFFFFF'];
+    const particles = [];
+    const particleCount = 30;
+    for (let i = 0; i < particleCount; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'fixed'; p.style.left = x + 'px'; p.style.top = y + 'px';
+        p.style.width = (Math.random() * 6 + 2) + 'px'; p.style.height = p.style.width;
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.borderRadius = '50%'; p.style.pointerEvents = 'none'; p.style.zIndex = '9999';
+        document.body.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 100 + 50;
+        particles.push({ el: p, vx: Math.cos(angle) * velocity, vy: Math.sin(angle) * velocity, life: 1 });
+    }
+    let lastTime = Date.now();
+    function update() {
+        const now = Date.now(); const dt = (now - lastTime) / 1000; lastTime = now;
+        let alive = false;
+        particles.forEach(p => {
+            if (p.life > 0) {
+                alive = true; p.life -= 2 * dt;
+                p.el.style.left = (parseFloat(p.el.style.left) + p.vx * dt) + 'px';
+                p.el.style.top = (parseFloat(p.el.style.top) + p.vy * dt) + 'px';
+                p.el.style.opacity = p.life; p.el.style.transform = `scale(${p.life})`;
+            } else { if(p.el.parentNode) p.el.parentNode.removeChild(p.el); }
         });
-        if(!writes.length) throw new Error('沒有可用的數據');
-        if(writes.length===1){
-          const src = $('pro_corr_source')?.value || DEFAULT_CORR_SRC;
-          setCorrText(src, writes[0].text);
-        }else{
-          for(const w of writes){ setCorrText(w.period, w.text); }
-        }
-      }else{
-        const buf = new TextDecoder('utf-8').decode(evt.target.result);
-        if(!buf || !buf.trim()) throw new Error('文字檔內沒有可用數據');
-        const src = $('pro_corr_source')?.value || DEFAULT_CORR_SRC;
-        setCorrText(src, buf);
-      }
-      updateCorrStatusIndicator();
-      proScheduleRun();
-      alert('相關係數已匯入並儲存。');
-    }catch(err){
-      alert('匯入相關係數失敗：'+err.message);
+        if (alive) requestAnimationFrame(update);
     }
-  };
-  fr.readAsArrayBuffer(file);
-}
-$('pro_corr_import_btn').addEventListener('click',()=>$('pro_corr_file').click());
-$('pro_corr_file').addEventListener('change',(e)=>{const f=e.target.files&&e.target.files[0]; if(!f) return; importCorrFile(f); e.target.value='';});
-$('pro_corr_load_btn').addEventListener('click',()=>{
-  const src = $('pro_corr_source')?.value || DEFAULT_CORR_SRC;
-  const txt = getCorrText(src);
-  alert(txt ? `已載入 ${src} 的相關係數資料（已自動使用）` : `目前沒有 ${src} 的相關係數資料`);
-  proScheduleRun();
-});
-// ✅ 一次清空 1Y / 3Y / 5Y 的相關係數資料
-$('pro_corr_clear_btn').addEventListener('click', () => {
-  ['1Y', '3Y', '5Y'].forEach(p => setCorrText(p, ''));
-  alert('已清空 1Y / 3Y / 5Y 的相關係數資料。');
-  updateCorrStatusIndicator(); // 立即更新燈號
-  proScheduleRun();            // 重新運算（若在 AI 分頁且啟用自動重算）
-});
-
-/* ========= Pro 觸發 ========= */
-function getExcludeSet(){ const box=$('pro_exclude_checks'); const out=new Set(); box.querySelectorAll('input[type="checkbox"]').forEach(ch=>{ if(ch.checked) out.add(ch.value); }); return out; }
-function universeWithNames(source){ const U=readSourceData(source); const map={}; U.forEach(x=>map[x.name]=x); return {U,map}; }
-function runProNow(){
-  try{
-    const minDy=parseFloat($('pro_minDy').value)||0,
-          maxDiv=Math.max(1,parseInt($('pro_maxDiv').value)||1),
-          maxTotal=Math.max(1,parseInt($('pro_maxTotal').value)||1),
-          wCap=parseFloat($('pro_wCap').value)||40,
-          lambda=parseFloat($('pro_lambda').value)||0,
-          source=$('pro_source').value,
-          sortMode=$('pro_sort').value,
-          corrSrc=$('pro_corr_source')?.value || DEFAULT_CORR_SRC;
-
-    const list=proOptimize(source, minDy, maxDiv, maxTotal, wCap, lambda, sortMode, corrSrc);
-    if(!list||!list.length) $('pro_output').innerHTML='<p class="ai-mini">（沒有產生結果；請匯入相關係數或放寬條件）</p>'; else renderPro(list);
-  }catch(err){
-    console.error(err);
-    $('pro_output').innerHTML='<p class="ai-mini">最佳化運算發生錯誤：'+(err&&err.message?err.message:String(err))+'</p>';
+    requestAnimationFrame(update);
   }
-}
-let __proTimer=null;
-function isOnAiTab(){ return document.querySelector('#panel-ai').classList.contains('active'); }
-function proScheduleRun(force=false){
-  if(!$('pro_autorun')?.checked && !force) return;
-  if(!isOnAiTab() && !force) return;
-  clearTimeout(__proTimer);
-  __proTimer=setTimeout(()=>{ try{ $('pro_output').innerHTML=''; runProNow(); }catch(e){ console.error(e); } },300);
-}
 
-/* ========= 綁定與啟動 ========= */
-function bindInputs(){
-  $('loan2EnabledCk').addEventListener('change',()=>{refreshLoan2UI();computeCashflow();});
-  $('loan2Box').addEventListener('toggle',saveState);
-  $('ratio').addEventListener('change',()=>{ if($('ratio').value.startsWith('custom')) autoApplied=false; else autoApplied=true; computeCashflow(); });
-  $('pro_source').addEventListener('change',()=>{ syncExcludeList(); proScheduleRun(true); });
-  $('pro_sort').addEventListener('change',()=>proScheduleRun(true));
-  $('pro_corr_source').addEventListener('change',()=>proScheduleRun(true));
-  // 預設排除載入
-  loadPresetExcludeToggle();
-}
-function boot(){
-  loadCatalog();
-  const loaded=loadState();
-  bindInputs();
-  refreshLoan2UI();
-  computeCashflow();
-  recomputePortfolio();
-  syncExcludeList();
-  updateCorrStatusIndicator();
-  if(!loaded) saveState();
-}
-document.addEventListener('DOMContentLoaded',boot,{once:true});
-window.addEventListener('pageshow',()=>{ refreshLoan2UI(); computeCashflow(); recomputePortfolio(); if(isOnAiTab()) proScheduleRun(true); });
-</script>
+  function renderOutputs(o){ 
+    $('out-monthly').textContent = money(o.monthly); 
+    $('out-grow').textContent = pct(o.grow); 
+    $('out-3y').textContent = money(o.after3y); 
+    $('out-3y-div').textContent = money(o.div3y); 
+      
+    const totalEl = $('out-total');
+    const newTotal = money(o.total);
+    if(totalEl.textContent !== newTotal) {
+        totalEl.textContent = newTotal;
+        totalEl.classList.remove('flash-anim');
+        void totalEl.offsetWidth; 
+        totalEl.classList.add('flash-anim');
+    }
+      
+    $('out-total-rate').textContent = pct(o.totalRate); 
+
+    /* --- 解鎖神秘黑箱邏輯 --- */
+    // 計算一個優化後的誘餌數值 (例如+25%)
+    const optimizedVal = o.monthly * 1.25; 
+    const optEl = document.getElementById('out-optimized');
+    if(optEl) optEl.textContent = money(optimizedVal);
+
+    /* --- 體驗優化：生活場景對照邏輯 --- */
+    const m = o.monthly;
+    const mapEl = document.getElementById('life-mapping');
+    const iconEl = document.getElementById('life-icon');
+    const textEl = document.getElementById('life-text');
+      
+    let icon = '🌱', text = '累積種子期';
+    if(m > 150 && m <= 3000) { icon='☕'; text='每天一杯星巴克'; }
+    else if(m > 3000 && m <= 10000) { icon='🍱'; text='每月加菜金 + 水電費全免'; }
+    else if(m > 10000 && m <= 25000) { icon='🚗'; text='支付國產車貸 + 停車費'; }
+    else if(m > 25000 && m <= 50000) { icon='✈️'; text='每季出國旅遊基金'; }
+    else if(m > 50000 && m <= 100000) { icon='🏠'; text='支付房貸，邁向財富自由'; }
+    else if(m > 100000) { icon='👑'; text='雙贏巔峰，被動收入大於支出'; }
+
+    if(textEl.textContent !== text) {
+        mapEl.style.transform = "scale(0.95)";
+        setTimeout(()=>{
+            iconEl.textContent = icon; textEl.textContent = text;
+            mapEl.style.transform = "scale(1)";
+        }, 100);
+    }
+
+    /* 裂變行銷邏輯：當月配息 > 10000 顯示強力 CTA */
+    const ctaEl = document.getElementById('calc-cta');
+    if(ctaEl){
+        if(o.monthly > 10000) {
+            ctaEl.style.display = 'block';
+            setTimeout(() => { ctaEl.classList.add('fade-in-section', 'visible'); }, 10);
+        } else {
+            ctaEl.style.display = 'none';
+        }
+    }
+  }
+    
+  function persist(){ try{ localStorage.setItem('momo-calc', JSON.stringify(state)); }catch(_){} }
+  function restore(){ try{ const s = JSON.parse(localStorage.getItem('momo-calc')); if(s && typeof s==='object'){ if(typeof s.baseCAGR==='number') state.baseCAGR=s.baseCAGR; if(typeof s.monthlyMul==='number') state.monthlyMul=s.monthlyMul; if(typeof s.principal==='number') state.principal=s.principal; if(typeof s.dist==='number') state.dist=s.dist; } }catch(_){} }
+    
+  function fromURL(){
+    const p=new URLSearchParams(location.search);
+    if(p.has('principal')) state.principal=clamp(safeNum(p.get('principal'), state.principal), 0, 1e9);
+    if(p.has('dist')) state.dist=clamp(safeNum(p.get('dist'), state.dist), 0, 100);
+    const st=p.get('strategy');
+    if(st && ['start','rise','peak'].includes(st)){
+      state.baseCAGR = STRATEGY[st]; state.monthlyMul = MONTHLY_MULT[st];
+      document.querySelectorAll('[data-strategy]').forEach(b=>{ const active = b.dataset.strategy===st; b.classList.toggle('is-active', active); b.setAttribute('aria-pressed', active?'true':'false'); });
+    }
+  }
+
+  function update(){
+    const badge = $('distNow'); if(badge) badge.textContent = (state.dist||0) + '%';
+    const amt=$('amt'), range=$('distRange');
+    if(amt) amt.value = safeNum(state.principal,0); if(range){ range.value = safeNum(state.dist,0); range.setAttribute('aria-valuenow', range.value); }
+    renderOutputs(compute(state)); persist();
+  }
+
+  function bindEvents(){
+    const r = $('distRange'); r.addEventListener('input', ()=>{ state.dist = safeNum(r.value,0); update(); }, passiveOpt); r.addEventListener('change', ()=>{ state.dist = safeNum(r.value,0); update(); }, passiveOpt);
+    [['dist5',5],['dist10',10],['dist15',15]].forEach(([id,v])=>{ $(id)?.addEventListener('click', ()=>{ state.dist=v; r.value=v; update(); }, passiveOpt); });
+    const a = $('amt'); a.addEventListener('input', ()=>{ const raw=safeNum(a.value,0); state.principal=clamp(raw,0,1_000_000_000); a.value=state.principal; update(); }, passiveOpt); a.addEventListener('change', ()=>{ const raw=safeNum(a.value,0); state.principal=clamp(raw,0,1_000_000_000); a.value=state.principal; update(); }, passiveOpt);
+      
+    // !!! 修改後的策略按鈕監聽：加入更新情報卡 !!!
+    document.querySelectorAll('[data-strategy]').forEach(btn=>{ 
+        btn.addEventListener('click', ()=>{ 
+            const key = btn.getAttribute('data-strategy'); 
+            state.baseCAGR = STRATEGY[key] ?? state.baseCAGR; 
+            state.monthlyMul = MONTHLY_MULT[key] ?? 1; 
+            document.querySelectorAll('[data-strategy]').forEach(b=>{ 
+                b.classList.remove('is-active'); 
+                b.setAttribute('aria-pressed','false'); 
+            }); 
+            btn.classList.add('is-active'); 
+            btn.setAttribute('aria-pressed','true'); 
+              
+            // 更新情報卡
+            updateStrategyInfo(key);
+              
+            update(); 
+        }, passiveOpt); 
+    });
+
+    const btn = $('btn-save-png'); const target = $('calc-capture');
+    if(btn && target){
+      btn.addEventListener('click', async (e)=>{
+        explodeGold(e.clientX, e.clientY); // 粒子特效
+        const prev = {boxShadow: target.style.boxShadow, padding: target.style.padding, bg: target.style.background, transform: target.style.transform}; target.style.transform = 'none';
+        const goldEls = Array.from(document.querySelectorAll('.goldCycle')); const prevClasses = goldEls.map(el => el.className); goldEls.forEach(el => { el.classList.add('goldPlain'); });
+        target.style.boxShadow='0 0 0 1px rgba(233,209,138,.18)'; target.style.padding='8px'; target.style.background='transparent';
+        try{ await ensureCanvas(); const canvas = await html2canvas(target,{ backgroundColor:'#0A1221', scale: Math.min(2, window.devicePixelRatio || 1), useCORS:true, logging:false }); canvas.toBlob(blob=>{ if(blob){ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download=`MOMO_calc_${new Date().toISOString().replace(/[:T]/g,'-').slice(0,19)}.png`; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 250); } }); }catch(e){ alert('匯出失敗，請再試一次'); }
+        finally{ target.style.boxShadow=prev.boxShadow; target.style.padding=prev.padding; target.style.background=prev.bg; target.style.transform=prev.transform; const goldNow = Array.from(document.querySelectorAll('.goldPlain')); goldNow.forEach((el,idx) => { el.className = prevClasses[idx] || el.className.replace(' goldPlain',''); }); }
+      }, passiveOpt);
+    }
+
+    const btnShare = $('btn-share-link');
+    if(btnShare){
+      btnShare.addEventListener('click', async (e) => {
+        explodeGold(e.clientX, e.clientY); // 粒子特效
+        const params = new URLSearchParams();
+        params.set('principal', state.principal);
+        params.set('dist', state.dist);
+        const activeStrategyBtn = document.querySelector('.strategy-btn.is-active');
+        if(activeStrategyBtn) { params.set('strategy', activeStrategyBtn.dataset.strategy); }
+        const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        try { await navigator.clipboard.writeText(shareUrl); const originalText = btnShare.textContent; btnShare.textContent = "已複製！✅"; btnShare.style.borderColor = "#06C755"; btnShare.style.color = "#06C755"; setTimeout(() => { btnShare.textContent = originalText; btnShare.style.borderColor = ""; btnShare.style.color = ""; }, 2000); } catch (err) { alert('複製失敗，請手動複製網址'); }
+      }, passiveOpt);
+    }
+
+    if (matchMedia('(max-width: 768px)').matches) document.body.classList.add('has-cta');
+    const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.1 }); document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+    const igSection = document.getElementById('ig-section');
+    const loadIgScript = () => { if(window.igScriptLoaded) return; var js = document.createElement("script"); js.src = "https://embedsocial.com/cdn/ht.js"; js.id = "EmbedSocialHashtagScript"; document.head.appendChild(js); window.igScriptLoaded = true; };
+    const igObserver = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { loadIgScript(); igObserver.disconnect(); } }); }, { rootMargin: "200px" }); if(igSection) igObserver.observe(igSection);
+  }
+
+  /* =========================================
+      AI 智能情境問候
+      ========================================= */
+  function initSmartGreeting() {
+      const hour = new Date().getHours();
+      let greeting = "";
+      let subMsg = "";
+      let color = "#E9D18A"; // 預設金色
+
+      if (hour >= 5 && hour < 11) {
+          greeting = "早安，開啟財富增長的一天";
+          subMsg = "AI 建議：定期檢視現金流目標。";
+          color = "#3dd68c"; // 綠色
+      } else if (hour >= 11 && hour < 17) {
+          greeting = "午安，午盤資金流向監控中";
+          subMsg = "市場震盪時，配息是最好的防禦。";
+          color = "#E9D18A"; // 金色
+      } else if (hour >= 17 && hour < 23) {
+          greeting = "晚安，美股與夜盤開盤在即";
+          subMsg = "MOMO AI 正在為您監控全球宏觀數據。";
+          color = "#ff6b6b"; // 紅色
+      } else {
+          greeting = "夜深了，讓雙贏策略為您工作";
+          subMsg = "您休息，資產繼續產生被動收入。";
+          color = "#AAB2BF"; // 藍灰色
+      }
+
+      const smallEl = document.querySelector('.hero small');
+      if (smallEl) {
+          smallEl.innerHTML = `
+              <span style="display:inline-block; width:8px; height:8px; background-color:${color}; border-radius:50%; margin-right:6px; box-shadow:0 0 8px ${color}; animation: breathe-dot 2s infinite;"></span>
+              ${greeting} <span style="opacity:0.5; margin:0 6px;">|</span> ${subMsg}
+          `;
+      }
+  }
+
+  /* =========================================
+      MCS 儀表板邏輯
+      ========================================= */
+  const API_BASE = 'https://mcs-worker.nms3194949.workers.dev';
+  let gaugeChart = null;
+
+  function setStagePill(stage) {
+    const pill = document.getElementById('mcsStagePill');
+    const titleEl = document.getElementById('mcsStageTitle');
+    const descEl  = document.getElementById('mcsStageDesc');
+    if(!pill) return;
+
+    const mapTitle = { Recession:'Recession (衰退區)', Slowdown:'Slowdown (放緩區)', Growth:'Growth (成長區)', Heat:'Heat (過熱區)' };
+    const mapDesc = { Recession:'風險偏好下降，信用利差放大。資產配置建議以「防禦與現金管理」為主，等待落底訊號。', Slowdown:'成長動能放緩但未全面衰退。建議保守調整高波動部位，關注高品質收益資產。', Growth:'經濟與企業獲利維持成長。適合核心長期持有，並於回檔時布局成長型資產。', Heat:'市場情緒偏熱，需注意估值與風險累積。建議適度停利，保留現金彈性。' };
+
+    pill.classList.remove('recession','slowdown','growth','heat');
+    if (!stage) {
+      pill.textContent = '--'; titleEl.textContent = '景氣象限：--'; descEl.textContent = '正在讀取 MCS 景氣數據...';
+      return;
+    }
+    pill.classList.add(stage.toLowerCase());
+    pill.textContent = stage;
+    titleEl.textContent = mapTitle[stage] || ('Stage: ' + stage);
+    descEl.textContent  = mapDesc[stage]  || '依 MCS 分數對應四大景氣區間。';
+  }
+
+  function updateAiSummary(data) {
+    const el = document.getElementById('aiSummaryText');
+    if (!el || !data || !data.factors) return;
+    const f = data.factors; const score = data.score || 0; let summary = "";
+    if (score >= 60) summary += `目前景氣處於 <span class="highlight">強勁成長期 (Growth)</span>，基本面數據穩健。`;
+    else if (score >= 40) summary += `目前景氣處於 <span class="highlight">震盪調整期</span>，多空力道拉鋸。`;
+    else summary += `目前景氣面臨 <span class="warn">修正風險 (Slowdown/Recession)</span>，基本面動能轉弱。`;
+
+    const isLiquidityStrong = (f.liquidity?.score >= 12); const isCreditStrong = (f.credit?.score >= 12);
+    if (isLiquidityStrong && isCreditStrong) summary += `受惠於 <span class="highlight">資金充沛</span> 與信用風險偏好維持高檔，市場具備「資金行情」支撐。`;
+    else if (!isLiquidityStrong && isCreditStrong) summary += `雖然信用利差穩定，但資金水位正在下降，需留意動能延續性。`;
+    else if (!isCreditStrong) summary += `且信用利差擴大，顯示市場避險情緒正在升溫，需提高警覺。`;
+      
+    summary += `<br><br><strong>✦ 操作建議：</strong>`;
+    if (score >= 60 && isLiquidityStrong) summary += `順勢操作。因流動性強勁，<span class="highlight">科技股、成長股與加密貨幣</span> 表現將優於防禦型資產。但需留意 Equity 分數若過高，切勿過度追價，建議逢回布局。`;
+    else if (score >= 60 && !isLiquidityStrong) summary += `回歸基本面。資金潮退去，選股將重於選市，聚焦 <span class="highlight">高 EPS 成長</span> 之實質業績股，避開無基之彈的投機標的。`;
+    else if (score < 40) summary += `防禦為主。建議拉高 <span class="highlight">現金與投資級債 (IG Bond)</span> 部位，降低股票曝險，直至 MACRO 指標落底回升。`;
+    else summary += `區間操作。市場缺乏明確方向，建議採取 <span class="highlight">股債平衡</span> 配置，並透過網格交易或定期定額分散波動風險。`;
+    
+    // 體驗優化：淡入動畫
+    el.innerHTML = summary;
+    el.animate([
+        { opacity: 0, transform: 'translateY(10px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+    ], { duration: 800, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'forwards' });
+  }
+
+  function updateMcsGauge(score, stage) {
+    const canvas = document.getElementById('mcsGaugeChart');
+    const centerText = document.getElementById('gaugeScoreText');
+    if(!canvas || !centerText) return;
+    centerText.textContent = (score == null || Number.isNaN(score)) ? '--' : Math.round(score);
+    const labels = ['Recession','Slowdown','Growth','Heat'];
+    const bgColors = ['rgba(248,113,113,0.22)','rgba(251,146,60,0.20)','rgba(34,197,94,0.18)','rgba(234,179,8,0.16)'];
+    const activeColors = { Recession:'rgba(248,113,113,0.9)', Slowdown:'rgba(251,146,60,0.9)', Growth:'rgba(34,197,94,0.9)', Heat:'rgba(234,179,8,0.9)' };
+    const baseColorsMap = { Recession:bgColors[0], Slowdown:bgColors[1], Growth:bgColors[2], Heat:bgColors[3] };
+    const finalBg = labels.map(s => (stage && s===stage) ? activeColors[s] : baseColorsMap[s]);
+    const finalBorder = labels.map(s => (stage && s===stage) ? 'rgba(15,23,42,1)' : 'rgba(15,23,42,0.6)');
+    const ctx = canvas.getContext('2d');
+    if (!gaugeChart) {
+      gaugeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data: [25,25,25,25], backgroundColor: finalBg, borderColor: finalBorder, borderWidth: 1.5, hoverOffset: 2 }] },
+        options: { responsive: true, cutout: '70%', plugins: { legend: { display: false }, tooltip: { enabled:false } } }
+      });
+    } else {
+      gaugeChart.data.datasets[0].backgroundColor = finalBg;
+      gaugeChart.data.datasets[0].borderColor = finalBorder;
+      gaugeChart.update();
+    }
+  }
+
+  function updateFactorCard(factorKey, factor) {
+    const metaEl = document.getElementById(factorKey + 'Meta');
+    const summaryEl = document.getElementById(factorKey + 'Summary');
+    if (!factor) return;
+    if (factorKey === 'credit') { if(metaEl) metaEl.innerHTML = `<span>HY Spread：${factor.hy_spread?.toFixed(2) ?? '--'}%</span>`; }
+    else if (factorKey === 'eps') { if(metaEl) metaEl.innerHTML = `<span>評估模型：股價動能推估</span>`; }
+    else if (factorKey === 'sentiment') { if(metaEl) metaEl.innerHTML = `<span>VIX：${factor.vix?.toFixed(1) ?? '--'}</span>`; }
+    else if (factorKey === 'liquidity') { if(metaEl) metaEl.innerHTML = `<span>Permits：${factor.permits}M <span class="meta-note">(${factor.permits_note})</span></span>`; }
+  }
+
+  async function loadMcs(profile = 'balanced') {
+    try {
+      let data = {}; let isFallback = false;
+      const sourceEl = document.getElementById('mcsSource');
+      const asOfEl = document.getElementById('mcsAsOf');
+      try {
+        const res  = await fetch(`${API_BASE}/api/mcs/allocation?profile=${profile}`, { cache:'no-store' });
+        if (!res.ok) throw new Error('API error');
+        data = await res.json();
+        if(sourceEl) { sourceEl.textContent = 'SOURCE: ' + (data.raw?.source || 'FRED'); sourceEl.style.cssText = "background:rgba(255,255,255,0.08);color:var(--muted);border:none;"; }
+      } catch(e) {
+        isFallback = true;
+        if(sourceEl) { sourceEl.innerHTML = '⚠ 連線失敗 (顯示模擬數據)'; sourceEl.style.cssText = "background:rgba(220,38,38,0.2);color:#fca5a5;border:1px solid #ef4444;font-weight:bold;"; }
+        data = { score: 66, stage: 'Growth', asOf: new Date().toISOString().slice(0,10), factors: {} };
+      }
+      if (!data.factors) data.factors = {};
+      if(!data.factors.macro) data.factors.macro = { score: 12, pmi: 47.2, claims: 230000, change: -0.5 };
+      if(!data.factors.liquidity) data.factors.liquidity = { score: 16, change: 1.5, net_liq: 6.35, net_liq_note: "資金寬鬆", cu_au: 4.15, cu_au_note: "溫和復甦" };
+      if(!data.factors.credit) data.factors.credit = { score: 18, change: 1.2, hy_spread: 3.17, ig_spread: 0.84 };
+
+      if(asOfEl) asOfEl.textContent = '更新：' + (data.asOf || '--');
+      setStagePill(data.stage);
+      updateMcsGauge(data.score, data.stage);
+      updateAiSummary(data);
+      
+      const f = data.factors;
+      ['credit','rates','macro','equity','eps','sentiment','liquidity'].forEach(k=>updateFactorCard(k, f[k]));
+
+    } catch (err) { console.error(err); }
+  }
+
+  /* =========================================
+      特效：數字滾動動畫 (Count Up)
+      ========================================= */
+  function initNumberCounter() {
+    const el = document.querySelector('.total-amount');
+    if (!el) return;
+
+    // 取得目標數字 (移除 $ 和 ,)
+    const targetStr = el.innerText; // ex: $78,857
+    const targetNum = parseInt(targetStr.replace(/[$,]/g, ''), 10);
+      
+    // 如果不是數字就停止
+    if (isNaN(targetNum)) return;
+
+    // 動畫設定
+    const duration = 2000; // 2秒跑完
+    const frameDuration = 1000 / 60; 
+    const totalFrames = Math.round(duration / frameDuration);
+    const easeOutQuad = t => t * (2 - t); // 緩出效果
+
+    let frame = 0;
+      
+    const counter = setInterval(() => {
+        frame++;
+        // 計算進度
+        const progress = easeOutQuad(frame / totalFrames);
+        const currentNum = Math.round(targetNum * progress);
+
+        // 格式化回 $78,857 格式
+        el.innerText = '$' + new Intl.NumberFormat('en-US').format(currentNum);
+
+        if (frame === totalFrames) {
+        clearInterval(counter);
+        // 確保最後顯示準確數字
+        el.innerText = targetStr; 
+          
+        // 跑完後加一個閃光特效類別 (Optional)
+        el.style.textShadow = "0 0 30px rgba(255, 255, 255, 0.8)";
+        setTimeout(() => { el.style.textShadow = ""; }, 500);
+        }
+    }, frameDuration);
+  }
+
+  function boot(){
+    // initSEO() 已移除，改用靜態 HTML
+    initSmartGreeting(); // 啟動智能問候
+    document.querySelectorAll('.block').forEach(mountBlock);
+    restore(); fromURL(); bindEvents(); update();
+    loadMcs('balanced');
+
+    // 啟動數字滾動監聽
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            initNumberCounter();
+            observer.disconnect(); // 只跑一次
+        }
+        });
+    }, { threshold: 0.5 }); // 看到 50% 區塊時觸發
+    const target = document.querySelector('.total-box');
+    if (target) observer.observe(target);
+
+    // !!! 初始化情報卡 !!!
+    const activeBtn = document.querySelector('.strategy-btn.is-active');
+    const initKey = activeBtn ? activeBtn.dataset.strategy : 'start';
+    updateStrategyInfo(initKey);
+  }
+  document.readyState==='loading' ? document.addEventListener('DOMContentLoaded', boot) : boot();
+  </script>
+
+  <script src="./assets/tools-config.js"></script>
+  <script src="./assets/tools-render.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){ if (window.MOMO_TOOLS && typeof MOMO_TOOLS.initHomeSection === 'function') { MOMO_TOOLS.initHomeSection(); } });
+  </script>
+  
+  <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
 </body>
 </html>
