@@ -3,11 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MOMO權證篩選器 (GitHub 版)</title>
+<title>MOMO權證篩選器</title>
 <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://unpkg.com/xlsx/dist/cpexcel.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <style>
   :root{
     --deep:#0A1221; --card:#0C152A;
@@ -19,136 +18,139 @@
   .wrap{max-width:1200px;margin:28px auto;padding:0 16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .field{flex:1 1 220px;background:#0b1630;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;outline:none;}
+  .field{flex:1 1 220px;background:#0b1630;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;outline:none;}
   .btn-link{background:var(--gold-grad);color:#000;border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;white-space:nowrap}
-  .btn-link:hover{opacity:0.9}
+  .btn-link:hover{background:linear-gradient(90deg,#FFEFA5 0%,#F4D97A 50%,#E0B94A 100%)}
   .btn-link[disabled]{opacity:.6;cursor:not-allowed}
-  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;border:1px solid var(--line)}
-  th,td{border:1px solid var(--line);padding:8px;text-align:left;white-space:nowrap}
-  th{position:sticky;top:0;background:#0f1b34;color:var(--gold-soft)}
-  .tag{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
-  .tag.C{background:#E25A5A} .tag.P{background:#39C27A}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px;border:1px solid var(--line)}
+  th,td{border:1px solid var(--line);padding:10px 8px;text-align:left;white-space:nowrap}
+  th{position:sticky;top:0;z-index:1;background:#0f1b34;color:var(--gold-soft)}
+  tbody tr:hover{background:#0f1b34}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600}
+  .tag.C{background:#E25A5A;color:#fff} .tag.P{background:#39C27A;color:#fff}
+  .hint{font-size:12px;color:var(--muted)}
   .gold-text{background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700}
 </style>
 </head>
-
 <body>
 <div class="wrap">
   <div class="card">
-    <h3>MOMO權證篩選器 (GitHub 版)</h3>
-    <p id="meta" style="font-size:12px;color:var(--muted)">請先設定 GAS 網址後點擊「下載權證資料」。</p>
+    <h3 style="margin:0">MOMO權證篩選器</h3>
+    <p id="meta" class="hint">資料來源：元大權證網（經由 GAS API 轉發）</p>
     <div class="row">
       <button id="btnFetch" class="btn-link">下載權證資料</button>
-      <input id="nameFilter" type="text" class="field" placeholder="關鍵字篩選..."/>
-      <select id="selType" class="field" style="max-width:120px">
+      <input id="fileInput" type="file" class="field" accept=".csv,.xlsx,.xls" title="選擇本機檔案"/>
+      <input id="nameFilter" type="text" class="field" placeholder="輸入名稱關鍵字"/>
+      <select id="selType" class="field" style="max-width:160px">
         <option value="C" selected>認購 (C)</option>
         <option value="P">認售 (P)</option>
       </select>
-      <select id="selLimit" class="field" style="max-width:120px">
+      <select id="selSortKey" class="field" style="max-width:280px">
+        <option value="s1" selected>S1 = 價差比/槓桿</option>
+        <option value="spread">價差比</option>
+        <option value="leverage">槓桿</option>
+        <option value="days_left">距到期天數</option>
+      </select>
+      <select id="selLimit" class="field" style="max-width:160px">
         <option value="10" selected>顯示 10 列</option>
         <option value="all">顯示全部</option>
       </select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:14px">
+        <input type="checkbox" id="chkFilterZeroSpread" checked/>排除價差=0
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:14px">
+        <input type="checkbox" id="chkHasIV" checked/>只顯示有隱波
+      </label>
       <button id="btnExportPng" class="btn-link">匯出 PNG</button>
     </div>
   </div>
-
   <div id="resultCard" class="card" style="margin-top:12px;display:none">
-    <div id="resultScroll" style="overflow:auto;max-height:70vh">
+    <div id="resultScroll" style="overflow:auto;max-height:70vh;margin-top:6px">
       <table id="resultTable">
         <thead>
-          <tr><th>代號</th><th>名稱</th><th>類型</th><th>價差比</th><th>槓桿</th><th>S1</th><th>天數</th><th>履約價</th><th>隱波</th></tr>
+          <tr>
+            <th>代號</th><th>名稱</th><th>類型</th><th>價差比</th><th>槓桿</th><th>行使比例</th>
+            <th>S1</th><th>S2</th><th>距到期天數</th><th>履約價</th><th>成交價</th>
+            <th>隱波</th><th>價內外</th><th>流通比</th>
+          </tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
-
 <script>
-/* --- 配置區 --- */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwGUgr8LFnjZDSCT5qDZ0lpD0o8c2ztVdAwCsmI2kHRqR3ZvofkT6BLoJpJLe-fTOrO/exec"; 
-
-/* --- 核心邏輯 --- */
 const $=s=>document.querySelector(s);
-let RAW=[];
+const fmtNum=(v,d=2)=>(v==null||!isFinite(v))?"—":(+v).toFixed(d);
+const showPct100=(v,d=2)=>(v==null||!isFinite(v))?"—":(v*100).toFixed(d)+"%";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwGUgr8LFnjZDSCT5qDZ0lpD0o8c2ztVdAwCsmI2kHRqR3ZvofkT6BLoJpJLe-fTOrO/exec"; 
+let RAW = [];
 
-// API 抓取
 $("#btnFetch").addEventListener("click", async () => {
-  if(GAS_URL.includes("在此貼入")) return alert("請先在程式碼中設定 GAS_URL！");
-  
-  const btn = $("#btnFetch");
-  btn.disabled = true; btn.textContent = "資料載入中...";
-
+  const btn = $("#btnFetch"); btn.disabled = true; btn.textContent = "抓取中...";
   try {
-    // 呼叫 GAS (GET 請求)
     const res = await fetch(GAS_URL);
-    if(!res.ok) throw new Error("API 回應異常");
     const csv = await res.text();
-
-    const wb = XLSX.read(csv, { type:"string", codepage:65001 });
-    const arr = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-    
-    RAW = arr.map(processRow);
+    const wb = XLSX.read(csv, { type: "string", codepage: 65001 });
+    RAW = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
     render();
-    $("#meta").textContent = `更新成功！共 ${RAW.length} 筆資料。`;
-  } catch (e) {
-    alert("失敗: " + e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = "下載權證資料";
-  }
+  } catch (e) { alert("失敗: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = "下載權證資料"; }
 });
 
-function processRow(r) {
-  // 對應元大欄位名稱
-  const name = r["FLD_WAR_NM"] || "";
-  const spread = parseFloat(r["買賣價差比"]) || 0;
-  const lev = Math.abs(parseFloat(r["FLD_LEVERAGE"])) || 1;
-  return {
-    code: r["FLD_WAR_ID"],
-    name: name,
-    cp: (/[售]/.test(name) || /P/.test(name)) ? "P" : "C",
-    spread: spread,
-    leverage: lev,
-    s1: spread / lev,
-    days: r["FLD_PERIOD"],
-    strike: r["FLD_N_STRIKE_PRC"],
-    iv: r["FLD_IV_CLOSE_PRICE"]
-  };
+function compute() {
+  const want = $("#selType").value;
+  const dropZero = $("#chkFilterZeroSpread").checked;
+  const q = $("#nameFilter").value.toLowerCase();
+  return RAW.map(r => {
+    const name = r["FLD_WAR_NM"] || "";
+    const spread = parseFloat(r["買賣價差比"]) || 0;
+    const lev = parseFloat(r["FLD_LEVERAGE"]) || 0;
+    const exr = parseFloat(r["FLD_N_UND_CONVER"]) || 0;
+    const s1 = (spread && Math.abs(lev) > 0) ? spread / Math.abs(lev) : null;
+    return {
+      code: r["FLD_WAR_ID"], name, cp: (/[售]/.test(name) || /P/.test(name)) ? "P" : "C",
+      spread, leverage: lev, exercise: exr, s1, s2: (s1 && exr > 0) ? s1 / exr : null,
+      days_left: parseInt(r["FLD_PERIOD"]), strike: r["FLD_N_STRIKE_PRC"],
+      price: r["FLD_WAR_TXN_PRICE"], iv: parseFloat(r["FLD_IV_CLOSE_PRICE"]),
+      moneyness: r["FLD_IN_OUT"], float_rate: r["FLD_OUT_VOL_RATE"]
+    };
+  }).filter(x => {
+    if (x.cp !== want || (dropZero && x.spread === 0)) return false;
+    if ($("#chkHasIV").checked && !x.iv) return false;
+    if (q && !x.name.toLowerCase().includes(q)) return false;
+    if (x.days_left <= 60) return false;
+    return true;
+  }).sort((a, b) => {
+    const key = $("#selSortKey").value;
+    return (a[key] || 0) - (b[key] || 0);
+  });
 }
 
 function render() {
-  const want = $("#selType").value;
-  const limit = $("#selLimit").value === "all" ? RAW.length : parseInt($("#selLimit").value);
-  const filterText = $("#nameFilter").value.toLowerCase();
-
-  const filtered = RAW.filter(r => r.cp === want && r.name.toLowerCase().includes(filterText));
-  filtered.sort((a,b) => a.s1 - b.s1);
-
-  const tb = $("#tbody");
-  tb.innerHTML = "";
-  filtered.slice(0, limit).forEach(r => {
+  const rows = compute();
+  const limit = $("#selLimit").value === "all" ? rows.length : parseInt($("#selLimit").value);
+  const tb = $("#tbody"); tb.innerHTML = "";
+  rows.slice(0, limit).forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${r.code}</td>
-      <td>${r.name}</td>
+      <td><b>${r.code}</b></td><td>${r.name}</td>
       <td><span class="tag ${r.cp}">${r.cp}</span></td>
-      <td>${r.spread.toFixed(3)}</td>
-      <td>${r.leverage.toFixed(2)}</td>
-      <td class="${r.s1 < 0.1 ? 'gold-text' : ''}">${(r.s1 * 100).toFixed(2)}%</td>
-      <td>${r.days}</td>
-      <td>${r.strike}</td>
-      <td>${r.iv}</td>
+      <td>${fmtNum(r.spread, 3)}</td><td class="${Math.abs(r.leverage)>5?'gold-text':''}">${fmtNum(Math.abs(r.leverage), 2)}</td>
+      <td>${fmtNum(r.exercise, 3)}</td><td class="${r.s1 < 0.1 ? 'gold-text' : ''}">${showPct100(r.s1)}</td>
+      <td>${showPct100(r.s2)}</td><td>${r.days_left}</td><td>${r.strike}</td>
+      <td>${fmtNum(r.price, 3)}</td><td>${fmtNum(r.iv, 2)}</td><td>${r.moneyness}</td><td>${r.float_rate}</td>
     `;
     tb.appendChild(tr);
   });
   $("#resultCard").style.display = "block";
 }
 
-["selType", "selLimit", "nameFilter"].forEach(id => $(`#${id}`).addEventListener("change", render));
+["selType","selSortKey","chkFilterZeroSpread","selLimit","chkHasIV"].forEach(id => $(`#${id}`).addEventListener("change", render));
+$("#nameFilter").addEventListener("input", render);
 $("#btnExportPng").addEventListener("click", async () => {
-  const canvas = await html2canvas($("#resultCard"), { backgroundColor: "#0A1221" });
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL(); a.download = "warrant.png"; a.click();
+  const canvas = await html2canvas($("#resultCard"), { backgroundColor: "#0A1221", scale: 2 });
+  const a = document.createElement("a"); a.href = canvas.toDataURL(); a.download = "momo.png"; a.click();
 });
 </script>
 </body>
